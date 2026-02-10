@@ -11,60 +11,80 @@ if (isset($_SESSION['user_id'])) {
     }
     exit;
 }
+
+$pageTitle = 'Home';
+include __DIR__ . '/layout/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Barangay Certificate System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-
-<!-- Navbar -->
-<nav class="bg-blue-600 text-white py-4">
-    <div class="container mx-auto flex justify-between items-center px-4">
-        <a href="#" class="text-xl font-bold">Barangay Certificate System</a>
-    </div>
-</nav>
-
-<!-- Main Content -->
-<main class="flex-grow container mx-auto px-4 flex flex-col items-center text-center mt-12">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
-        Welcome to the Barangay Certificate Request System
+<!-- Hero Section -->
+<div class="flex flex-col items-center text-center mb-16">
+    <h1 class="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+        Welcome to Digital Certificates
     </h1>
-    <p class="text-gray-700 text-lg mb-8 max-w-xl">
-        Submit certificate requests online, schedule appointments, and track status without long queues.
+    <p class="text-gray-600 text-xl mb-8 max-w-2xl leading-relaxed">
+        Request barangay certificates online, schedule appointments, and track your status in real-time. No more long queues.
     </p>
 
-    <!-- Buttons -->
-    <div class="flex gap-4 mb-10">
-        <a href="?page=login" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            Login
-        </a>
-        <a href="?page=register" class="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition">
-            Register
-        </a>
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-12">
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+            <div class="text-4xl mb-3">⚡</div>
+            <h3 class="font-semibold text-lg mb-2">Fast Processing</h3>
+            <p class="text-gray-600 text-sm">Submit requests online and get faster processing times.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+            <div class="text-4xl mb-3">📅</div>
+            <h3 class="font-semibold text-lg mb-2">Easy Scheduling</h3>
+            <p class="text-gray-600 text-sm">Choose your appointment date and time at your convenience.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+            <div class="text-4xl mb-3">📱</div>
+            <h3 class="font-semibold text-lg mb-2">Track Anytime</h3>
+            <p class="text-gray-600 text-sm">Monitor your request status from anywhere, anytime.</p>
+        </div>
     </div>
 
     <!-- Certificate List -->
-    <div class="text-left w-full max-w-md bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Available Certificates:</h2>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
-            <li>Residency (Proof of Address)</li>
-            <li>Indigency (Financial Aid / Scholarships)</li>
-            <li>Good Moral Character (Jobs / School)</li>
-            <li>Business Operation (For Permits)</li>
-            <li>No Objection (Consent for Activities)</li>
-        </ul>
+    <div class="text-left w-full max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-8 border border-blue-200">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-800">Available Certificates</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3">
+                <span class="text-blue-600 font-bold">✓</span>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Residency</h4>
+                    <p class="text-sm text-gray-600">Proof of Address</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="text-blue-600 font-bold">✓</span>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Indigency</h4>
+                    <p class="text-sm text-gray-600">Financial Aid / Scholarships</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="text-blue-600 font-bold">✓</span>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Good Moral Character</h4>
+                    <p class="text-sm text-gray-600">Jobs / School Requirements</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="text-blue-600 font-bold">✓</span>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Business Operation</h4>
+                    <p class="text-sm text-gray-600">For Permits & Licenses</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="text-blue-600 font-bold">✓</span>
+                <div>
+                    <h4 class="font-semibold text-gray-800">No Objection</h4>
+                    <p class="text-sm text-gray-600">Consent for Activities</p>
+                </div>
+            </div>
+        </div>
     </div>
-</main>
+</div>
 
-<!-- Footer -->
-<footer class="bg-blue-600 text-white text-center py-4 mt-12">
-    &copy; <?= date("Y") ?> Barangay Certificate System. All rights reserved.
-</footer>
-
-</body>
-</html>
+<?php include __DIR__ . '/layout/footer.php'; ?>

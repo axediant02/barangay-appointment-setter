@@ -5,8 +5,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-// Fetch statistics
-
 // Total residents
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM users WHERE role = 'resident'");
 $totalResidents = $stmt->fetch()['total'] ?? 0;
@@ -32,7 +30,6 @@ $stats = $stmt->fetch();
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-<!-- Navbar -->
 <nav class="bg-gray-800 p-4 text-white flex justify-between">
     <h1 class="font-semibold text-lg">Admin Dashboard</h1>
     <div class="space-x-4">
@@ -46,7 +43,6 @@ $stats = $stmt->fetch();
 
     <h2 class="text-2xl font-bold mb-6">System Overview</h2>
 
-    <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
 
         <div class="bg-white p-6 rounded-lg shadow">
@@ -81,7 +77,6 @@ $stats = $stmt->fetch();
 
     </div>
 
-    <!-- Recent Requests Preview -->
     <div class="mt-10 bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-4">Recent Requests</h3>
 

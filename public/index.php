@@ -1,8 +1,7 @@
 <?php
 session_start();
-require_once '../config/database.php'; // PDO connection
+require_once '../config/database.php';
 
-// Simple helper to redirect
 function redirect($url) {
     header("Location: $url");
     exit;

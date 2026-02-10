@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             // Login success
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role']; // 'admin' or 'resident'
+            $_SESSION['role'] = $user['role'];
 
             // Redirect based on role
             if ($user['role'] === 'admin') {

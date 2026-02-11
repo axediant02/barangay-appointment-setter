@@ -184,31 +184,135 @@ $recentRequests = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
     /**
-     * Polling Functionality
-     * Fetches new statistics and recent requests every 10 seconds
+     * Status color mapping
      */
-    async function syncDashboardData() {
+    const statusColors = {
+        'Pending': 'text-amber-600 bg-amber-50 border-amber-200',
+        'Approved': 'text-emerald-600 bg-emerald-50 border-emerald-200',
+        'Completed': 'text-cyan-600 bg-cyan-50 border-cyan-200',
+        'Rejected': 'text-red-600 bg-red-50 border-red-200'
+    };
+
+    /**
+     * Sync dashboard statistics
+     */
+    async function syncDashboardStats() {
         try {
-            const response = await fetch('api.php?action=admin-dashboard-sync');
-            if (!response.ok) throw new Error('Network error');
+            const response = await fetch('./api.php?action=admin-dashboard-sync');
+            
+            if (!response.ok) {
+                console.error('API Error:', response.status, response.statusText);
+                return;
+            }
             
             const data = await response.json();
             
-            // Sync Stats
-            document.getElementById('stat-residents').innerText = data.stats.residents || 0;
-            document.getElementById('stat-total').innerText = data.stats.total || 0;
-            document.getElementById('stat-pending').innerText = data.stats.pending || 0;
-            document.getElementById('stat-approved').innerText = data.stats.approved || 0;
-            document.getElementById('stat-completed').innerText = data.stats.completed || 0;
-            document.getElementById('stat-rejected').innerText = data.stats.rejected || 0;
+            if (!data.stats) {
+                console.error('Invalid API response structure:', data);
+                return;
+            }
+            
+            // Sync Stats - ensure safe value updates
+            const statElements = {
+                'stat-residents': data.stats.residents || 0,
+                'stat-total': data.stats.total || 0,
+                'stat-pending': data.stats.pending || 0,
+                'stat-approved': data.stats.approved || 0,
+                'stat-completed': data.stats.completed || 0,
+                'stat-rejected': data.stats.rejected || 0
+            };
+            
+            for (const [elementId, value] of Object.entries(statElements)) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.innerText = value;
+                }
+            }
 
         } catch (error) {
-            console.warn("Dashboard sync paused: ", error.message);
+            console.warn("Stats sync error: ", error.message);
         }
     }
 
-    // Initialize Polling
-    setInterval(syncDashboardData, 10000);
+    /**
+     * Sync recent requests and update table
+     */
+    async function syncRecentRequests() {
+        try {
+            const response = await fetch('./api.php?action=admin-recent-requests');
+            
+            if (!response.ok) {
+                console.error('API Error:', response.status, response.statusText);
+                return;
+            }
+            
+            const requests = await response.json();
+            
+            if (!Array.isArray(requests)) {
+                console.error('Invalid API response - expected array:', requests);
+                return;
+            }
+            
+            const tbody = document.getElementById('recent-requests-body');
+            if (!tbody) return;
+            
+            // Clear and rebuild table rows
+            tbody.innerHTML = '';
+            
+            requests.forEach(request => {
+                const tr = document.createElement('tr');
+                tr.classList.add('hover:bg-teal-50/30', 'transition-colors');
+                tr.setAttribute('data-request-id', request.id);
+                
+                const badgeColor = statusColors[request.status] || 'text-gray-600 bg-gray-50 border-gray-200';
+                
+                tr.innerHTML = `
+                    <td class="px-8 py-5 font-bold text-gray-900">${escapeHtml(request.resident_name)}</td>
+                    <td class="px-8 py-5">
+                        <span class="text-sm text-gray-600 font-medium">📄 ${escapeHtml(request.certificate_name)}</span>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase border ${badgeColor} status-cell">
+                            ${request.status}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-gray-500 text-sm">${request.created_at_formatted}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+        } catch (error) {
+            console.warn("Recent requests sync error: ", error.message);
+        }
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Main sync function - calls both stats and requests sync
+     */
+    async function syncDashboardData() {
+        await Promise.all([
+            syncDashboardStats(),
+            syncRecentRequests()
+        ]);
+    }
+
+    // Initialize Polling after DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Run sync immediately on page load
+        syncDashboardData();
+        // Then set up interval for continuous updates (every 10 seconds)
+        setInterval(syncDashboardData, 10000);
+    });
 </script>
 
 </body>

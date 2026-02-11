@@ -1,34 +1,28 @@
 <?php
-/**
- * Logic for Manage Certificates
- */
 
-// 1. Fetch all certificates from the database
+// fetch certificates from the database
 try {
     $stmt = $pdo->query("SELECT * FROM certificates ORDER BY name ASC");
     $certificates = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // Handle potential errors
+    // error handling
     $certificates = [];
-}
 
-// 2. If $certificates is still null or false for any reason, force it to an empty array
+}
 if (!$certificates) {
     $certificates = [];
 }
 
-// 3. Handle Deletion Logic (If the delete link is clicked)
+// delete logic
 if (isset($_GET['delete']) && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
     $deleteStmt = $pdo->prepare("DELETE FROM certificates WHERE id = ?");
     $deleteStmt->execute([$id]);
-    
-    // Refresh the page to show updated list
     header("Location: ?page=manage-certificates");
     exit;
 }
 
-// 4. Handle Add Certificate Logic (When form is submitted)
+// certificate form submision handling
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);

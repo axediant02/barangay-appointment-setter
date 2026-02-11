@@ -1,11 +1,9 @@
 <?php
-// Route protection
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ?page=login");
     exit;
 }
 
-// Data Fetching - Using fetchColumn() for simple counts
 $totalResidents = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'resident'")->fetchColumn();
 $totalResidents = $totalResidents ?: 0;
 
@@ -60,7 +58,6 @@ $recentRequests = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
             transform: translateY(-4px);
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
     </style>
@@ -149,7 +146,6 @@ $recentRequests = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
                 </thead>
                 <tbody class="divide-y divide-gray-100" id="recent-requests-body">
                     <?php 
-                    // PHP 7 Compatible status colors array
                     $statusColors = [
                         'Pending'   => 'text-amber-600 bg-amber-50 border-amber-200',
                         'Approved'  => 'text-emerald-600 bg-emerald-50 border-emerald-200',
@@ -183,9 +179,6 @@ $recentRequests = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-    /**
-     * Status color mapping
-     */
     const statusColors = {
         'Pending': 'text-amber-600 bg-amber-50 border-amber-200',
         'Approved': 'text-emerald-600 bg-emerald-50 border-emerald-200',

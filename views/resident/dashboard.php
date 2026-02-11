@@ -25,15 +25,12 @@ $pageTitle = 'Dashboard - Resident';
 include __DIR__ . '/../layout/header.php';
 ?>
 
-<!-- Welcome Section -->
 <div class="mb-12">
     <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome, <?= htmlspecialchars($_SESSION['username'] ?? 'Resident') ?>! 👋</h1>
     <p class="text-gray-600 text-lg">Manage your certificate requests and appointments here</p>
 </div>
 
-<!-- Stats Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12" id="stats-container">
-    <!-- Total -->
     <div class="bg-white rounded-xl shadow border border-gray-100 p-6 hover:shadow-lg transition">
         <div class="flex items-center justify-between">
             <div>
@@ -44,7 +41,6 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </div>
 
-    <!-- Pending -->
     <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow border border-amber-200 p-6 hover:shadow-lg transition">
         <div class="flex items-center justify-between">
             <div>
@@ -55,7 +51,6 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </div>
 
-    <!-- Approved -->
     <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl shadow border border-teal-200 p-6 hover:shadow-lg transition">
         <div class="flex items-center justify-between">
             <div>
@@ -66,7 +61,6 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </div>
 
-    <!-- Completed -->
     <div class="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl shadow border border-cyan-200 p-6 hover:shadow-lg transition">
         <div class="flex items-center justify-between">
             <div>
@@ -77,7 +71,6 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </div>
 
-    <!-- Rejected -->
     <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl shadow border border-red-200 p-6 hover:shadow-lg transition">
         <div class="flex items-center justify-between">
             <div>
@@ -89,9 +82,7 @@ include __DIR__ . '/../layout/header.php';
     </div>
 </div>
 
-<!-- Quick Actions Section -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Request Certificate Card -->
     <a href="?page=create-request" class="bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition hover:scale-105">
         <div class="text-5xl mb-4">📝</div>
         <h3 class="text-2xl font-bold mb-2">Request Certificate</h3>
@@ -101,7 +92,6 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </a>
 
-    <!-- My Requests Card -->
     <a href="?page=my-requests" class="bg-gradient-to-br from-cyan-600 to-blue-600 text-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition hover:scale-105">
         <div class="text-5xl mb-4">📊</div>
         <h3 class="text-2xl font-bold mb-2">View My Requests</h3>
@@ -112,7 +102,6 @@ include __DIR__ . '/../layout/header.php';
     </a>
 </div>
 
-<!-- Info Section -->
 <div class="mt-12 bg-teal-50 border-2 border-teal-200 rounded-xl p-8">
     <h3 class="text-xl font-bold text-gray-900 mb-4">❓ How It Works</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -134,9 +123,7 @@ include __DIR__ . '/../layout/header.php';
     </div>
 </div>
 
-<!-- Real-time Update Script -->
 <script>
-    // Update stats every 5 seconds
     function updateStats() {
         fetch('api.php?action=resident-stats')
             .then(response => response.json())
@@ -150,7 +137,6 @@ include __DIR__ . '/../layout/header.php';
             .catch(error => console.log('Update error:', error));
     }
 
-    // Poll every 5 seconds
     setInterval(updateStats, 5000);
 </script>
 

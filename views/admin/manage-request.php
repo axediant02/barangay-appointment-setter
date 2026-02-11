@@ -1,6 +1,5 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    /* Custom Scrollbar for better aesthetics */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
     ::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 10px; }
@@ -18,7 +17,6 @@
         box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
     }
     
-    /* Dynamic Status Colors */
     .status-Pending { border-left: 4px solid #CA8A04; background-color: #FEFCE8; }
     .status-Approved { border-left: 4px solid #059669; background-color: #ECFDF5; }
     .status-Completed { border-left: 4px solid #0891B2; background-color: #ECFEFF; }
@@ -75,7 +73,6 @@
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-bold text-gray-900"><?= htmlspecialchars($req['full_name']) ?></div>
-                                                <!-- <div class="text-xs text-gray-500">Resident ID: #<?= str_pad($req['id'], 5, '0', STR_PAD_LEFT) ?></div> -->
                                             </div>
                                         </div>
                                     </td>

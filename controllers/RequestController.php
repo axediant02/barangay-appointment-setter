@@ -15,11 +15,9 @@ class RequestController {
         $this->requestModel = new RequestModel($pdo);
     }
 
-    // Show request form
     public function createForm() {
         $certificates = $this->certificateModel->getAll();
 
-        // Optional: pre-fill username and email
         $stmt = $this->pdo->prepare("SELECT username, email FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,7 +25,6 @@ class RequestController {
         require '../views/resident/create-request.php';
     }
 
-    // Store request with resident info snapshot
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -62,7 +59,6 @@ class RequestController {
         }
     }
 
-    // Show resident's requests
     public function myRequests() {
         $requests = $this->requestModel->getByUser($_SESSION['user_id']);
         require '../views/resident/my-request.php';

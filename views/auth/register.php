@@ -1,5 +1,5 @@
 <?php
-require_once '../config/database.php'; // Make sure your $pdo is available
+require_once '../config/database.php';
 
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,13 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strlen($password) < 6) {
         $errors[] = "Password must be at least 6 characters long.";
     } else {
-        // Check if email exists
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
             $errors[] = "Email is already registered.";
         } else {
-            // Insert new user
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("
                 INSERT INTO users (username, email, password, role)
@@ -29,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt->execute([$username, $email, $hash]);
 
-            // Log in user
             $_SESSION['user_id'] = $pdo->lastInsertId();
             $_SESSION['role'] = 'resident';
             $_SESSION['username'] = $username;

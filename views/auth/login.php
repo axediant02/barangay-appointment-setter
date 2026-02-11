@@ -7,18 +7,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$email || !$password) {
         $errors[] = "Both email and password are required.";
     } else {
-        // Fetch user from database
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            // Login success
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['name'] = $user['name'];
 
-            // Redirect based on role
             if ($user['role'] === 'admin') {
                 header("Location: ?page=admin-dashboard");
             } else {
@@ -51,16 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="bg-gradient-to-br from-teal-50 to-cyan-50 min-h-screen flex items-center justify-center p-4">
 
 <div class="w-full max-w-md">
-    <!-- Card -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <!-- Header -->
         <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-8 py-8 text-white text-center">
             <div class="text-5xl mb-3">📋</div>
             <h1 class="text-3xl font-bold">Welcome Back</h1>
             <p class="text-teal-100 mt-2">Log in to your account</p>
         </div>
 
-        <!-- Form -->
         <div class="px-8 py-8 space-y-6">
             <?php if ($errors): ?>
                 <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
@@ -105,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn-primary mt-8">Sign In</button>
             </form>
 
-            <!-- Register Link -->
             <div class="pt-6 border-t border-gray-200 text-center">
                 <p class="text-gray-600">
                     Don't have an account? 
@@ -117,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <!-- Help Text -->
     <div class="mt-8 text-center text-gray-600 text-sm">
         <p>Need help? Contact support at <strong>info@barangay.gov.ph</strong></p>
     </div>

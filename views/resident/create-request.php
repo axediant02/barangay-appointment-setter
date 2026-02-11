@@ -36,7 +36,6 @@
 
             <form method="POST" class="space-y-6">
 
-                <!-- Resident Info -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Full Name *</label>
                     <input type="text" name="full_name" value="<?= htmlspecialchars($user['username'] ?? '') ?>" class="form-input" required>
@@ -70,7 +69,6 @@
                     <input type="text" name="contact_number" class="form-input" required>
                 </div>
 
-                <!-- Certificate Selection -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Certificate Type *</label>
                     <select name="certificate_id" class="form-input" required>
@@ -81,7 +79,6 @@
                     </select>
                 </div>
 
-                <!-- Appointment Date -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Preferred Appointment Date *</label>
                     <input type="date" name="appointment_date" class="form-input" required min="<?= date('Y-m-d', strtotime('+1 day')) ?>">

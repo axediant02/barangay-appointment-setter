@@ -6,19 +6,15 @@ function redirect($url) {
     header("Location: $url");
     exit;
 }
-
-// Check if user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
 $role = $_SESSION['role'] ?? null;
 
-// Get requested page from query param
 $page = $_GET['page'] ?? 'home';
 
-// Routing logic
+//routing
 switch ($page) {
     case 'login':
         if ($isLoggedIn) {
-            // Redirect based on role
             if ($role === 'admin') redirect('?page=admin-dashboard');
             else redirect('?page=resident-dashboard');
         }
@@ -83,11 +79,9 @@ switch ($page) {
     case 'home':
     default:
         if ($isLoggedIn) {
-            // Redirect logged-in users to their dashboard
             if ($role === 'admin') redirect('?page=admin-dashboard');
             else redirect('?page=resident-dashboard');
         } else {
-            // Show landing page to non-logged-in users
             include '../views/landing-page.php';
         }
         break;

@@ -1,11 +1,9 @@
-</main><!-- End of Main Content -->
+</main>
 
-<!-- Footer -->
 <footer class="bg-gradient-to-r from-teal-900 to-teal-800 text-teal-100 mt-12 border-t border-teal-700">
     <div class="max-w-7xl mx-auto px-4 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             
-            <!-- About Section -->
             <div>
                 <h3 class="text-white font-semibold mb-4 text-lg">About Us</h3>
                 <p class="text-sm leading-relaxed opacity-90">
@@ -13,7 +11,6 @@
                 </p>
             </div>
 
-            <!-- Quick Links -->
             <div>
                 <h3 class="text-white font-semibold mb-4 text-lg">Quick Links</h3>
                 <ul class="space-y-2 text-sm">
@@ -23,7 +20,6 @@
                 </ul>
             </div>
 
-            <!-- Certificate Types -->
             <div>
                 <h3 class="text-white font-semibold mb-4 text-lg">Certificates</h3>
                 <ul class="space-y-2 text-sm">
@@ -34,7 +30,6 @@
                 </ul>
             </div>
 
-            <!-- Contact Info -->
             <div>
                 <h3 class="text-white font-semibold mb-4 text-lg">Contact</h3>
                 <ul class="space-y-2 text-sm">
@@ -45,7 +40,6 @@
             </div>
         </div>
 
-        <!-- Divider -->
         <div class="border-t border-teal-700 pt-6">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="text-sm opacity-90">

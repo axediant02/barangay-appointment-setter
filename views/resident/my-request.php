@@ -41,21 +41,17 @@
             </a>
         </div>
     <?php else: ?>
-        <!-- Requests Grid -->
         <div class="grid grid-cols-1 gap-4" id="requests-container">
             <?php foreach ($requests as $req): ?>
-                <!-- Request Card -->
                 <div class="bg-white rounded-xl shadow border border-gray-100 hover:shadow-lg transition" data-request-id="<?= $req['id'] ?>">
                     <div class="p-6">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <!-- Info Section -->
                             <div class="flex-grow">
                                 <h3 class="text-xl font-bold text-gray-900 mb-2">
                                     📄 <span class="cert-name"><?= htmlspecialchars($req['certificate_name']) ?></span>
                                 </h3>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <!-- Appointment Date -->
                                     <div>
                                         <p class="text-gray-600 font-medium">Appointment Date</p>
                                         <p class="text-gray-900 font-semibold">
@@ -63,7 +59,6 @@
                                         </p>
                                     </div>
                                     
-                                    <!-- Status -->
                                     <div>
                                         <p class="text-gray-600 font-medium">Status</p>
                                         <div class="mt-1">
@@ -86,7 +81,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Remarks -->
                                 <div class="remarks-container">
                                     <?php if (!empty($req['remarks'])): ?>
                                         <div class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
@@ -98,7 +92,6 @@
                                 </div>
                             </div>
 
-                            <!-- Action Buttons -->
                             <div class="flex flex-col gap-2 action-buttons">
                                 <?php if ($req['status'] === 'Completed'): ?>
                                     <button class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition">
@@ -117,7 +110,6 @@
                         </div>
                     </div>
                     
-                    <!-- Footer with Meta Info -->
                     <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-600 flex items-center gap-2">
                         <span>📌 Request ID: #<?= $req['id'] ?></span>
                         <span>•</span>
@@ -127,7 +119,6 @@
             <?php endforeach; ?>
         </div>
 
-        <!-- Back to Dashboard -->
         <div class="mt-8">
             <a href="?page=resident-dashboard" class="text-teal-600 font-semibold hover:text-teal-700">
                 ← Back to Dashboard
@@ -199,7 +190,5 @@
             })
             .catch(error => console.log('Update error:', error));
     }
-
-    // Poll every 5 seconds
     setInterval(updateRequests, 5000);
 </script>

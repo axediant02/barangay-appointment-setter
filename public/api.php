@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 session_start();
 require_once '../config/database.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized']);
@@ -152,7 +151,6 @@ switch ($action) {
         ");
         $stats = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        // Ensure all values are integers, not NULL
         $stats['residents'] = (int) $totalResidents;
         $stats['total'] = (int) ($stats['total'] ?? 0);
         $stats['pending'] = (int) ($stats['pending'] ?? 0);

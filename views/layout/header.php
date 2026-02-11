@@ -1,10 +1,7 @@
 <?php
-// Ensure session is started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Determine page title
 $pageTitle = $pageTitle ?? 'Barangay Certificate System';
 ?>
 <!DOCTYPE html>
@@ -45,12 +42,10 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-<!-- Navigation Bar -->
 <nav class="bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex justify-between items-center">
             
-            <!-- Logo/Branding -->
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-teal-600">
                     📋
@@ -60,13 +55,10 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
                 </a>
             </div>
 
-            <!-- Navigation Links -->
             <div class="flex items-center gap-6">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <!-- Logged In User Navigation -->
                     <div class="flex items-center gap-6">
                         <?php if ($_SESSION['role'] === 'admin'): ?>
-                            <!-- Admin Links -->
                             <a href="?page=admin-dashboard" class="hover:text-teal-100 transition font-medium">
                                 Dashboard
                             </a>
@@ -81,7 +73,6 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
                         </a>
 
                         <?php else: ?>
-                            <!-- Resident Links -->
                             <a href="?page=resident-dashboard" class="hover:text-teal-100 transition font-medium">
                                 Dashboard
                             </a>
@@ -94,7 +85,6 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
                         <?php endif; ?>
                     </div>
 
-                    <!-- User Info & Logout -->
                     <div class="flex items-center gap-4 pl-4 border-l border-teal-400">
                         <div class="text-sm">
                             <div class="font-semibold"><?= htmlspecialchars($_SESSION['name'] ?? 'User') ?></div>
@@ -107,7 +97,6 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
                     </div>
 
                 <?php else: ?>
-                    <!-- Not Logged In Navigation -->
                     <div class="flex items-center gap-4">
                         <a href="?page=login" class="hover:text-teal-100 transition font-medium">
                             Login
@@ -122,5 +111,4 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
     </div>
 </nav>
 
-<!-- Main Content Wrapper -->
 <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">

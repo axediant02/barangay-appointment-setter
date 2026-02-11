@@ -7,7 +7,6 @@ class RequestModel {
         $this->pdo = $pdo;
     }
 
-    // Get all requests (for admin)
     public function getAll() {
         $stmt = $this->pdo->query("
             SELECT r.*, u.username as resident_username, c.name as certificate_name
@@ -19,7 +18,6 @@ class RequestModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Get requests by specific user (for resident)
     public function getByUser($userId) {
         $stmt = $this->pdo->prepare("
             SELECT r.*, c.name as certificate_name
@@ -32,7 +30,6 @@ class RequestModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Create a new request including resident info snapshot
     public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber) {
         $stmt = $this->pdo->prepare("
             INSERT INTO requests 
@@ -42,7 +39,6 @@ class RequestModel {
         return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber]);
     }
 
-    // Update request status (for admin)
     public function updateStatus($id, $status, $remarks) {
         $stmt = $this->pdo->prepare("
             UPDATE requests

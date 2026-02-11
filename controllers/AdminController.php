@@ -1,0 +1,60 @@
+<?php
+
+require_once '../models/Request.php';
+require_once '../models/Certificate.php';
+
+class AdminController {
+
+    private $requestModel;
+    private $certificateModel;
+
+    public function __construct($pdo) {
+        $this->requestModel = new RequestModel($pdo);
+        $this->certificateModel = new Certificate($pdo);
+    }
+
+    public function manageRequests() {
+        $requests = $this->requestModel->getAll();
+        require '../views/admin/manage-request.php';
+    }
+
+    public function updateRequest() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            $id = $_POST['request_id'];
+            $status = $_POST['status'];
+            $remarks = $_POST['remarks'];
+
+            $this->requestModel->updateStatus($id, $status, $remarks);
+
+            header("Location: ?page=manage-requests");
+            exit;
+        }
+    }
+
+    public function manageCertificates() {
+        $certificates = $this->certificateModel->getAll();
+        require '../views/admin/manage-certificates.php';
+    }
+
+    public function createCertificate() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+
+            $this->certificateModel->create($name, $description);
+
+            header("Location: ?page=manage-certificates");
+            exit;
+        }
+    }
+
+    public function deleteCertificate() {
+        $id = $_GET['id'];
+        $this->certificateModel->delete($id);
+
+        header("Location: ?page=manage-certificates");
+        exit;
+    }
+}

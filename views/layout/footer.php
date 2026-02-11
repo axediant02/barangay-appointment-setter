@@ -1,14 +1,14 @@
 </main><!-- End of Main Content -->
 
 <!-- Footer -->
-<footer class="bg-gray-800 text-gray-300 mt-12 border-t border-gray-700">
-    <div class="container mx-auto px-4 py-8">
+<footer class="bg-gradient-to-r from-teal-900 to-teal-800 text-teal-100 mt-12 border-t border-teal-700">
+    <div class="max-w-7xl mx-auto px-4 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             
             <!-- About Section -->
             <div>
                 <h3 class="text-white font-semibold mb-4 text-lg">About Us</h3>
-                <p class="text-sm leading-relaxed">
+                <p class="text-sm leading-relaxed opacity-90">
                     Barangay Certificate System provides a modern, efficient way to request certificates and manage appointments without long queues.
                 </p>
             </div>
@@ -17,7 +17,7 @@
             <div>
                 <h3 class="text-white font-semibold mb-4 text-lg">Quick Links</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="?page=landing" class="hover:text-white transition">Home</a></li>
+                    <li><a href="?page=home" class="hover:text-white transition">Home</a></li>
                     <li><a href="?page=login" class="hover:text-white transition">Login</a></li>
                     <li><a href="?page=register" class="hover:text-white transition">Register</a></li>
                 </ul>
@@ -46,9 +46,9 @@
         </div>
 
         <!-- Divider -->
-        <div class="border-t border-gray-700 pt-6">
+        <div class="border-t border-teal-700 pt-6">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="text-sm">
+                <div class="text-sm opacity-90">
                     &copy; <?= date("Y") ?> Barangay Certificate System. All rights reserved.
                 </div>
                 <div class="flex gap-6 text-sm">

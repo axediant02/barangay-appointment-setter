@@ -23,7 +23,7 @@
         <!-- Requests Table -->
         <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full" id="manage-requests-table">
                     <thead class="bg-gradient-to-r from-teal-600 to-teal-700 text-white">
                         <tr>
                             <th class="px-6 py-4 text-left text-sm font-semibold">Resident</th>
@@ -34,9 +34,9 @@
                             <th class="px-6 py-4 text-left text-sm font-semibold">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200" id="manage-requests-body">
                         <?php foreach ($requests as $req): ?>
-                            <tr class="hover:bg-gray-50 transition">
+                            <tr class="hover:bg-gray-50 transition" data-request-id="<?= $req['id'] ?>">
                                 <form method="POST" class="contents">
                                     <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
 
@@ -51,7 +51,7 @@
                                     </td>
 
                                     <td class="px-6 py-4">
-                                        <select name="status" class="form-input text-sm">
+                                        <select name="status" class="form-input text-sm status-select" data-current="<?= $req['status'] ?>">
                                             <?php
                                             $statuses = ['Pending', 'Approved', 'Completed', 'Rejected'];
                                             foreach ($statuses as $status):
@@ -98,3 +98,38 @@
         </a>
     </div>
 </div>
+
+<!-- Real-time Update Script -->
+<script>
+    function updateRequestsTable() {
+        fetch('api.php?action=manage-requests')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('manage-requests-table');
+                if (!table) return;
+
+                // Update each request row
+                data.forEach(req => {
+                    const row = document.querySelector(`[data-request-id="${req.id}"]`);
+                    if (row) {
+                        // Update status select if it changed
+                        const statusSelect = row.querySelector('.status-select');
+                        if (statusSelect && statusSelect.value !== req.status) {
+                            statusSelect.value = req.status;
+                            statusSelect.setAttribute('data-current', req.status);
+                        }
+
+                        // Update remarks field
+                        const remarksInput = row.querySelector('input[name="remarks"]');
+                        if (remarksInput && remarksInput.value !== (req.remarks || '')) {
+                            remarksInput.value = req.remarks || '';
+                        }
+                    }
+                });
+            })
+            .catch(error => console.log('Update error:', error));
+    }
+
+    // Poll every 5 seconds
+    setInterval(updateRequestsTable, 5000);
+</script>

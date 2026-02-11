@@ -32,13 +32,13 @@ include __DIR__ . '/../layout/header.php';
 </div>
 
 <!-- Stats Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12" id="stats-container">
     <!-- Total -->
     <div class="bg-white rounded-xl shadow border border-gray-100 p-6 hover:shadow-lg transition">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-600 text-sm font-medium">Total Requests</p>
-                <h3 class="text-3xl font-bold text-gray-900"><?= $stats['total'] ?? 0 ?></h3>
+                <h3 class="text-3xl font-bold text-gray-900" id="stat-total"><?= $stats['total'] ?? 0 ?></h3>
             </div>
             <div class="text-4xl">📋</div>
         </div>
@@ -49,7 +49,7 @@ include __DIR__ . '/../layout/header.php';
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-amber-800 text-sm font-medium">Pending</p>
-                <h3 class="text-3xl font-bold text-amber-700"><?= $stats['pending'] ?? 0 ?></h3>
+                <h3 class="text-3xl font-bold text-amber-700" id="stat-pending"><?= $stats['pending'] ?? 0 ?></h3>
             </div>
             <div class="text-4xl">⏳</div>
         </div>
@@ -60,7 +60,7 @@ include __DIR__ . '/../layout/header.php';
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-teal-800 text-sm font-medium">Approved</p>
-                <h3 class="text-3xl font-bold text-teal-700"><?= $stats['approved'] ?? 0 ?></h3>
+                <h3 class="text-3xl font-bold text-teal-700" id="stat-approved"><?= $stats['approved'] ?? 0 ?></h3>
             </div>
             <div class="text-4xl">✅</div>
         </div>
@@ -71,7 +71,7 @@ include __DIR__ . '/../layout/header.php';
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-cyan-800 text-sm font-medium">Completed</p>
-                <h3 class="text-3xl font-bold text-cyan-700"><?= $stats['completed'] ?? 0 ?></h3>
+                <h3 class="text-3xl font-bold text-cyan-700" id="stat-completed"><?= $stats['completed'] ?? 0 ?></h3>
             </div>
             <div class="text-4xl">🎉</div>
         </div>
@@ -82,7 +82,7 @@ include __DIR__ . '/../layout/header.php';
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-red-800 text-sm font-medium">Rejected</p>
-                <h3 class="text-3xl font-bold text-red-700"><?= $stats['rejected'] ?? 0 ?></h3>
+                <h3 class="text-3xl font-bold text-red-700" id="stat-rejected"><?= $stats['rejected'] ?? 0 ?></h3>
             </div>
             <div class="text-4xl">❌</div>
         </div>
@@ -133,5 +133,25 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </div>
 </div>
+
+<!-- Real-time Update Script -->
+<script>
+    // Update stats every 5 seconds
+    function updateStats() {
+        fetch('api.php?action=resident-stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stat-total').textContent = data.total || 0;
+                document.getElementById('stat-pending').textContent = data.pending || 0;
+                document.getElementById('stat-approved').textContent = data.approved || 0;
+                document.getElementById('stat-completed').textContent = data.completed || 0;
+                document.getElementById('stat-rejected').textContent = data.rejected || 0;
+            })
+            .catch(error => console.log('Update error:', error));
+    }
+
+    // Poll every 5 seconds
+    setInterval(updateStats, 5000);
+</script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

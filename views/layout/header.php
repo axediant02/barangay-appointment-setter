@@ -98,7 +98,7 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
                     <div class="flex items-center gap-4 pl-4 border-l border-teal-400">
                         <div class="text-sm">
                             <div class="font-semibold"><?= htmlspecialchars($_SESSION['name'] ?? 'User') ?></div>
-                            <div class="text-teal-100 text-xs uppercase"><?= htmlspecialchars($_SESSION['role'] ?? 'User') ?></div>
+                            <div class="text-teal-100 text-xs uppercase"><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></div>
                         </div>
                         <button onclick="document.getElementById('logoutForm').submit()" class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded transition-colors">
                             Logout

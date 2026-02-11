@@ -41,7 +41,7 @@
                                     <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
 
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        <?= htmlspecialchars($req['resident_name']) ?>
+                                        <?= htmlspecialchars($req['full_name']) ?>
                                     </td>
                                     <td class="px-6 py-4 text-gray-900">
                                         <?= htmlspecialchars($req['certificate_name']) ?>

@@ -92,7 +92,7 @@ $stats = $stmt->fetch();
             <tbody id="recent-requests-body">
                 <?php
                 $stmt = $pdo->query("
-                    SELECT r.*, u.name as resident_name, c.name as certificate_name
+                    SELECT r.*, u.username as resident_name, c.name as certificate_name
                     FROM requests r
                     JOIN users u ON r.user_id = u.id
                     JOIN certificates c ON r.certificate_id = c.id

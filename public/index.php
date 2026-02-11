@@ -77,7 +77,7 @@ switch ($page) {
 
     case 'manage-certificates':
         if (!$isLoggedIn || $role !== 'admin') redirect('?page=login');
-        include '../views/admin/manage-certificates.php';
+        include '../views/admin/manage-certificate.php';
         break;
 
     case 'home':

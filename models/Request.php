@@ -12,13 +12,13 @@ class RequestModel {
     ============================ */
 
     // Create new request
-    public function create($userId, $certificateId) {
+    public function create($userId, $certificateId, $appointmentDate) {
         $stmt = $this->pdo->prepare("
-            INSERT INTO requests (user_id, certificate_id, status, remarks, created_at)
-            VALUES (?, ?, 'Pending', '', NOW())
+            INSERT INTO requests (user_id, certificate_id, appointment_date, status, remarks, created_at)
+            VALUES (?, ?, ?, 'Pending', '', NOW())
         ");
 
-        return $stmt->execute([$userId, $certificateId]);
+        return $stmt->execute([$userId, $certificateId, $appointmentDate]);
     }
 
     // Get requests of a specific resident

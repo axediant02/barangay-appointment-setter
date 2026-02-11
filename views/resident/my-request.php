@@ -42,16 +42,16 @@
         </div>
     <?php else: ?>
         <!-- Requests Grid -->
-        <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-4" id="requests-container">
             <?php foreach ($requests as $req): ?>
                 <!-- Request Card -->
-                <div class="bg-white rounded-xl shadow border border-gray-100 hover:shadow-lg transition">
+                <div class="bg-white rounded-xl shadow border border-gray-100 hover:shadow-lg transition" data-request-id="<?= $req['id'] ?>">
                     <div class="p-6">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                             <!-- Info Section -->
                             <div class="flex-grow">
                                 <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                    📄 <?= htmlspecialchars($req['certificate_name']) ?>
+                                    📄 <span class="cert-name"><?= htmlspecialchars($req['certificate_name']) ?></span>
                                 </h3>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -59,7 +59,7 @@
                                     <div>
                                         <p class="text-gray-600 font-medium">Appointment Date</p>
                                         <p class="text-gray-900 font-semibold">
-                                            📅 <?= date('F d, Y', strtotime($req['appointment_date'])) ?>
+                                            📅 <span class="appt-date"><?= date('F d, Y', strtotime($req['appointment_date'])) ?></span>
                                         </p>
                                     </div>
                                     
@@ -67,39 +67,35 @@
                                     <div>
                                         <p class="text-gray-600 font-medium">Status</p>
                                         <div class="mt-1">
-                                            <?php 
-                                            $statusClass = 'status-' . strtolower($req['status']);
-                                            $statusEmoji = '❓';
-                                            switch($req['status']) {
-                                                case 'Pending':
-                                                    $statusEmoji = '⏳';
-                                                    break;
-                                                case 'Approved':
-                                                    $statusEmoji = '✅';
-                                                    break;
-                                                case 'Completed':
-                                                    $statusEmoji = '🎉';
-                                                    break;
-                                                case 'Rejected':
-                                                    $statusEmoji = '❌';
-                                                    break;
-                                            }
-                                            ?>
-                                            <span class="status-badge <?= $statusClass ?>">
-                                                <?= $statusEmoji ?> <?= htmlspecialchars($req['status']) ?>
+                                            <span class="status-badge status-<?= strtolower($req['status']) ?>" data-status="<?= $req['status'] ?>">
+                                                <span class="status-emoji">
+                                                    <?php 
+                                                    $statusEmoji = '❓';
+                                                    switch($req['status']) {
+                                                        case 'Pending': $statusEmoji = '⏳'; break;
+                                                        case 'Approved': $statusEmoji = '✅'; break;
+                                                        case 'Completed': $statusEmoji = '🎉'; break;
+                                                        case 'Rejected': $statusEmoji = '❌'; break;
+                                                    }
+                                                    echo $statusEmoji;
+                                                    ?>
+                                                </span>
+                                                <span class="status-text"><?= htmlspecialchars($req['status']) ?></span>
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Remarks -->
-                                <?php if (!empty($req['remarks'])): ?>
-                                    <div class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                                        <p class="text-sm text-blue-800">
-                                            <strong>📝 Remarks:</strong> <?= htmlspecialchars($req['remarks']) ?>
-                                        </p>
-                                    </div>
-                                <?php endif; ?>
+                                <div class="remarks-container">
+                                    <?php if (!empty($req['remarks'])): ?>
+                                        <div class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                            <p class="text-sm text-blue-800">
+                                                <strong>📝 Remarks:</strong> <span class="remarks-text"><?= htmlspecialchars($req['remarks']) ?></span>
+                                            </p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
 
                             <!-- Action Buttons -->
@@ -114,7 +110,7 @@
                                     </button>
                                 <?php else: ?>
                                     <button class="px-6 py-2 bg-gray-400 text-white rounded-lg font-semibold" disabled>
-                                        <?= htmlspecialchars($req['status']) ?>
+                                        <span class="btn-status"><?= htmlspecialchars($req['status']) ?></span>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -140,5 +136,56 @@
     <?php endif; ?>
 </div>
 
-</body>
-</html>
+<!-- Real-time Update Script -->
+<script>
+    function updateRequests() {
+        fetch('api.php?action=my-requests')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('requests-container');
+                if (!container) return;
+
+                // Update existing requests
+                data.forEach(req => {
+                    const card = document.querySelector(`[data-request-id="${req.id}"]`);
+                    if (card) {
+                        // Update status badge
+                        const statusEmojis = {
+                            'Pending': '⏳',
+                            'Approved': '✅',
+                            'Completed': '🎉',
+                            'Rejected': '❌'
+                        };
+                        
+                        const statusBadge = card.querySelector('.status-badge');
+                        if (statusBadge) {
+                            statusBadge.className = 'status-badge status-' + req.status.toLowerCase();
+                            statusBadge.setAttribute('data-status', req.status);
+                            statusBadge.querySelector('.status-emoji').textContent = statusEmojis[req.status] || '❓';
+                            statusBadge.querySelector('.status-text').textContent = req.status;
+                        }
+
+                        // Update remarks
+                        const remarksContainer = card.querySelector('.remarks-container');
+                        if (req.remarks) {
+                            if (!remarksContainer.querySelector('.remarks-text')) {
+                                remarksContainer.innerHTML = `
+                                    <div class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                        <p class="text-sm text-blue-800">
+                                            <strong>📝 Remarks:</strong> <span class="remarks-text">${req.remarks}</span>
+                                        </p>
+                                    </div>
+                                `;
+                            } else {
+                                remarksContainer.querySelector('.remarks-text').textContent = req.remarks;
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.log('Update error:', error));
+    }
+
+    // Poll every 5 seconds
+    setInterval(updateRequests, 5000);
+</script>

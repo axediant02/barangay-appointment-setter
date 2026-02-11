@@ -43,36 +43,36 @@ $stats = $stmt->fetch();
 
     <h2 class="text-2xl font-bold mb-6">System Overview</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4" id="stats-container">
 
         <div class="bg-white p-6 rounded-lg shadow">
             <p class="text-gray-500 text-sm">Residents</p>
-            <h3 class="text-2xl font-bold"><?= $totalResidents ?></h3>
+            <h3 class="text-2xl font-bold" id="stat-residents"><?= $totalResidents ?></h3>
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow">
             <p class="text-gray-500 text-sm">Total Requests</p>
-            <h3 class="text-2xl font-bold"><?= $stats['total'] ?? 0 ?></h3>
+            <h3 class="text-2xl font-bold" id="stat-total"><?= $stats['total'] ?? 0 ?></h3>
         </div>
 
         <div class="bg-yellow-100 p-6 rounded-lg shadow">
             <p class="text-sm">Pending</p>
-            <h3 class="text-2xl font-bold text-yellow-600"><?= $stats['pending'] ?? 0 ?></h3>
+            <h3 class="text-2xl font-bold text-yellow-600" id="stat-pending"><?= $stats['pending'] ?? 0 ?></h3>
         </div>
 
         <div class="bg-blue-100 p-6 rounded-lg shadow">
             <p class="text-sm">Approved</p>
-            <h3 class="text-2xl font-bold text-blue-600"><?= $stats['approved'] ?? 0 ?></h3>
+            <h3 class="text-2xl font-bold text-blue-600" id="stat-approved"><?= $stats['approved'] ?? 0 ?></h3>
         </div>
 
         <div class="bg-green-100 p-6 rounded-lg shadow">
             <p class="text-sm">Completed</p>
-            <h3 class="text-2xl font-bold text-green-600"><?= $stats['completed'] ?? 0 ?></h3>
+            <h3 class="text-2xl font-bold text-green-600" id="stat-completed"><?= $stats['completed'] ?? 0 ?></h3>
         </div>
 
         <div class="bg-red-100 p-6 rounded-lg shadow">
             <p class="text-sm">Rejected</p>
-            <h3 class="text-2xl font-bold text-red-600"><?= $stats['rejected'] ?? 0 ?></h3>
+            <h3 class="text-2xl font-bold text-red-600" id="stat-rejected"><?= $stats['rejected'] ?? 0 ?></h3>
         </div>
 
     </div>
@@ -80,7 +80,7 @@ $stats = $stmt->fetch();
     <div class="mt-10 bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-4">Recent Requests</h3>
 
-        <table class="w-full border-collapse">
+        <table class="w-full border-collapse" id="recent-requests-table">
             <thead>
                 <tr class="bg-gray-200">
                     <th class="p-2 text-left">Resident</th>
@@ -89,7 +89,7 @@ $stats = $stmt->fetch();
                     <th class="p-2 text-left">Date</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="recent-requests-body">
                 <?php
                 $stmt = $pdo->query("
                     SELECT r.*, u.name as resident_name, c.name as certificate_name
@@ -102,10 +102,10 @@ $stats = $stmt->fetch();
 
                 foreach ($stmt as $row):
                 ?>
-                <tr class="border-b">
+                <tr class="border-b" data-request-id="<?= $row['id'] ?>">
                     <td class="p-2"><?= htmlspecialchars($row['resident_name']) ?></td>
                     <td class="p-2"><?= htmlspecialchars($row['certificate_name']) ?></td>
-                    <td class="p-2"><?= $row['status'] ?></td>
+                    <td class="p-2 status-cell"><?= $row['status'] ?></td>
                     <td class="p-2"><?= $row['appointment_date'] ?></td>
                 </tr>
                 <?php endforeach; ?>
@@ -114,6 +114,45 @@ $stats = $stmt->fetch();
     </div>
 
 </div>
+
+<!-- Real-time Update Script -->
+<script>
+    function updateAdminStats() {
+        fetch('api.php?action=admin-stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stat-residents').textContent = data.residents || 0;
+                document.getElementById('stat-total').textContent = data.total || 0;
+                document.getElementById('stat-pending').textContent = data.pending || 0;
+                document.getElementById('stat-approved').textContent = data.approved || 0;
+                document.getElementById('stat-completed').textContent = data.completed || 0;
+                document.getElementById('stat-rejected').textContent = data.rejected || 0;
+            })
+            .catch(error => console.log('Stats update error:', error));
+    }
+
+    function updateRecentRequests() {
+        fetch('api.php?action=admin-recent-requests')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('recent-requests-body');
+                if (!tbody) return;
+
+                // Update status for existing rows
+                data.forEach(req => {
+                    const row = document.querySelector(`[data-request-id="${req.id}"]`);
+                    if (row) {
+                        row.querySelector('.status-cell').textContent = req.status;
+                    }
+                });
+            })
+            .catch(error => console.log('Requests update error:', error));
+    }
+
+    // Poll every 5 seconds
+    setInterval(updateAdminStats, 5000);
+    setInterval(updateRecentRequests, 5000);
+</script>
 
 </body>
 </html>

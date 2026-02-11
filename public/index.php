@@ -43,12 +43,20 @@ switch ($page) {
 
     case 'create-request':
         if (!$isLoggedIn || $role !== 'resident') redirect('?page=login');
-        include '../views/resident/create-request.php';
+        require_once '../controllers/RequestController.php';
+        $controller = new RequestController($pdo);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->store();
+        } else {
+            $controller->createForm();
+        }
         break;
 
     case 'my-requests':
         if (!$isLoggedIn || $role !== 'resident') redirect('?page=login');
-        include '../views/resident/my-requests.php';
+        require_once '../controllers/RequestController.php';
+        $controller = new RequestController($pdo);
+        $controller->myRequests();
         break;
 
     case 'admin-dashboard':
@@ -58,7 +66,13 @@ switch ($page) {
 
     case 'manage-requests':
         if (!$isLoggedIn || $role !== 'admin') redirect('?page=login');
-        include '../views/admin/manage-requests.php';
+        require_once '../controllers/AdminController.php';
+        $controller = new AdminController($pdo);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->updateRequest();
+        } else {
+            $controller->manageRequests();
+        }
         break;
 
     case 'manage-certificates':

@@ -30,12 +30,12 @@ $stats = $stmt->fetch();
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-<nav class="bg-gray-800 p-4 text-white flex justify-between">
+<nav class="bg-teal-600 p-4 text-white flex justify-between sticky top-0 z-40">
     <h1 class="font-semibold text-lg">Admin Dashboard</h1>
     <div class="space-x-4">
-        <a href="?page=manage-requests" class="hover:underline">Manage Requests</a>
-        <a href="?page=manage-certificates" class="hover:underline">Certificates</a>
-        <a href="?page=logout" class="hover:underline">Logout</a>
+        <a href="?page=manage-requests" class="hover:text-teal-100 transition">Manage Requests</a>
+        <a href="?page=manage-certificates" class="hover:text-teal-100 transition">Certificates</a>
+        <a href="?page=logout" class="hover:text-teal-100 transition">Logout</a>
     </div>
 </nav>
 

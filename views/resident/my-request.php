@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Requests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-badge {
+            @apply inline-block px-4 py-2 rounded-full font-semibold text-sm;
+        }
+        .status-pending {
+            @apply bg-amber-100 text-amber-800 border border-amber-300;
+        }
+        .status-approved {
+            @apply bg-teal-100 text-teal-800 border border-teal-300;
+        }
+        .status-completed {
+            @apply bg-cyan-100 text-cyan-800 border border-cyan-300;
+        }
+        .status-rejected {
+            @apply bg-red-100 text-red-800 border border-red-300;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4">
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h2 class="text-4xl font-bold text-gray-900 mb-2">My Requests</h2>
+        <p class="text-gray-600 text-lg">Track all your certificate requests and their current status</p>
+    </div>
+
+    <?php if (empty($requests)): ?>
+        <!-- Empty State -->
+        <div class="bg-white rounded-xl shadow border border-gray-100 p-12 text-center">
+            <div class="text-6xl mb-4">📋</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">No Requests Yet</h3>
+            <p class="text-gray-600 mb-6">You haven't submitted any certificate requests yet.</p>
+            <a href="?page=create-request" class="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition">
+                Create Your First Request →
+            </a>
+        </div>
+    <?php else: ?>
+        <!-- Requests Grid -->
+        <div class="grid grid-cols-1 gap-4">
+            <?php foreach ($requests as $req): ?>
+                <!-- Request Card -->
+                <div class="bg-white rounded-xl shadow border border-gray-100 hover:shadow-lg transition">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <!-- Info Section -->
+                            <div class="flex-grow">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                    📄 <?= htmlspecialchars($req['certificate_name']) ?>
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <!-- Appointment Date -->
+                                    <div>
+                                        <p class="text-gray-600 font-medium">Appointment Date</p>
+                                        <p class="text-gray-900 font-semibold">
+                                            📅 <?= date('F d, Y', strtotime($req['appointment_date'])) ?>
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Status -->
+                                    <div>
+                                        <p class="text-gray-600 font-medium">Status</p>
+                                        <div class="mt-1">
+                                            <?php 
+                                            $statusClass = 'status-' . strtolower($req['status']);
+                                            $statusEmoji = '❓';
+                                            switch($req['status']) {
+                                                case 'Pending':
+                                                    $statusEmoji = '⏳';
+                                                    break;
+                                                case 'Approved':
+                                                    $statusEmoji = '✅';
+                                                    break;
+                                                case 'Completed':
+                                                    $statusEmoji = '🎉';
+                                                    break;
+                                                case 'Rejected':
+                                                    $statusEmoji = '❌';
+                                                    break;
+                                            }
+                                            ?>
+                                            <span class="status-badge <?= $statusClass ?>">
+                                                <?= $statusEmoji ?> <?= htmlspecialchars($req['status']) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Remarks -->
+                                <?php if (!empty($req['remarks'])): ?>
+                                    <div class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                        <p class="text-sm text-blue-800">
+                                            <strong>📝 Remarks:</strong> <?= htmlspecialchars($req['remarks']) ?>
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col gap-2">
+                                <?php if ($req['status'] === 'Completed'): ?>
+                                    <button class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition">
+                                        ✅ Ready
+                                    </button>
+                                <?php elseif ($req['status'] === 'Approved'): ?>
+                                    <button class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition">
+                                        📅 Upcoming
+                                    </button>
+                                <?php else: ?>
+                                    <button class="px-6 py-2 bg-gray-400 text-white rounded-lg font-semibold" disabled>
+                                        <?= htmlspecialchars($req['status']) ?>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer with Meta Info -->
+                    <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-600 flex items-center gap-2">
+                        <span>📌 Request ID: #<?= $req['id'] ?></span>
+                        <span>•</span>
+                        <span>🕐 Submitted: <?= date('M d, Y', strtotime($req['created_at'] ?? 'now')) ?></span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Back to Dashboard -->
+        <div class="mt-8">
+            <a href="?page=resident-dashboard" class="text-teal-600 font-semibold hover:text-teal-700">
+                ← Back to Dashboard
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
+
+</body>
+</html>

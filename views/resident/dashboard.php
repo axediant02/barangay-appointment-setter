@@ -27,7 +27,7 @@ include __DIR__ . '/../layout/header.php';
 
 <!-- Welcome Section -->
 <div class="mb-12">
-    <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome, <?= htmlspecialchars($_SESSION['name'] ?? 'Resident') ?>! 👋</h1>
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome, <?= htmlspecialchars($_SESSION['username'] ?? 'Resident') ?>! 👋</h1>
     <p class="text-gray-600 text-lg">Manage your certificate requests and appointments here</p>
 </div>
 
@@ -155,3 +155,6 @@ include __DIR__ . '/../layout/header.php';
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+<?php
+$adminPassword = password_hash('admin123', PASSWORD_DEFAULT);
+echo $adminPassword;    

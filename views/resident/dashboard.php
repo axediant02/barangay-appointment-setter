@@ -7,119 +7,135 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'resident') {
 
 $userId = $_SESSION['user_id'];
 
-// Fetch request statistics
+// 1. Fetch request statistics
 $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total,
-        SUM(status = 'Pending') as pending,
-        SUM(status = 'Approved') as approved,
-        SUM(status = 'Completed') as completed,
-        SUM(status = 'Rejected') as rejected
+        SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN status = 'Rejected' THEN 1 ELSE 0 END) as rejected
     FROM requests
     WHERE user_id = ?
 ");
 $stmt->execute([$userId]);
 $stats = $stmt->fetch();
 
+// 2. Fetch Recent Requests (PHP 7 compatible)
+$recentStmt = $pdo->prepare("
+    SELECT r.*, c.name as certificate_name 
+    FROM requests r
+    JOIN certificates c ON r.certificate_id = c.id
+    WHERE r.user_id = ?
+    ORDER BY r.created_at DESC
+    LIMIT 5
+");
+$recentStmt->execute([$userId]);
+$recentRequests = $recentStmt->fetchAll();
+
 $pageTitle = 'Dashboard - Resident';
 include __DIR__ . '/../layout/header.php';
 ?>
 
-<div class="mb-12">
-    <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome, <?= htmlspecialchars($_SESSION['username'] ?? 'Resident') ?>! 👋</h1>
-    <p class="text-gray-600 text-lg">Manage your certificate requests and appointments here</p>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12" id="stats-container">
-    <div class="bg-white rounded-xl shadow border border-gray-100 p-6 hover:shadow-lg transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-gray-600 text-sm font-medium">Total Requests</p>
-                <h3 class="text-3xl font-bold text-gray-900" id="stat-total"><?= $stats['total'] ?? 0 ?></h3>
-            </div>
-            <div class="text-4xl">📋</div>
-        </div>
-    </div>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    .stat-card { @apply bg-white rounded-xl border border-slate-200 p-4 transition-all; }
+    .status-badge { @apply px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider border; }
+</style>
 
-    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow border border-amber-200 p-6 hover:shadow-lg transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-amber-800 text-sm font-medium">Pending</p>
-                <h3 class="text-3xl font-bold text-amber-700" id="stat-pending"><?= $stats['pending'] ?? 0 ?></h3>
-            </div>
-            <div class="text-4xl">⏳</div>
-        </div>
-    </div>
-
-    <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl shadow border border-teal-200 p-6 hover:shadow-lg transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-teal-800 text-sm font-medium">Approved</p>
-                <h3 class="text-3xl font-bold text-teal-700" id="stat-approved"><?= $stats['approved'] ?? 0 ?></h3>
-            </div>
-            <div class="text-4xl">✅</div>
-        </div>
-    </div>
-
-    <div class="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl shadow border border-cyan-200 p-6 hover:shadow-lg transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-cyan-800 text-sm font-medium">Completed</p>
-                <h3 class="text-3xl font-bold text-cyan-700" id="stat-completed"><?= $stats['completed'] ?? 0 ?></h3>
-            </div>
-            <div class="text-4xl">🎉</div>
-        </div>
-    </div>
-
-    <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl shadow border border-red-200 p-6 hover:shadow-lg transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-red-800 text-sm font-medium">Rejected</p>
-                <h3 class="text-3xl font-bold text-red-700" id="stat-rejected"><?= $stats['rejected'] ?? 0 ?></h3>
-            </div>
-            <div class="text-4xl">❌</div>
-        </div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <a href="?page=create-request" class="bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition hover:scale-105">
-        <div class="text-5xl mb-4">📝</div>
-        <h3 class="text-2xl font-bold mb-2">Request Certificate</h3>
-        <p class="text-teal-100">Start a new certificate request and schedule your appointment</p>
-        <div class="mt-6 inline-block px-6 py-2 bg-white text-teal-600 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Get Started →
-        </div>
-    </a>
-
-    <a href="?page=my-requests" class="bg-gradient-to-br from-cyan-600 to-blue-600 text-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition hover:scale-105">
-        <div class="text-5xl mb-4">📊</div>
-        <h3 class="text-2xl font-bold mb-2">View My Requests</h3>
-        <p class="text-cyan-100">Track all your requests and their current status</p>
-        <div class="mt-6 inline-block px-6 py-2 bg-white text-cyan-600 rounded-lg font-semibold hover:bg-gray-100 transition">
-            View All →
-        </div>
-    </a>
-</div>
-
-<div class="mt-12 bg-teal-50 border-2 border-teal-200 rounded-xl p-8">
-    <h3 class="text-xl font-bold text-gray-900 mb-4">❓ How It Works</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="max-w-5xl mx-auto px-4 pt-6 pb-10">
+    
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <div class="text-3xl mb-2">1️⃣</div>
-            <p class="font-semibold text-gray-900 mb-1">Submit Request</p>
-            <p class="text-gray-600 text-sm">Choose the certificate type and schedule your preferred appointment date</p>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Welcome, <?= htmlspecialchars($_SESSION['username'] ?? 'Resident') ?></h1>
+            <p class="text-slate-500 text-sm">Here's an update on your certificate requests.</p>
         </div>
-        <div>
-            <div class="text-3xl mb-2">2️⃣</div>
-            <p class="font-semibold text-gray-900 mb-1">Wait for Review</p>
-            <p class="text-gray-600 text-sm">Our admin team will review your request and update you on approval status</p>
+        
+        <a href="?page=create-request" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+            New Request
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8" id="stats-container">
+        <div class="stat-card">
+            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Total</p>
+            <h3 class="text-xl font-bold text-slate-800" id="stat-total"><?= (int)($stats['total'] ?? 0) ?></h3>
         </div>
-        <div>
-            <div class="text-3xl mb-2">3️⃣</div>
-            <p class="font-semibold text-gray-900 mb-1">Claim Certificate</p>
-            <p class="text-gray-600 text-sm">Once ready, come to your appointment and receive your certificate</p>
+        <div class="stat-card border-amber-100 bg-amber-50/30">
+            <p class="text-amber-600 text-[10px] font-bold uppercase tracking-wider mb-1">Pending</p>
+            <h3 class="text-xl font-bold text-amber-600" id="stat-pending"><?= (int)($stats['pending'] ?? 0) ?></h3>
         </div>
+        <div class="stat-card border-teal-100 bg-teal-50/30">
+            <p class="text-teal-600 text-[10px] font-bold uppercase tracking-wider mb-1">Approved</p>
+            <h3 class="text-xl font-bold text-teal-600" id="stat-approved"><?= (int)($stats['approved'] ?? 0) ?></h3>
+        </div>
+        <div class="stat-card border-blue-100 bg-blue-50/30">
+            <p class="text-blue-600 text-[10px] font-bold uppercase tracking-wider mb-1">Ready</p>
+            <h3 class="text-xl font-bold text-blue-600" id="stat-completed"><?= (int)($stats['completed'] ?? 0) ?></h3>
+        </div>
+        <div class="stat-card border-red-100 bg-red-50/30">
+            <p class="text-red-600 text-[10px] font-bold uppercase tracking-wider mb-1">Rejected</p>
+            <h3 class="text-xl font-bold text-red-600" id="stat-rejected"><?= (int)($stats['rejected'] ?? 0) ?></h3>
+        </div>
+    </div>
+
+    <div class="mb-4 flex items-center justify-between px-1">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Recent Activity</h3>
+        <a href="?page=my-requests" class="text-teal-600 text-xs font-bold hover:underline flex items-center gap-1">
+            View All
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <?php if (empty($recentRequests)): ?>
+            <div class="p-12 text-center">
+                <p class="text-slate-400 text-sm font-medium italic">No recent requests found.</p>
+            </div>
+        <?php else: ?>
+            <div class="divide-y divide-slate-100">
+                <?php foreach ($recentRequests as $req): ?>
+                    <div class="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 border border-slate-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-800 leading-tight"><?= htmlspecialchars($req['certificate_name']) ?></h4>
+                                <p class="text-[11px] text-slate-500 font-medium mt-0.5">
+                                    #<?= $req['id'] ?> • <?= date('M d, Y', strtotime($req['created_at'])) ?>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <?php 
+                                $status = $req['status'];
+                                $statusClass = 'bg-slate-50 text-slate-600 border-slate-200';
+                                switch ($status) {
+                                    case 'Approved': $statusClass = 'bg-teal-50 text-teal-700 border-teal-100'; break;
+                                    case 'Pending': $statusClass = 'bg-amber-50 text-amber-700 border-amber-100'; break;
+                                    case 'Completed': $statusClass = 'bg-blue-50 text-blue-700 border-blue-100'; break;
+                                    case 'Rejected': $statusClass = 'bg-red-50 text-red-700 border-red-100'; break;
+                                }
+                            ?>
+                            <span class="status-badge <?= $statusClass ?>">
+                                <?= htmlspecialchars($status) ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -128,19 +144,16 @@ include __DIR__ . '/../layout/header.php';
         fetch('api.php?action=resident-stats')
             .then(response => response.json())
             .then(data => {
-                document.getElementById('stat-total').textContent = data.total || 0;
-                document.getElementById('stat-pending').textContent = data.pending || 0;
-                document.getElementById('stat-approved').textContent = data.approved || 0;
-                document.getElementById('stat-completed').textContent = data.completed || 0;
-                document.getElementById('stat-rejected').textContent = data.rejected || 0;
+                const up = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val || 0; };
+                up('stat-total', data.total);
+                up('stat-pending', data.pending);
+                up('stat-approved', data.approved);
+                up('stat-completed', data.completed);
+                up('stat-rejected', data.rejected);
             })
-            .catch(error => console.log('Update error:', error));
+            .catch(e => console.log('Sync error'));
     }
-
-    setInterval(updateStats, 5000);
+    setInterval(updateStats, 20000);
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
-<?php
-$adminPassword = password_hash('admin123', PASSWORD_DEFAULT);
-echo $adminPassword;    

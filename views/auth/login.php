@@ -12,16 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['name'] = $user['name'];
-
-            if ($user['role'] === 'admin') {
-                header("Location: ?page=admin-dashboard");
+            // Use the session helper function for consistency
+            if (setSessionData($user)) {
+                if ($user['role'] === 'admin') {
+                    header("Location: ?page=admin-dashboard", true, 302);
+                } else {
+                    header("Location: ?page=resident-dashboard", true, 302);
+                }
+                exit;
             } else {
-                header("Location: ?page=resident-dashboard");
+                $errors[] = "Session initialization failed. Please try again.";
             }
-            exit;
         } else {
             $errors[] = "Invalid email or password.";
         }

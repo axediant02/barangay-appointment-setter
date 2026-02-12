@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Requests | BrgyPortal</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+<?php require '../views/layout/header.php'; ?>
 
+<style>
 .status-badge {
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide border;
 }
@@ -22,7 +14,6 @@ body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e29
     @apply bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-200 hover:border-teal-300 overflow-hidden;
 }
 
-/* Sticky Header Style */
 .sticky-nav {
     position: sticky;
     top: 0;
@@ -32,15 +23,12 @@ body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e29
     border-bottom: 1px solid #e2e8f0;
 }
 
-/* HIGH-CONTRAST REMARKS HIGHLIGHT */
 .remarks-highlight {
-    background-color: #f0fdfa; /* Ultra light teal */
-    border: 2px dashed #99f6e4; /* Teal-200 */
+    background-color: #f0fdfa;
+    border: 2px dashed #99f6e4;
     box-shadow: 0 0 15px rgba(20, 184, 166, 0.05);
 }
 </style>
-</head>
-<body class="min-h-screen pb-12">
 
 <nav class="sticky-nav mb-6">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -52,7 +40,6 @@ body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e29
             </span>
             <span class="text-sm tracking-tight">Return</span>
         </button>
-        
         <div class="hidden sm:block">
             <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Resident Portal v2.0</span>
         </div>
@@ -150,12 +137,25 @@ body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e29
 
 <?php endforeach; ?>
 </div>
+
+<!-- Pagination -->
+<?php if ($totalPages > 1): ?>
+<div class="mt-8 flex justify-center items-center gap-2">
+    <?php if ($currentPage > 1): ?>
+        <a href="?page=my-requests&page_num=<?= $currentPage - 1 ?>" class="px-3 py-1 bg-teal-500 text-white rounded-lg font-bold text-xs hover:bg-teal-600 transition">Prev</a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?page=my-requests&page_num=<?= $i ?>" class="px-3 py-1 rounded-lg font-bold text-xs <?= $i === $currentPage ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-teal-500 hover:text-white transition' ?>"><?= $i ?></a>
+    <?php endfor; ?>
+
+    <?php if ($currentPage < $totalPages): ?>
+        <a href="?page=my-requests&page_num=<?= $currentPage + 1 ?>" class="px-3 py-1 bg-teal-500 text-white rounded-lg font-bold text-xs hover:bg-teal-600 transition">Next</a>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
 <?php endif; ?>
 
-<div class="mt-16 text-center">
-    <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">End of Records</p>
 </div>
 
-</div>
-</body>
-</html>
+<?php require '../views/layout/footer.php'; ?>

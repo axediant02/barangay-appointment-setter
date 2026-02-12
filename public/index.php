@@ -55,6 +55,17 @@ switch ($page) {
         $controller->myRequests();
         break;
 
+    case 'cancel-request':
+        if (!$isLoggedIn || $role !== 'resident') redirect('?page=login');
+        require_once '../controllers/RequestController.php';
+        $controller = new RequestController($pdo);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->cancel();
+        } else {
+            redirect('?page=my-requests');
+        }
+        break;
+
     case 'admin-dashboard':
         if (!$isLoggedIn || $role !== 'admin') redirect('?page=login');
         include '../views/admin/dashboard.php';

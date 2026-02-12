@@ -59,6 +59,42 @@ class RequestController {
         }
     }
 
+    // ✅ CANCEL FEATURE (Only if Pending)
+    public function cancel() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            $requestId = $_POST['request_id'] ?? null;
+
+            if (!$requestId) {
+                $_SESSION['error'] = "Invalid request.";
+                header("Location: ?page=my-requests");
+                exit;
+            }
+
+            $stmt = $this->pdo->prepare("
+                UPDATE requests
+                SET status = 'Cancelled'
+                WHERE id = ?
+                AND user_id = ?
+                AND status = 'Pending'
+            ");
+
+            $stmt->execute([
+                $requestId,
+                $_SESSION['user_id']
+            ]);
+
+            if ($stmt->rowCount() > 0) {
+                $_SESSION['success'] = "Request cancelled successfully.";
+            } else {
+                $_SESSION['error'] = "Request cannot be cancelled. It may already be processed.";
+            }
+
+            header("Location: ?page=my-requests");
+            exit;
+        }
+    }
+
     public function myRequests() {
         $requests = $this->requestModel->getByUser($_SESSION['user_id']);
         require '../views/resident/my-request.php';

@@ -25,6 +25,7 @@
     .status-Approved { border-left: 4px solid #059669; }
     .status-Completed { border-left: 4px solid #0891B2; }
     .status-Rejected { border-left: 4px solid #DC2626; }
+    .status-Cancelled { border-left: 4px solid #6B7280; }
 
     /* Sticky Navigation Styles */
     .sticky-nav {
@@ -115,14 +116,23 @@
                                     <td class="px-6 py-5">
                                         <select name="status" class="form-input text-[10px] font-black uppercase tracking-widest border-none bg-slate-50">
                                             <?php
-                                            $statuses = ['Pending' => '⏳ Pending', 'Approved' => '✅ Approved', 'Completed' => '💎 Completed', 'Rejected' => '❌ Rejected'];
-                                            foreach ($statuses as $val => $label):
-                                                $selected = $req['status'] == $val ? 'selected' : '';
+                                            $currentStatus = $req['status'];
+                                            $statusMap = [
+                                                'Pending' => ['Pending' => '⏳ Pending', 'Approved' => '✅ Approved', 'Rejected' => '❌ Rejected'],
+                                                'Approved' => ['Approved' => '✅ Approved', 'Completed' => '💎 Completed'],
+                                                'Rejected' => ['Rejected' => '❌ Rejected'],
+                                                'Completed' => ['Completed' => '💎 Completed'],
+                                                'Cancelled' => ['Cancelled' => '🚫 Cancelled']
+                                            ];
+
+                                            $available = $statusMap[$currentStatus] ?? [$currentStatus => $currentStatus];
+                                            foreach ($available as $val => $label):
+                                                $selected = $currentStatus == $val ? 'selected' : '';
                                             ?>
                                                 <option value="<?= $val ?>" <?= $selected ?>><?= $label ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                    </td>
+                                    </td>   
 
                                     <td class="px-6 py-5">
                                         <input type="text" name="remarks" value="<?= htmlspecialchars($req['remarks'] ?? '') ?>" placeholder="Add remark..." class="form-input text-xs w-full bg-transparent border-dashed border-slate-200">

@@ -25,7 +25,13 @@ class AdminController {
             $status = $_POST['status'];
             $remarks = $_POST['remarks'];
 
-            $this->requestModel->updateStatus($id, $status, $remarks);
+            $ok = $this->requestModel->updateStatus($id, $status, $remarks);
+
+            if ($ok) {
+                $_SESSION['success'] = "Request updated successfully.";
+            } else {
+                $_SESSION['error'] = "Invalid status transition or request not found. Action not allowed.";
+            }
 
             header("Location: ?page=manage-requests");
             exit;

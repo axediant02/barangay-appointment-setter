@@ -7,9 +7,6 @@ class RequestModel {
         $this->pdo = $pdo;
     }
 
-    // ----------------------------
-    // Fetch all requests (admin)
-    // ----------------------------
     public function getAll() {
         $stmt = $this->pdo->query("
             SELECT r.*, u.username AS resident_username, c.name AS certificate_name
@@ -21,9 +18,6 @@ class RequestModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // ----------------------------
-    // Paginated requests for a specific resident
-    // ----------------------------
     public function getByUserPaginated($userId, $page = 1, $perPage = 5) {
         $offset = ($page - 1) * $perPage;
 
@@ -54,9 +48,6 @@ class RequestModel {
         ];
     }
 
-    // ----------------------------
-    // Paginated requests for admin
-    // ----------------------------
     public function getAllPaginated($page = 1, $perPage = 10) {
         $offset = ($page - 1) * $perPage;
 
@@ -85,9 +76,6 @@ class RequestModel {
         ];
     }
 
-    // ----------------------------
-    // Fetch all requests for a resident (non-paginated)
-    // ----------------------------
     public function getByUser($userId) {
         $stmt = $this->pdo->prepare("
             SELECT r.*, c.name AS certificate_name
@@ -100,9 +88,6 @@ class RequestModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // ----------------------------
-    // Create new request
-    // ----------------------------
     public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber) {
         $stmt = $this->pdo->prepare("
             INSERT INTO requests 
@@ -112,9 +97,6 @@ class RequestModel {
         return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber]);
     }
 
-    // ----------------------------
-    // Update request status (with allowed transitions)
-    // ----------------------------
     public function updateStatus($id, $status, $remarks = null) {
         $stmt = $this->pdo->prepare("SELECT status, certificate_id, user_id FROM requests WHERE id = ?");
         $stmt->execute([$id]);
@@ -145,9 +127,6 @@ class RequestModel {
         return $stmt->execute([$status, $remarks, $id]);
     }
 
-    // ----------------------------
-    // Count active requests for a certificate today (excluding cancelled)
-    // ----------------------------
     public function countUserActiveRequestsForCertificateToday($userId, $certificateId) {
         $stmt = $this->pdo->prepare("
             SELECT COUNT(*) 
@@ -161,9 +140,6 @@ class RequestModel {
         return (int)$stmt->fetchColumn();
     }
 
-    // ----------------------------
-    // Count cancellations for a specific certificate
-    // ----------------------------
     public function countUserCancellationsForCertificate($userId, $certificateId) {
         $stmt = $this->pdo->prepare("
             SELECT COUNT(*) 
@@ -176,27 +152,16 @@ class RequestModel {
         return (int)$stmt->fetchColumn();
     }
 
-    // ----------------------------
-    // Can cancel request? (max 3 per certificate)
-    // ----------------------------
     public function canCancelRequest($userId, $certificateId) {
         return $this->countUserCancellationsForCertificate($userId, $certificateId) < 3;
     }
 
-    // ----------------------------
-    // Is temporarily banned? (3 cancellations reached)
-    // ----------------------------
     public function isTemporarilyBanned($userId, $certificateId) {
         return $this->countUserCancellationsForCertificate($userId, $certificateId) >= 3;
     }
 
-    // ----------------------------
-    // Can create request?
-    // Must not be banned AND must not have active request today
-    // ----------------------------
-    public function canCreateRequest($userId, $certificateId) {
 
-        // Block if cancellation limit reached
+    public function canCreateRequest($userId, $certificateId) {
         if ($this->isTemporarilyBanned($userId, $certificateId)) {
             return false;
         }

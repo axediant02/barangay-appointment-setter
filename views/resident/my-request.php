@@ -142,7 +142,6 @@
 </div>
 <?php endif; ?>
 
-<!-- Pagination -->
 <?php if ($totalPages > 1): ?>
 <div class="mt-8 flex justify-center items-center gap-2">
     <?php if ($currentPage > 1): ?>

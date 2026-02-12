@@ -15,9 +15,6 @@ class RequestController {
         $this->requestModel = new RequestModel($pdo);
     }
 
-    // ----------------------------
-    // Show request creation form
-    // ----------------------------
     public function createForm() {
 
         $certificates = $this->certificateModel->getAll();
@@ -26,9 +23,6 @@ class RequestController {
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // ---------------------------------
-        // Get certificates requested today
-        // ---------------------------------
         $stmt = $this->pdo->prepare("
             SELECT certificate_id 
             FROM requests 
@@ -39,9 +33,6 @@ class RequestController {
         $stmt->execute([$_SESSION['user_id']]);
         $userRequestsToday = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        // ---------------------------------
-        // Get cancellation counts per certificate
-        // ---------------------------------
         $stmt = $this->pdo->prepare("
             SELECT certificate_id, COUNT(*) as total
             FROM requests
@@ -62,9 +53,6 @@ class RequestController {
         require '../views/resident/create-request.php';
     }
 
-    // ----------------------------
-    // Store new request
-    // ----------------------------
     public function store() {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -83,9 +71,6 @@ class RequestController {
                 exit;
             }
 
-            // ---------------------------------
-            // Check permanent ban (3 cancellations)
-            // ---------------------------------
             $stmt = $this->pdo->prepare("
                 SELECT COUNT(*) 
                 FROM requests 
@@ -102,9 +87,6 @@ class RequestController {
                 exit;
             }
 
-            // ---------------------------------
-            // Daily active request check
-            // ---------------------------------
             if (!$this->requestModel->canCreateRequest($_SESSION['user_id'], $certificateId)) {
                 $_SESSION['error'] = "You already have an active request for this certificate today.";
                 header("Location: ?page=create-request");
@@ -129,9 +111,6 @@ class RequestController {
         }
     }
 
-    // ----------------------------
-    // Cancel request (only if Pending)
-    // ----------------------------
     public function cancel() {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -186,9 +165,6 @@ class RequestController {
         }
     }
 
-    // ----------------------------
-    // Resident: My Requests
-    // ----------------------------
     public function myRequests() {
 
         $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
@@ -200,9 +176,6 @@ class RequestController {
         $totalPages  = $paginated['totalPages'] ?? 1;
         $currentPage = $paginated['currentPage'] ?? 1;
 
-        // ---------------------------------
-        // Get cancellation counts per certificate
-        // ---------------------------------
         $stmt = $this->pdo->prepare("
             SELECT certificate_id, COUNT(*) as total
             FROM requests
@@ -225,9 +198,6 @@ class RequestController {
         require '../views/resident/my-request.php';
     }
 
-    // ----------------------------
-    // Admin: All Requests
-    // ----------------------------
     public function allRequests() {
 
         $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;

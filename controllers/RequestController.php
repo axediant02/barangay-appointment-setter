@@ -15,6 +15,7 @@ class RequestController {
         $this->requestModel = new RequestModel($pdo);
     }
 
+    // Show request creation form
     public function createForm() {
         $certificates = $this->certificateModel->getAll();
 
@@ -25,6 +26,7 @@ class RequestController {
         require '../views/resident/create-request.php';
     }
 
+    // Store new request
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -59,7 +61,7 @@ class RequestController {
         }
     }
 
-    // ✅ CANCEL FEATURE (Only if Pending)
+    // Cancel request (only if Pending)
     public function cancel() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -95,8 +97,18 @@ class RequestController {
         }
     }
 
+    // Show user requests with pagination
     public function myRequests() {
-        $requests = $this->requestModel->getByUser($_SESSION['user_id']);
+        $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
+        $perPage = 5; // UX-friendly: 5 requests per page
+
+        // Fetch paginated requests from model
+        $paginated = $this->requestModel->getByUserPaginated($_SESSION['user_id'], $page, $perPage);
+
+        $requests = $paginated['data'] ?? [];
+        $totalPages = $paginated['totalPages'] ?? 1;
+        $currentPage = $paginated['currentPage'] ?? 1;
+
         require '../views/resident/my-request.php';
     }
 }

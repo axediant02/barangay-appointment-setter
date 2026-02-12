@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Certificate | BrgyPortal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+<?php require '../views/layout/header.php'; ?>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
         .form-section {
             @apply bg-slate-50 rounded-xl p-8 border-2 border-slate-200 mb-8;
@@ -31,9 +25,7 @@
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
         }
-    </style>
-</head>
-<body class="bg-slate-100 min-h-screen pb-20">
+</style>
 
 <div class="max-w-3xl mx-auto pt-8 px-4">
     
@@ -132,5 +124,4 @@
     </div>
 </div>
 
-</body>
-</html>
+<?php require '../views/layout/footer.php'; ?>

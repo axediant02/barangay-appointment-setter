@@ -1,5 +1,6 @@
 <?php
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+// Session check is performed in index.php, just ensure admin access
+if (empty($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ?page=login");
     exit;
 }

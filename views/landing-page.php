@@ -80,7 +80,7 @@ include __DIR__ . '/layout/header.php';
                     <div class="space-y-4">
                         <div class="h-12 w-full bg-slate-50 rounded-xl border border-dashed border-slate-200"></div>
                         <div class="h-32 w-full bg-teal-50/50 rounded-xl border-2 border-teal-100 flex items-center justify-center">
-                            <span class="text-teal-600 font-black text-xs uppercase tracking-widest italic">Digital Certificate Preview</span>
+                            <span class="text-teal-600 font-black text-xs uppercase tracking-widest italic"></span>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="h-10 bg-slate-50 rounded-lg"></div>

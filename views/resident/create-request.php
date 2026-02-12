@@ -115,16 +115,34 @@
                                 <?php foreach ($certificates as $cert): 
                                     $alreadyRequested = in_array($cert['id'], $userRequestsToday ?? []);
                                     $isBanned = $userBanStatus[$cert['id']] ?? false;
+                                    $cancelCount = $userCancellationCounts[$cert['id']] ?? 0;
                                 ?>
                                     <option value="<?= $cert['id'] ?>"
-                                        <?= $alreadyRequested ? 'disabled title="You already requested this certificate today"' : '' ?>
-                                        <?= $isBanned ? 'disabled title="You reached the maximum of 3 cancellations for this certificate"' : '' ?>
+                                        <?= $alreadyRequested ? 'disabled' : '' ?>
+                                        <?= $isBanned ? 'disabled' : '' ?>
                                     >
                                         <?= htmlspecialchars($cert['name']) ?>
-                                        <?= $isBanned ? ' (Request Disabled)' : '' ?>
+                                        <?php if ($cancelCount > 0): ?>
+                                            (<?= $cancelCount ?>/3 cancellations used)
+                                        <?php endif; ?>
+                                        <?= $isBanned ? ' - Request Disabled' : '' ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+
+                            <!-- Helper Message -->
+                            <div class="mt-3 text-xs font-semibold space-y-1">
+                                <p class="text-slate-500">
+                                    • You can request only once per certificate per day.
+                                </p>
+                                <p class="text-slate-500">
+                                    • If you cancel 3 times for the same certificate, requesting will be disabled.
+                                </p>
+                                <p class="text-red-600">
+                                    • Disabled certificates mean you reached cancellation limit.
+                                </p>
+                            </div>
+
                         </div>
 
                         <div>

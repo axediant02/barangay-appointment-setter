@@ -13,8 +13,8 @@ RUN a2enmod rewrite
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
-COPY . /var/www/html/
+# Copy application files from parent directory (one level up)
+COPY .. /var/www/html/
 
 # Set Apache document root to public/
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public

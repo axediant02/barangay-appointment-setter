@@ -1,13 +1,16 @@
 <?php
-session_start();
+// Load session configuration and helpers
+require_once '../config/session.php';
 require_once '../config/database.php';
 
 function redirect($url) {
     header("Location: $url");
     exit;
 }
-$isLoggedIn = isset($_SESSION['user_id']);
-$role = $_SESSION['role'] ?? null;
+
+// Check session status with cleaner helper functions
+$isLoggedIn = isLoggedIn();
+$role = getCurrentRole();
 
 $page = $_GET['page'] ?? 'home';
 
@@ -27,8 +30,7 @@ switch ($page) {
         break;
 
     case 'logout':
-        session_unset();
-        session_destroy();
+        logout();
         redirect('?page=home');
         break;
 

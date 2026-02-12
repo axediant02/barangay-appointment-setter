@@ -27,7 +27,6 @@ class RequestModel {
     public function getByUserPaginated($userId, $page = 1, $perPage = 5) {
         $offset = ($page - 1) * $perPage;
 
-        // Fetch paginated requests
         $stmt = $this->pdo->prepare("
             SELECT r.*, c.name AS certificate_name
             FROM requests r
@@ -42,7 +41,6 @@ class RequestModel {
         $stmt->execute();
         $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Get total requests count for pagination
         $countStmt = $this->pdo->prepare("SELECT COUNT(*) AS total FROM requests WHERE user_id = ?");
         $countStmt->execute([$userId]);
         $total = (int)($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
@@ -118,14 +116,14 @@ class RequestModel {
     // Update request status (with allowed transitions)
     // ----------------------------
     public function updateStatus($id, $status, $remarks = null) {
-        // Fetch current status
-        $stmt = $this->pdo->prepare("SELECT status FROM requests WHERE id = ?");
+        $stmt = $this->pdo->prepare("SELECT status, certificate_id, user_id FROM requests WHERE id = ?");
         $stmt->execute([$id]);
-        $current = $stmt->fetchColumn();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($current === false) return false;
+        if (!$row) return false;
 
-        // Define allowed transitions
+        $current = $row['status'];
+
         $allowed = [
             'Pending'   => ['Approved', 'Rejected', 'Cancelled'],
             'Approved'  => ['Completed'],
@@ -134,18 +132,80 @@ class RequestModel {
             'Cancelled' => []
         ];
 
-        // Same status is allowed (just update remarks)
         if ($status === $current) {
             $stmt = $this->pdo->prepare("UPDATE requests SET remarks = ? WHERE id = ?");
             return $stmt->execute([$remarks, $id]);
         }
 
-        // Check if transition is allowed
         if (!isset($allowed[$current]) || !in_array($status, $allowed[$current], true)) {
             return false;
         }
 
         $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ? WHERE id = ?");
         return $stmt->execute([$status, $remarks, $id]);
+    }
+
+    // ----------------------------
+    // Count active requests for a certificate today (excluding cancelled)
+    // ----------------------------
+    public function countUserActiveRequestsForCertificateToday($userId, $certificateId) {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*) 
+            FROM requests 
+            WHERE user_id = ? 
+              AND certificate_id = ? 
+              AND status != 'Cancelled'
+              AND DATE(created_at) = CURDATE()
+        ");
+        $stmt->execute([$userId, $certificateId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    // ----------------------------
+    // Count cancellations for a specific certificate
+    // ----------------------------
+    public function countUserCancellationsForCertificate($userId, $certificateId) {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*) 
+            FROM requests 
+            WHERE user_id = ? 
+              AND certificate_id = ? 
+              AND status = 'Cancelled'
+        ");
+        $stmt->execute([$userId, $certificateId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    // ----------------------------
+    // Can cancel request? (max 3 per certificate)
+    // ----------------------------
+    public function canCancelRequest($userId, $certificateId) {
+        return $this->countUserCancellationsForCertificate($userId, $certificateId) < 3;
+    }
+
+    // ----------------------------
+    // Is temporarily banned? (3 cancellations reached)
+    // ----------------------------
+    public function isTemporarilyBanned($userId, $certificateId) {
+        return $this->countUserCancellationsForCertificate($userId, $certificateId) >= 3;
+    }
+
+    // ----------------------------
+    // Can create request?
+    // Must not be banned AND must not have active request today
+    // ----------------------------
+    public function canCreateRequest($userId, $certificateId) {
+
+        // Block if cancellation limit reached
+        if ($this->isTemporarilyBanned($userId, $certificateId)) {
+            return false;
+        }
+
+        // Only 1 active request per day
+        if ($this->countUserActiveRequestsForCertificateToday($userId, $certificateId) > 0) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -12,14 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['name'] = $user['name'];
+            $_SESSION['user_id'] = (int)$user['id'];
+            $_SESSION['role'] = (string)$user['role'];
+            $_SESSION['username'] = (string)$user['name'];
+            $_SESSION['email'] = (string)$user['email'];
+            
+            // Ensure session is saved before redirect
+            session_commit();
 
             if ($user['role'] === 'admin') {
-                header("Location: ?page=admin-dashboard");
+                header("Location: ?page=admin-dashboard", true, 302);
             } else {
-                header("Location: ?page=resident-dashboard");
+                header("Location: ?page=resident-dashboard", true, 302);
             }
             exit;
         } else {

@@ -14,7 +14,17 @@ class AdminController {
     }
 
     public function manageRequests() {
+        $pageNum = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
+        $perPage = 10;
+        
         $requests = $this->requestModel->getAll();
+        $totalRequests = count($requests);
+        $totalPages = ceil($totalRequests / $perPage);
+        $offset = ($pageNum - 1) * $perPage;
+        
+        $requests = array_slice($requests, $offset, $perPage);
+        $currentPage = $pageNum;
+        
         require '../views/admin/manage-request.php';
     }
 

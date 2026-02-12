@@ -80,6 +80,7 @@
 <?php foreach ($requests as $req): 
     $status = $req['status'] ?? 'Pending';
     $statusLower = strtolower($status);
+
     $accentClass = 'border-l-slate-300';
     $statusEmoji = '⏳';
 
@@ -101,19 +102,21 @@
             </p>
         </div>
 
-        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto sm:justify-end">
+
             <span class="status-badge status-<?= $statusLower ?> shadow-sm">
                 <?= $statusEmoji ?> <?= $status ?>
             </span>
 
             <?php if ($status === 'Pending'): ?>
-            <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Are you sure you want to cancel this request?');">
-                <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
-                <button type="submit" class="px-5 py-2.5 bg-white text-red-600 border border-red-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition active:scale-95 shadow-sm">
-                    Cancel
-                </button>
-            </form>
+                <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                    <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                    <button type="submit" class="px-5 py-2.5 bg-white text-red-600 border border-red-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition active:scale-95 shadow-sm">
+                        Cancel
+                    </button>
+                </form>
             <?php endif; ?>
+
         </div>
     </div>
 
@@ -137,6 +140,7 @@
 
 <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <!-- Pagination -->
 <?php if ($totalPages > 1): ?>
@@ -154,7 +158,10 @@
     <?php endif; ?>
 </div>
 <?php endif; ?>
-<?php endif; ?>
+
+<div class="mt-16 text-center">
+    <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">End of Records</p>
+</div>
 
 </div>
 

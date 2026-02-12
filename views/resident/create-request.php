@@ -2,32 +2,43 @@
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        .form-section {
-            @apply bg-slate-50 rounded-xl p-8 border-2 border-slate-200 mb-8;
-        }
+    
+    .form-section {
+        @apply bg-slate-50 rounded-xl p-8 border-2 border-slate-200 mb-8;
+    }
 
-        .input-label {
-            @apply block text-base font-black text-slate-800 mb-2 uppercase tracking-wide;
-        }
+    .input-label {
+        @apply block text-base font-black text-slate-800 mb-2 uppercase tracking-wide;
+    }
 
-        /* HIGH VISIBILITY INPUTS */
-        .form-input {
-            @apply w-full border-2 border-slate-400 rounded-lg px-4 py-3.5 bg-slate-100 text-lg font-semibold transition-all;
-            @apply placeholder:text-slate-500 text-slate-900;
-            @apply focus:outline-none focus:ring-4 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white;
-        }
+    .form-input {
+        @apply w-full border-2 border-slate-400 rounded-lg px-4 py-3.5 bg-slate-100 text-lg font-semibold transition-all;
+        @apply placeholder:text-slate-500 text-slate-900;
+        @apply focus:outline-none focus:ring-4 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white;
+    }
 
-        select.form-input {
-            @apply appearance-none cursor-pointer pr-12;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%230f172a' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 1rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-        }
+    select.form-input {
+        @apply appearance-none cursor-pointer pr-12;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%230f172a' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 1rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
 </style>
 
 <div class="max-w-3xl mx-auto pt-8 px-4">
+
+    <?php if (!empty($_SESSION['error'])): ?>
+        <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <?= $_SESSION['error']; unset($_SESSION['error']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['success'])): ?>
+        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <?= $_SESSION['success']; unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
     
     <div class="flex justify-between items-center mb-6">
         <button onclick="history.back()" class="flex items-center gap-2 text-slate-600 hover:text-teal-600 transition font-black text-sm uppercase tracking-widest">
@@ -101,8 +112,17 @@
                             <label class="input-label">Type of Certificate <span class="text-red-600">*</span></label>
                             <select name="certificate_id" class="form-input" required>
                                 <option value="">Select Certificate Type</option>
-                                <?php foreach ($certificates as $cert): ?>
-                                    <option value="<?= $cert['id'] ?>"><?= htmlspecialchars($cert['name']) ?></option>
+                                <?php foreach ($certificates as $cert): 
+                                    $alreadyRequested = in_array($cert['id'], $userRequestsToday ?? []);
+                                    $isBanned = $userBanStatus[$cert['id']] ?? false;
+                                ?>
+                                    <option value="<?= $cert['id'] ?>"
+                                        <?= $alreadyRequested ? 'disabled title="You already requested this certificate today"' : '' ?>
+                                        <?= $isBanned ? 'disabled title="You reached the maximum of 3 cancellations for this certificate"' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($cert['name']) ?>
+                                        <?= $isBanned ? ' (Request Disabled)' : '' ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -119,6 +139,7 @@
                         Submit My Request
                     </button>
                 </div>
+
             </form>
         </div>
     </div>

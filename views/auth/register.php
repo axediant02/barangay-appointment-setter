@@ -1,15 +1,14 @@
 <?php
-require_once '../config/session.php';
 require_once '../config/database.php';
 
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['username'] ?? '';
+    $username = $_POST['username'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
-    if (!$name || !$email || !$password || !$confirm) {
+    if (!$username || !$email || !$password || !$confirm) {
         $errors[] = "All fields are required.";
     } elseif ($password !== $confirm) {
         $errors[] = "Passwords do not match.";
@@ -23,28 +22,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("
-                INSERT INTO users (name, email, password, role)
+                INSERT INTO users (username, email, password, role)
                 VALUES (?, ?, ?, 'resident')
             ");
-            $stmt->execute([$name, $email, $hash]);
+            $stmt->execute([$username, $email, $hash]);
 
-            // Use the session helper function for consistency
-            $newUserId = $pdo->lastInsertId();
-            if ($newUserId) {
-                $userData = [
-                    'id' => $newUserId,
-                    'role' => 'resident',
-                    'name' => $name,
-                    'email' => $email
-                ];
-                
-                if (setSessionData($userData)) {
-                    header("Location: ?page=resident-dashboard", true, 302);
-                    exit;
-                } else {
-                    $errors[] = "Session initialization failed. Please try logging in.";
-                }
-            }
+            $_SESSION['user_id'] = $pdo->lastInsertId();
+            $_SESSION['role'] = 'resident';
+            $_SESSION['username'] = $username;
+
+            header("Location: ?page=resident-dashboard");
+            exit;
         }
     }
 }

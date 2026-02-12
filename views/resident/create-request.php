@@ -18,11 +18,18 @@
     }
 
     select.form-input {
-        @apply appearance-none cursor-pointer pr-12;
+        @apply w-full border-2 border-slate-400 rounded-lg px-4 py-3.5 bg-slate-100 text-lg font-semibold transition-all;
+        @apply placeholder:text-slate-500 text-slate-900;
+        @apply focus:outline-none focus:ring-4 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%230f172a' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
         background-position: right 1rem center;
         background-repeat: no-repeat;
         background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+        cursor: pointer;
     }
 </style>
 
@@ -86,7 +93,7 @@
 
                         <div>
                             <label class="input-label">Birthday</label>
-                            <input type="date" name="birthday" class="form-input">
+                            <input type="date" name="birthday" class="form-input" required max="<?= date('Y-m-d', strtotime('-18 years')) ?>">
                         </div>
 
                         <div class="md:col-span-2">

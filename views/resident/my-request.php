@@ -80,6 +80,9 @@
 <?php foreach ($requests as $req): 
     $status = $req['status'] ?? 'Pending';
     $statusLower = strtolower($status);
+    $certificateId = $req['certificate_id'];
+    $cancelCount = $userCancellationCounts[$certificateId] ?? 0;
+    $isBanned = $userBanStatus[$certificateId] ?? false;
 
     $accentClass = 'border-l-slate-300';
     $statusEmoji = '⏳';
@@ -109,12 +112,24 @@
             </span>
 
             <?php if ($status === 'Pending'): ?>
-                <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Are you sure you want to cancel this request?');">
-                    <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
-                    <button type="submit" class="px-5 py-2.5 bg-white text-red-600 border border-red-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition active:scale-95 shadow-sm">
-                        Cancel
-                    </button>
-                </form>
+
+                <?php if ($isBanned): ?>
+                    <div class="text-red-600 text-[10px] font-black uppercase tracking-widest">
+                        Cancellation limit reached (<?= $cancelCount ?>/3)<br>
+                        Request ability temporarily disabled.
+                    </div>
+                <?php else: ?>
+                    <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                        <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                        <button type="submit" class="px-5 py-2.5 bg-white text-red-600 border border-red-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition active:scale-95 shadow-sm">
+                            Cancel
+                        </button>
+                        <div class="text-[9px] text-slate-400 mt-1 font-semibold uppercase tracking-wide">
+                            Cancellations used: <?= $cancelCount ?>/3
+                        </div>
+                    </form>
+                <?php endif; ?>
+
             <?php endif; ?>
 
         </div>

@@ -1,10 +1,10 @@
 <?php
-// Session check is performed in index.php, just ensure variables are available here
-$userId = $_SESSION['user_id'] ?? null;
-if (empty($userId)) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'resident') {
     header("Location: ?page=login");
     exit;
 }
+
+$userId = $_SESSION['user_id'];
 $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total,

@@ -1,13 +1,10 @@
 <?php
-// Protect route
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'resident') {
     header("Location: ?page=login");
     exit;
 }
 
 $userId = $_SESSION['user_id'];
-
-// 1. Fetch request statistics
 $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total,
@@ -21,7 +18,6 @@ $stmt = $pdo->prepare("
 $stmt->execute([$userId]);
 $stats = $stmt->fetch();
 
-// 2. Fetch Recent Requests (PHP 7 compatible)
 $recentStmt = $pdo->prepare("
     SELECT r.*, c.name as certificate_name 
     FROM requests r

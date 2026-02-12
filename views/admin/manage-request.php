@@ -4,14 +4,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 ?>
-
-
-<!-- Tailwind CSS + Styles remain same as your code -->
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ... keep your existing CSS ... */
 </style>
-
 <div class="sticky-nav border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
         <button onclick="history.back()" class="inline-flex items-center gap-2 text-teal-600 font-bold hover:text-teal-800 transition group bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
@@ -119,7 +114,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             </div>
         </div>
 
-        <!-- Pagination -->
         <?php if($totalPages > 1): ?>
             <div class="flex justify-center gap-2 mt-6">
                 <?php if($pageNum > 1): ?>

@@ -130,7 +130,6 @@
                                 <?php endforeach; ?>
                             </select>
 
-                            <!-- Helper Message -->
                             <div class="mt-3 text-xs font-semibold space-y-1">
                                 <p class="text-slate-500">
                                     • You can request only once per certificate per day.

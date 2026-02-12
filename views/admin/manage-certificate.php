@@ -1,25 +1,15 @@
 <?php
-/**
- * Controller Logic
- * Placed at the very top to prevent "Undefined Variable" errors
- */
 require_once '../config/database.php';
 
-// 1. Initialize the variable immediately
 $certificates = []; 
-
 try {
-    // 2. Fetch certificates
     $stmt = $pdo->query("SELECT * FROM certificates ORDER BY name ASC");
     $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // Ensure we assign an array even if fetch returns false
     $certificates = $fetched ? $fetched : [];
 } catch (PDOException $e) {
-    // Silently handle error or log it: error_log($e->getMessage());
     $certificates = []; 
 }
 
-// 3. Delete logic
 if (isset($_GET['delete']) && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
     $deleteStmt = $pdo->prepare("DELETE FROM certificates WHERE id = ?");
@@ -28,7 +18,6 @@ if (isset($_GET['delete']) && isset($_GET['id'])) {
     exit;
 }
 
-// 4. Submission logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);

@@ -45,6 +45,40 @@ class RequestModel {
             SET status = ?, remarks = ?
             WHERE id = ?
         ");
-        return $stmt->execute([$status, $remarks, $id]);
+            // Enforce allowed status transitions
+            $stmt = $this->pdo->prepare("SELECT status FROM requests WHERE id = ?");
+            $stmt->execute([$id]);
+            $current = $stmt->fetchColumn();
+
+            if ($current === false) {
+                return false;
+            }
+
+            $allowed = [
+                'Pending' => ['Approved', 'Rejected'],
+                'Approved' => ['Completed'],
+                'Rejected' => [],
+                'Completed' => [],
+                'Cancelled' => []
+            ];
+
+            // If current status not recognized, disallow change
+            if (!isset($allowed[$current])) {
+                return false;
+            }
+
+            // Allow keeping same status
+            if ($status === $current) {
+                // Still update remarks if provided
+                $stmt = $this->pdo->prepare("UPDATE requests SET remarks = ? WHERE id = ?");
+                return $stmt->execute([$remarks, $id]);
+            }
+
+            if (!in_array($status, $allowed[$current], true)) {
+                return false;
+            }
+
+            $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ? WHERE id = ?");
+            return $stmt->execute([$status, $remarks, $id]);
     }
 }

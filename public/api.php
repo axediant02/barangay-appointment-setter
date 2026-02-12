@@ -55,6 +55,11 @@ switch ($action) {
         echo json_encode($requests);
         break;
 
+    case 'cancel-request':
+        $controller = new RequestController($pdo);
+        $controller->cancel();
+        break;
+
     case 'admin-stats':
         if ($role !== 'admin') {
             http_response_code(403);

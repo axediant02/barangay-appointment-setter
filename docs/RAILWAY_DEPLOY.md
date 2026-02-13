@@ -281,6 +281,10 @@ Then insert at least one admin user (hash with `password_hash()` in PHP if neede
 
 ## 11. Troubleshooting
 
+### PHP 7.4 locally vs Railway
+
+The project supports **PHP 7.4** locally. On Railway, the app is built with a **Dockerfile** that uses **PHP 8.2** so the deploy does not depend on Nixpacks’ PHP 8.0 (which has been dropped). Your `composer.json` keeps `"php": ">=7.4"`; the Dockerfile is only used when deploying.
+
 ### 502 Bad Gateway (fixed in repo)
 
 The repo now includes:

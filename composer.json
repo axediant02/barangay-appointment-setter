@@ -2,7 +2,7 @@
   "name": "barangay/certificate-system",
   "description": "Barangay Certificate System",
   "require": {
-    "php": ">=8.0",
+    "php": ">=7.4",
     "ext-pdo_mysql": "*"
   }
 }

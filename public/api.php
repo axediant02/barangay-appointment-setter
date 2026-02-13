@@ -3,6 +3,11 @@ header('Content-Type: application/json');
 session_start();
 require_once '../config/database.php';
 
+// Controllers used by some actions (eg. cancel-request)
+if (file_exists('../controllers/RequestController.php')) {
+    require_once '../controllers/RequestController.php';
+}
+
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized']);
@@ -13,6 +18,7 @@ $action = $_GET['action'] ?? null;
 $userId = $_SESSION['user_id'];
 $role = $_SESSION['role'] ?? null;
 
+try {
 switch ($action) {
     case 'resident-stats':
         if ($role !== 'resident') {
@@ -100,7 +106,7 @@ switch ($action) {
         }
         
         $stmt = $pdo->query("
-            SELECT r.*, u.name as resident_name, c.name as certificate_name
+            SELECT r.*, u.username as resident_name, c.name as certificate_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
@@ -133,7 +139,7 @@ switch ($action) {
         }
         
         $stmt = $pdo->query("
-            SELECT r.*, u.name as resident_name, c.name as certificate_name
+            SELECT r.*, u.username as resident_name, c.name as certificate_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
@@ -141,6 +147,35 @@ switch ($action) {
         ");
         $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($requests);
+        break;
+
+    // Alias used by admin live table polling in manage-request.php
+    case 'admin-requests':
+        if ($role !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            exit;
+        }
+
+        $stmt = $pdo->query("
+            SELECT r.*, u.username as resident_name, c.name as certificate_name
+            FROM requests r
+            JOIN users u ON r.user_id = u.id
+            JOIN certificates c ON r.certificate_id = c.id
+            ORDER BY r.created_at DESC
+        ");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Normalize shape a bit for the frontend (format appointment_date)
+        $normalized = [];
+        foreach ($rows as $row) {
+            if (!empty($row['appointment_date'])) {
+                $row['appointment_date'] = date('M d, Y', strtotime($row['appointment_date']));
+            }
+            $normalized[] = $row;
+        }
+
+        echo json_encode($normalized);
         break;
 
     case 'admin-dashboard-sync':
@@ -177,5 +212,13 @@ switch ($action) {
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Invalid action']);
+}
+} catch (Throwable $e) {
+    // Ensure we always return JSON, even on unexpected errors
+    http_response_code(500);
+    echo json_encode([
+        'error' => 'Server error',
+        'message' => $e->getMessage()
+    ]);
 }
 ?>

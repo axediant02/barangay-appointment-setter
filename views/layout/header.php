@@ -7,20 +7,18 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
 // Initialize user display info
 $userName = 'User';
 $userUsername = 'User';
-$userRole = null;
+$userRole = $_SESSION['role'] ?? null;
 
-if (isset($_SESSION['user_id'])) {
-    // Header is in views/layout, config is at project root /config/database.php
-    require_once __DIR__ . '/../../config/database.php';
-
-    // DB uses `username` (and possibly `name`), not `full_name`
+// Only try DB lookup if we have a PDO instance (index.php includes config/database.php)
+if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
+    // DB uses `username`
     $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($user) {
-        $userName = $user['username'];
-        $userUsername = $user['username'];
-        $userRole = $user['role'] ?? null;
+    $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($userRow) {
+        $userName = $userRow['username'];
+        $userUsername = $userRow['username'];
+        $userRole = $userRow['role'] ?? $userRole;
         $_SESSION['role'] = $userRole; // ensure role is in session
     }
 }

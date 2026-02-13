@@ -281,6 +281,16 @@ Then insert at least one admin user (hash with `password_hash()` in PHP if neede
 
 ## 11. Troubleshooting
 
+### 502 Bad Gateway (fixed in repo)
+
+The repo now includes:
+
+- **`railway.json`** – Sets the start command to `php -S 0.0.0.0:$PORT -t public` so the app listens on Railway’s `PORT`.
+- **`config/database.php`** – Reads credentials from env vars (`MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE` or `DB_*`). **You must** link your MySQL service to the web service: Web Service → **Variables** → **Add Reference** → select your MySQL service so these variables are set.
+- **`composer.json`** – Declares `ext-pdo_mysql` so the PHP build includes the MySQL driver.
+
+After pulling these changes, redeploy. If 502 persists, check **Deployments → View Logs** for PHP or DB errors.
+
 | Issue | What to check |
 |-------|----------------|
 | **502 / App not responding** | Logs (Railway service → **Deployments** → latest → **View Logs**). Ensure start command is `php -S 0.0.0.0:$PORT -t public` and that `$PORT` is used. |

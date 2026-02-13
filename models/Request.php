@@ -88,6 +88,29 @@ class RequestModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /** @return array|null Request row with certificate_name for the given user */
+    public function findByIdAndUser($id, $userId) {
+        $stmt = $this->pdo->prepare("
+            SELECT r.*, c.name AS certificate_name
+            FROM requests r
+            JOIN certificates c ON r.certificate_id = c.id
+            WHERE r.id = ? AND r.user_id = ?
+        ");
+        $stmt->execute([$id, $userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /** Update resident-editable fields; only allowed when status = Pending */
+    public function updateResidentRequest($id, $userId, $fullName, $civilStatus, $birthday, $address, $contactNumber, $appointmentDate) {
+        $stmt = $this->pdo->prepare("
+            UPDATE requests
+            SET full_name = ?, civil_status = ?, birthday = ?, address = ?, contact_number = ?, appointment_date = ?
+            WHERE id = ? AND user_id = ? AND status = 'Pending'
+        ");
+        return $stmt->execute([$fullName, $civilStatus, $birthday ?: null, $address, $contactNumber, $appointmentDate, $id, $userId]);
+    }
+
     public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber) {
         $stmt = $this->pdo->prepare("
             INSERT INTO requests 

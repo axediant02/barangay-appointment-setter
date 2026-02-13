@@ -66,6 +66,20 @@ switch ($page) {
         }
         break;
 
+    case 'view-request':
+        if (!$isLoggedIn || $role !== 'resident') redirect('?page=login');
+        require_once '../controllers/RequestController.php';
+        $controller = new RequestController($pdo);
+        $controller->viewRequest();
+        break;
+
+    case 'edit-request':
+        if (!$isLoggedIn || $role !== 'resident') redirect('?page=login');
+        require_once '../controllers/RequestController.php';
+        $controller = new RequestController($pdo);
+        $controller->editRequest();
+        break;
+
     case 'admin-dashboard':
         if (!$isLoggedIn || $role !== 'admin') redirect('?page=login');
         include '../views/admin/dashboard.php';

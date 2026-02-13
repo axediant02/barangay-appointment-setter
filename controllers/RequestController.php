@@ -198,6 +198,70 @@ class RequestController {
         require '../views/resident/my-request.php';
     }
 
+    public function viewRequest() {
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        if (!$id) {
+            $_SESSION['error'] = 'Invalid request.';
+            header('Location: ?page=my-requests');
+            exit;
+        }
+        $request = $this->requestModel->findByIdAndUser($id, $_SESSION['user_id']);
+        if (!$request) {
+            $_SESSION['error'] = 'Request not found.';
+            header('Location: ?page=my-requests');
+            exit;
+        }
+        require '../views/resident/view-request.php';
+    }
+
+    public function editRequest() {
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        if (!$id) {
+            $_SESSION['error'] = 'Invalid request.';
+            header('Location: ?page=my-requests');
+            exit;
+        }
+        $request = $this->requestModel->findByIdAndUser($id, $_SESSION['user_id']);
+        if (!$request) {
+            $_SESSION['error'] = 'Request not found.';
+            header('Location: ?page=my-requests');
+            exit;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $requestId       = (int)($_POST['request_id'] ?? 0);
+            $fullName        = trim($_POST['full_name'] ?? '');
+            $civilStatus     = trim($_POST['civil_status'] ?? '');
+            $birthday        = trim($_POST['birthday'] ?? '') ?: null;
+            $address         = trim($_POST['address'] ?? '');
+            $contactNumber   = trim($_POST['contact_number'] ?? '');
+            $appointmentDate = trim($_POST['appointment_date'] ?? '');
+            if ($requestId !== $id || !$fullName || !$address || !$contactNumber || !$appointmentDate) {
+                $_SESSION['error'] = 'All required fields must be filled.';
+                header("Location: ?page=edit-request&id=$id");
+                exit;
+            }
+            $ok = $this->requestModel->updateResidentRequest(
+                $id,
+                $_SESSION['user_id'],
+                $fullName,
+                $civilStatus,
+                $birthday,
+                $address,
+                $contactNumber,
+                $appointmentDate
+            );
+            if ($ok) {
+                $_SESSION['success'] = 'Request updated successfully.';
+                header("Location: ?page=view-request&id=$id");
+                exit;
+            }
+            $_SESSION['error'] = 'Request could not be updated. It may no longer be pending.';
+            header("Location: ?page=edit-request&id=$id");
+            exit;
+        }
+        require '../views/resident/edit-request.php';
+    }
+
     public function allRequests() {
 
         $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;

@@ -8,6 +8,7 @@ WORKDIR /app
 
 COPY . .
 
-# Railway injects PORT at runtime
+# Railway injects PORT at runtime; must run in shell so $PORT is expanded
 EXPOSE 8080
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t public"]
+ENTRYPOINT []
+CMD ["/bin/sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t public"]

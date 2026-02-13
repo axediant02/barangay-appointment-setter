@@ -94,7 +94,7 @@ require '../views/layout/header.php';
             <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 
                 <div class="flex-1 min-w-0">
-                    <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight truncate">
+                    <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight truncate certificate-name">
                         <?php echo htmlspecialchars($req['certificate_name']); ?>
                     </h3>
                     <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">
@@ -118,8 +118,8 @@ require '../views/layout/header.php';
 
             <div class="px-6 pb-6 border-t border-slate-50 pt-4">
                 <div class="flex flex-col md:flex-row justify-between items-end gap-6">
-                    
-                    <div class="w-full flex-1">
+
+                    <div class="w-full flex-1 remarks-wrapper">
                         <?php if (!empty($req['remarks'])): ?>
                             <div class="remarks-highlight rounded-xl p-4 border-2">
                                 <p class="text-[9px] font-black uppercase tracking-widest text-teal-600 mb-1">Official Admin Remarks</p>
@@ -173,9 +173,8 @@ function updateRequestCard(updatedReq) {
     const card = document.querySelector(`[data-request-id="${updatedReq.id}"]`);
     if (!card) return;
 
+    // Update status badge
     const badge = card.querySelector('.request-status');
-    const remarksWrapper = card.querySelector('.flex-1');
-
     let emoji = '⏳';
     let borderClass = 'border-l-amber-500';
 
@@ -184,10 +183,8 @@ function updateRequestCard(updatedReq) {
         case 'Completed': emoji='💎'; borderClass='border-l-cyan-500'; break;
         case 'Rejected': emoji='❌'; borderClass='border-l-red-500'; break;
         case 'Cancelled': emoji='🚫'; borderClass='border-l-gray-400'; break;
-        default: emoji='⏳'; borderClass='border-l-amber-500';
     }
 
-    // Update badge
     badge.className = 'status-badge request-status shadow-sm status-' + updatedReq.status.toLowerCase();
     badge.innerText = emoji + ' ' + updatedReq.status;
 
@@ -195,7 +192,8 @@ function updateRequestCard(updatedReq) {
     card.classList.remove('border-l-amber-500','border-l-teal-500','border-l-cyan-500','border-l-red-500','border-l-gray-400');
     card.classList.add(borderClass);
 
-    // Update remarks
+    // Update remarks safely
+    const remarksWrapper = card.querySelector('.remarks-wrapper');
     if (updatedReq.remarks) {
         remarksWrapper.innerHTML = `
             <div class="remarks-highlight rounded-xl p-4 border-2">
@@ -205,6 +203,12 @@ function updateRequestCard(updatedReq) {
                 <p class="text-sm text-slate-700 italic font-medium">
                     "${updatedReq.remarks}"
                 </p>
+            </div>
+        `;
+    } else {
+        remarksWrapper.innerHTML = `
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 opacity-60">
+                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Status: Waiting for review</p>
             </div>
         `;
     }

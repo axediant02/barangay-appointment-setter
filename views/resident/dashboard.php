@@ -5,6 +5,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'resident') {
 }
 
 $userId = $_SESSION['user_id'];
+
+// Fetch user details to display the name (DB uses `username`, not `full_name`)
+$stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+$stmt->execute([$userId]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$username = $user['username'] ?? 'Resident';
+
+// Fetch request stats
 $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total,
@@ -18,6 +26,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$userId]);
 $stats = $stmt->fetch();
 
+// Fetch recent requests
 $recentStmt = $pdo->prepare("
     SELECT r.*, c.name as certificate_name 
     FROM requests r
@@ -36,16 +45,19 @@ include __DIR__ . '/../layout/header.php';
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-    .stat-card { @apply bg-white rounded-xl border border-slate-200 p-4 transition-all; }
-    .status-badge { @apply px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider border; }
+body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+.stat-card { @apply bg-white rounded-xl border border-slate-200 p-4 transition-all; }
+.status-badge { @apply px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider border; }
 </style>
 
 <div class="max-w-5xl mx-auto px-4 pt-6 pb-10">
-    
+
+    <!-- Welcome -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Welcome, <?= htmlspecialchars($_SESSION['username'] ?? 'Resident') ?></h1>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+                Welcome, <?= htmlspecialchars($username) ?>
+            </h1>
             <p class="text-slate-500 text-sm">Here's an update on your certificate requests.</p>
         </div>
         
@@ -57,6 +69,7 @@ include __DIR__ . '/../layout/header.php';
         </a>
     </div>
 
+    <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8" id="stats-container">
         <div class="stat-card">
             <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Total</p>
@@ -80,6 +93,7 @@ include __DIR__ . '/../layout/header.php';
         </div>
     </div>
 
+    <!-- Recent Activity -->
     <div class="mb-4 flex items-center justify-between px-1">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Recent Activity</h3>
         <a href="?page=my-requests" class="text-teal-600 text-xs font-bold hover:underline flex items-center gap-1">
@@ -112,7 +126,6 @@ include __DIR__ . '/../layout/header.php';
                                 </p>
                             </div>
                         </div>
-                        
                         <div>
                             <?php 
                                 $status = $req['status'];
@@ -136,20 +149,20 @@ include __DIR__ . '/../layout/header.php';
 </div>
 
 <script>
-    function updateStats() {
-        fetch('api.php?action=resident-stats')
-            .then(response => response.json())
-            .then(data => {
-                const up = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val || 0; };
-                up('stat-total', data.total);
-                up('stat-pending', data.pending);
-                up('stat-approved', data.approved);
-                up('stat-completed', data.completed);
-                up('stat-rejected', data.rejected);
-            })
-            .catch(e => console.log('Sync error'));
-    }
-    setInterval(updateStats, 20000);
+function updateStats() {
+    fetch('api.php?action=resident-stats')
+        .then(response => response.json())
+        .then(data => {
+            const up = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val || 0; };
+            up('stat-total', data.total);
+            up('stat-pending', data.pending);
+            up('stat-approved', data.approved);
+            up('stat-completed', data.completed);
+            up('stat-rejected', data.rejected);
+        })
+        .catch(e => console.log('Sync error'));
+}
+setInterval(updateStats, 20000);
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

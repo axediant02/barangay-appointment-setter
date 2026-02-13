@@ -206,7 +206,7 @@ function updateRequestRow(req) {
 
 // Poll every 5 seconds
 function syncAdminRequests() {
-    fetch('api.php?action=admin-requests')
+    fetch('api.php?action=admin-requests&page_num=<?= (int)($pageNum ?? 1) ?>')
         .then(res => res.json())
         .then(data => {
             const requests = Array.isArray(data) ? data : data.requests ?? [];

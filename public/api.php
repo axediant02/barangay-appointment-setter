@@ -157,13 +157,22 @@ switch ($action) {
             exit;
         }
 
-        $stmt = $pdo->query("
+        // Respect the same pagination as manage-requests (10 per page)
+        $pageNum = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
+        $perPage = 10;
+        $offset = ($pageNum - 1) * $perPage;
+
+        $stmt = $pdo->prepare("
             SELECT r.*, u.username as resident_name, c.name as certificate_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
             ORDER BY r.created_at DESC
+            LIMIT :limit OFFSET :offset
         ");
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Normalize shape a bit for the frontend (format appointment_date)

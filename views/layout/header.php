@@ -3,6 +3,27 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $pageTitle = $pageTitle ?? 'Barangay Certificate System';
+
+// Initialize user display info
+$userName = 'User';
+$userUsername = 'User';
+$userRole = null;
+
+if (isset($_SESSION['user_id'])) {
+    // Header is in views/layout, config is at project root /config/database.php
+    require_once __DIR__ . '/../../config/database.php';
+
+    // DB uses `username` (and possibly `name`), not `full_name`
+    $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user) {
+        $userName = $user['username'];
+        $userUsername = $user['username'];
+        $userRole = $user['role'] ?? null;
+        $_SESSION['role'] = $userRole; // ensure role is in session
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,37 +79,21 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
             <div class="flex items-center gap-6">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="flex items-center gap-6">
-                        <?php if ($_SESSION['role'] === 'admin'): ?>
-                            <a href="?page=admin-dashboard" class="hover:text-teal-100 transition font-medium">
-                                Dashboard
-                            </a>
-                            <a href="?page=manage-requests" class="hover:text-teal-100 transition font-medium">
-                                Manage Requests
-                            </a>
-                            <a href="?page=manage-certificates" class="hover:text-teal-100 transition font-medium">
-                                Certificates
-                            </a>
-                            <a href="?page=manage-request" class="hover:text-blue-100 transition">
-                                Certificates
-                        </a>
-
+                        <?php if ($userRole === 'admin'): ?>
+                            <a href="?page=admin-dashboard" class="hover:text-teal-100 transition font-medium">Dashboard</a>
+                            <a href="?page=manage-requests" class="hover:text-teal-100 transition font-medium">Manage Requests</a>
+                            <a href="?page=manage-certificates" class="hover:text-teal-100 transition font-medium">Certificates</a>
                         <?php else: ?>
-                            <a href="?page=resident-dashboard" class="hover:text-teal-100 transition font-medium">
-                                Dashboard
-                            </a>
-                            <a href="?page=create-request" class="hover:text-teal-100 transition font-medium">
-                                Request Certificate
-                            </a>
-                            <a href="?page=my-requests" class="hover:text-teal-100 transition font-medium">
-                                My Requests
-                            </a>
+                            <a href="?page=resident-dashboard" class="hover:text-teal-100 transition font-medium">Dashboard</a>
+                            <a href="?page=create-request" class="hover:text-teal-100 transition font-medium">Request Certificate</a>
+                            <a href="?page=my-requests" class="hover:text-teal-100 transition font-medium">My Requests</a>
                         <?php endif; ?>
                     </div>
 
                     <div class="flex items-center gap-4 pl-4 border-l border-teal-400">
                         <div class="text-sm">
-                            <div class="font-semibold"><?= htmlspecialchars($_SESSION['name'] ?? 'User') ?></div>
-                            <div class="text-teal-100 text-xs uppercase"><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></div>
+                            <div class="font-semibold"><?= htmlspecialchars($userName) ?></div>
+                            <div class="text-teal-100 text-xs uppercase"><?= htmlspecialchars($userUsername) ?></div>
                         </div>
                         <button onclick="document.getElementById('logoutForm').submit()" class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded transition-colors">
                             Logout
@@ -98,12 +103,8 @@ $pageTitle = $pageTitle ?? 'Barangay Certificate System';
 
                 <?php else: ?>
                     <div class="flex items-center gap-4">
-                        <a href="?page=login" class="hover:text-teal-100 transition font-medium">
-                            Login
-                        </a>
-                        <a href="?page=register" class="px-4 py-2 bg-white text-teal-600 rounded-lg hover:bg-teal-50 transition-colors font-semibold">
-                            Register
-                        </a>
+                        <a href="?page=login" class="hover:text-teal-100 transition font-medium">Login</a>
+                        <a href="?page=register" class="px-4 py-2 bg-white text-teal-600 rounded-lg hover:bg-teal-50 transition-colors font-semibold">Register</a>
                     </div>
                 <?php endif; ?>
             </div>

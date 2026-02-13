@@ -1,4 +1,8 @@
-<?php require '../views/layout/header.php'; ?>
+<?php 
+require '../views/layout/header.php'; 
+
+// Ensure $requests, $userCancellationCounts, $userBanStatus, $totalPages, $currentPage are already defined from backend
+?>
 
 <style>
     /* Status Badge Standardized Width */
@@ -66,93 +70,92 @@
             <h3 class="text-xl font-bold text-slate-800 uppercase">No requests found</h3>
         </div>
     <?php else: ?>
+        <div class="space-y-4">
+        <?php foreach ($requests as $req): 
+            $status = $req['status'] ?? 'Pending';
+            $statusLower = strtolower($status);
+            $certificateId = $req['certificate_id'];
+            $cancelCount = $userCancellationCounts[$certificateId] ?? 0;
+            $isBanned = $userBanStatus[$certificateId] ?? false;
 
-    <div class="space-y-4">
-    <?php foreach ($requests as $req): 
-        $status = $req['status'] ?? 'Pending';
-        $statusLower = strtolower($status);
-        $certificateId = $req['certificate_id'];
-        $cancelCount = $userCancellationCounts[$certificateId] ?? 0;
-        $isBanned = $userBanStatus[$certificateId] ?? false;
+            $accentClass = 'border-l-slate-300';
+            $statusEmoji = '⏳';
 
-        $accentClass = 'border-l-slate-300';
-        $statusEmoji = '⏳';
+            switch($status) {
+                case 'Approved':  $accentClass = 'border-l-teal-500'; $statusEmoji = '✅'; break;
+                case 'Completed': $accentClass = 'border-l-cyan-500'; $statusEmoji = '💎'; break;
+                case 'Rejected':  $accentClass = 'border-l-red-500';  $statusEmoji = '❌'; break;
+                case 'Cancelled': $accentClass = 'border-l-gray-400'; $statusEmoji = '🚫'; break;
+                default:          $accentClass = 'border-l-amber-500'; $statusEmoji = '⏳'; break;
+            }
+        ?>
 
-        switch($status) {
-            case 'Approved':  $accentClass = 'border-l-teal-500'; $statusEmoji = '✅'; break;
-            case 'Completed': $accentClass = 'border-l-cyan-500'; $statusEmoji = '💎'; break;
-            case 'Rejected':  $accentClass = 'border-l-red-500';  $statusEmoji = '❌'; break;
-            case 'Cancelled': $accentClass = 'border-l-gray-400'; $statusEmoji = '🚫'; break;
-            default:          $accentClass = 'border-l-amber-500'; $statusEmoji = '⏳'; break;
-        }
-    ?>
-
-    <div class="request-card border-l-[6px] <?php echo $accentClass; ?>">
-        <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            
-            <div class="flex-1 min-w-0">
-                <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight truncate">
-                    <?php echo htmlspecialchars($req['certificate_name']); ?>
-                </h3>
-                <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">
-                    📅 Appt: <span class="text-slate-700"><?php echo date('M d, Y', strtotime($req['appointment_date'])); ?></span>
-                </p>
-            </div>
-
-            <div class="flex items-center justify-end gap-4 w-full md:w-64 shrink-0">
-                <a href="?page=view-request&id=<?php echo (int)$req['id']; ?>" 
-                   class="px-6 py-2 bg-teal-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-teal-700 transition shadow-sm">
-                    View
-                </a>
+        <div class="request-card border-l-[6px] <?php echo $accentClass; ?>" data-request-id="<?php echo (int)$req['id']; ?>">
+            <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 
-                <div class="w-32 flex justify-end">
-                    <span class="status-badge status-<?php echo $statusLower; ?> shadow-sm">
-                        <?php echo $statusEmoji . ' ' . $status; ?>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="px-6 pb-6 border-t border-slate-50 pt-4">
-            <div class="flex flex-col md:flex-row justify-between items-end gap-6">
-                
-                <div class="w-full flex-1">
-                    <?php if (!empty($req['remarks'])): ?>
-                        <div class="remarks-highlight rounded-xl p-4 border-2">
-                            <p class="text-[9px] font-black uppercase tracking-widest text-teal-600 mb-1">Official Admin Remarks</p>
-                            <p class="text-sm text-slate-700 italic font-medium">"<?php echo htmlspecialchars($req['remarks']); ?>"</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 opacity-60">
-                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Status: Waiting for review</p>
-                        </div>
-                    <?php endif; ?>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight truncate">
+                        <?php echo htmlspecialchars($req['certificate_name']); ?>
+                    </h3>
+                    <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">
+                        📅 Appt: <span class="text-slate-700"><?php echo date('M d, Y', strtotime($req['appointment_date'])); ?></span>
+                    </p>
                 </div>
 
-                <div class="flex flex-col items-end gap-1 shrink-0">
-                    <?php if ($status === 'Pending'): ?>
-                        <?php if ($isBanned): ?>
-                            <div class="text-red-600 text-[10px] font-black uppercase tracking-widest text-right leading-tight">
-                                Cancellation limit reached<br>(<?php echo $cancelCount; ?>/3)
+                <div class="flex items-center justify-end gap-4 w-full md:w-64 shrink-0">
+                    <a href="?page=view-request&id=<?php echo (int)$req['id']; ?>" 
+                       class="px-6 py-2 bg-teal-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-teal-700 transition shadow-sm">
+                        View
+                    </a>
+                    
+                    <div class="w-32 flex justify-end">
+                        <span class="status-badge status-<?php echo $statusLower; ?> shadow-sm request-status">
+                            <?php echo $statusEmoji . ' ' . $status; ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 pb-6 border-t border-slate-50 pt-4">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+                    
+                    <div class="w-full flex-1">
+                        <?php if (!empty($req['remarks'])): ?>
+                            <div class="remarks-highlight rounded-xl p-4 border-2">
+                                <p class="text-[9px] font-black uppercase tracking-widest text-teal-600 mb-1">Official Admin Remarks</p>
+                                <p class="text-sm text-slate-700 italic font-medium">"<?php echo htmlspecialchars($req['remarks']); ?>"</p>
                             </div>
                         <?php else: ?>
-                            <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Cancel this request?');">
-                                <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                                <button type="submit" class="px-6 py-2 bg-white text-red-600 border border-red-200 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition shadow-sm">
-                                    Cancel Request
-                                </button>
-                            </form>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase">Used: <?php echo $cancelCount; ?>/3</p>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 opacity-60">
+                                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Status: Waiting for review</p>
+                            </div>
                         <?php endif; ?>
-                    <?php endif; ?>
-                </div>
+                    </div>
 
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <?php if ($status === 'Pending'): ?>
+                            <?php if ($isBanned): ?>
+                                <div class="text-red-600 text-[10px] font-black uppercase tracking-widest text-right leading-tight">
+                                    Cancellation limit reached<br>(<?php echo $cancelCount; ?>/3)
+                                </div>
+                            <?php else: ?>
+                                <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Cancel this request?');">
+                                    <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
+                                    <button type="submit" class="px-6 py-2 bg-white text-red-600 border border-red-200 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition shadow-sm">
+                                        Cancel Request
+                                    </button>
+                                </form>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase">Used: <?php echo $cancelCount; ?>/3</p>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+
+                </div>
             </div>
         </div>
-    </div>
 
-    <?php endforeach; ?>
-    </div>
+        <?php endforeach; ?>
+        </div>
     <?php endif; ?>
 
     <?php if ($totalPages > 1): ?>
@@ -164,5 +167,60 @@
     <?php endif; ?>
 
 </div>
+
+<script>
+function updateRequestCard(updatedReq) {
+    const card = document.querySelector(`[data-request-id="${updatedReq.id}"]`);
+    if (!card) return;
+
+    const badge = card.querySelector('.request-status');
+    const remarksWrapper = card.querySelector('.flex-1');
+
+    let emoji = '⏳';
+    let borderClass = 'border-l-amber-500';
+
+    switch (updatedReq.status) {
+        case 'Approved': emoji='✅'; borderClass='border-l-teal-500'; break;
+        case 'Completed': emoji='💎'; borderClass='border-l-cyan-500'; break;
+        case 'Rejected': emoji='❌'; borderClass='border-l-red-500'; break;
+        case 'Cancelled': emoji='🚫'; borderClass='border-l-gray-400'; break;
+        default: emoji='⏳'; borderClass='border-l-amber-500';
+    }
+
+    // Update badge
+    badge.className = 'status-badge request-status shadow-sm status-' + updatedReq.status.toLowerCase();
+    badge.innerText = emoji + ' ' + updatedReq.status;
+
+    // Update card border accent
+    card.classList.remove('border-l-amber-500','border-l-teal-500','border-l-cyan-500','border-l-red-500','border-l-gray-400');
+    card.classList.add(borderClass);
+
+    // Update remarks
+    if (updatedReq.remarks) {
+        remarksWrapper.innerHTML = `
+            <div class="remarks-highlight rounded-xl p-4 border-2">
+                <p class="text-[9px] font-black uppercase tracking-widest text-teal-600 mb-1">
+                    Official Admin Remarks
+                </p>
+                <p class="text-sm text-slate-700 italic font-medium">
+                    "${updatedReq.remarks}"
+                </p>
+            </div>
+        `;
+    }
+}
+
+function syncRequests() {
+    fetch('api.php?action=my-requests')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(req => updateRequestCard(req));
+        })
+        .catch(err => console.error('Realtime sync error:', err));
+}
+
+// Poll every 5 seconds
+setInterval(syncRequests, 5000);
+</script>
 
 <?php require '../views/layout/footer.php'; ?>

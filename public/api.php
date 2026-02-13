@@ -24,15 +24,23 @@ switch ($action) {
         $stmt = $pdo->prepare("
             SELECT 
                 COUNT(*) as total,
-                SUM(status = 'Pending') as pending,
-                SUM(status = 'Approved') as approved,
-                SUM(status = 'Completed') as completed,
-                SUM(status = 'Rejected') as rejected
+                SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = 'Rejected' THEN 1 ELSE 0 END) as rejected
             FROM requests
             WHERE user_id = ?
         ");
         $stmt->execute([$userId]);
         $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Ensure all values are integers (not NULL)
+        $stats['total'] = (int) ($stats['total'] ?? 0);
+        $stats['pending'] = (int) ($stats['pending'] ?? 0);
+        $stats['approved'] = (int) ($stats['approved'] ?? 0);
+        $stats['completed'] = (int) ($stats['completed'] ?? 0);
+        $stats['rejected'] = (int) ($stats['rejected'] ?? 0);
+        
         echo json_encode($stats);
         break;
 

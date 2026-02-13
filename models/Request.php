@@ -148,6 +148,7 @@ class RequestModel {
 
         $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ? WHERE id = ?");
         return $stmt->execute([$status, $remarks, $id]);
+        return $stmt->execute([$status, $remarks, $id]);
     }
 
     public function countUserActiveRequestsForCertificateToday($userId, $certificateId) {

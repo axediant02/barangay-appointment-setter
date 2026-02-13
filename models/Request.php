@@ -146,8 +146,21 @@ class RequestModel {
             return false;
         }
 
-        $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ? WHERE id = ?");
-        return $stmt->execute([$status, $remarks, $id]);
+        // Update status and set updated_at timestamp for real-time tracking
+        // Try to update with updated_at, fallback if column doesn't exist
+        try {
+            $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $result = $stmt->execute([$status, $remarks, $id]);
+            if ($result) return true;
+        } catch (PDOException $e) {
+            // Column might not exist, try without updated_at
+            if (strpos($e->getMessage(), 'updated_at') !== false) {
+                $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ? WHERE id = ?");
+                return $stmt->execute([$status, $remarks, $id]);
+            }
+            throw $e;
+        }
+        return false;
     }
 
     public function countUserActiveRequestsForCertificateToday($userId, $certificateId) {

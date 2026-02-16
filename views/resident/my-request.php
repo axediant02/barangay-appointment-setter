@@ -1,13 +1,11 @@
 <?php 
 require '../views/layout/header.php'; 
 
-// Ensure $requests, $userCancellationCounts, $userBanStatus, $totalPages, $currentPage are already defined from backend
 ?>
 
 <style>
-    /* Status Badge Standardized Width */
     .status-badge {
-        min-width: 110px; /* Forces all badges to be the same width */
+        min-width: 110px;
         justify-content: center;
         @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wide border;
     }
@@ -58,10 +56,17 @@ require '../views/layout/header.php';
         </div>
     <?php endif; ?>
 
+    <?php
+        $totalRecords = (int)($totalRecords ?? 0);
+        $limit = (int)($limit ?? 5);
+        $currentPage = (int)($currentPage ?? 1);
+        $from = $totalRecords === 0 ? 0 : (($currentPage - 1) * $limit) + 1;
+        $to = min($currentPage * $limit, $totalRecords);
+    ?>
     <div class="mb-10">
         <h2 class="text-5xl font-black text-slate-900 tracking-tighter italic uppercase">My Requests</h2>
         <p class="text-slate-500 text-xs font-bold mt-2 uppercase tracking-widest">
-            Total Records: <?php echo count($requests ?? []); ?>
+            Showing <?php echo $from; ?>–<?php echo $to; ?> of <?php echo $totalRecords; ?>
         </p>
     </div>
 
@@ -149,7 +154,6 @@ require '../views/layout/header.php';
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -173,7 +177,6 @@ function updateRequestCard(updatedReq) {
     const card = document.querySelector(`[data-request-id="${updatedReq.id}"]`);
     if (!card) return;
 
-    // Update status badge
     const badge = card.querySelector('.request-status');
     let emoji = '⏳';
     let borderClass = 'border-l-amber-500';
@@ -188,11 +191,9 @@ function updateRequestCard(updatedReq) {
     badge.className = 'status-badge request-status shadow-sm status-' + updatedReq.status.toLowerCase();
     badge.innerText = emoji + ' ' + updatedReq.status;
 
-    // Update card border accent
     card.classList.remove('border-l-amber-500','border-l-teal-500','border-l-cyan-500','border-l-red-500','border-l-gray-400');
     card.classList.add(borderClass);
 
-    // Update remarks safely
     const remarksWrapper = card.querySelector('.remarks-wrapper');
     if (updatedReq.remarks) {
         remarksWrapper.innerHTML = `
@@ -223,7 +224,6 @@ function syncRequests() {
         .catch(err => console.error('Realtime sync error:', err));
 }
 
-// Poll every 5 seconds
 setInterval(syncRequests, 5000);
 </script>
 

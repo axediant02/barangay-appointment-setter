@@ -15,6 +15,9 @@ class RequestController {
         $this->requestModel = new RequestModel($pdo);
     }
 
+    /* =========================================================
+        CREATE FORM
+    ========================================================= */
     public function createForm() {
 
         $certificates = $this->certificateModel->getAll();
@@ -53,6 +56,9 @@ class RequestController {
         require '../views/resident/create-request.php';
     }
 
+    /* =========================================================
+        STORE REQUEST
+    ========================================================= */
     public function store() {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -82,7 +88,7 @@ class RequestController {
             $cancelCount = $stmt->fetchColumn();
 
             if ($cancelCount >= 3) {
-                $_SESSION['error'] = "You cannot request this certificate because you reached the maximum of 3 cancellations.";
+                $_SESSION['error'] = "You reached the maximum of 3 cancellations for this certificate.";
                 header("Location: ?page=create-request");
                 exit;
             }
@@ -93,7 +99,6 @@ class RequestController {
                 exit;
             }
 
-            // Create the request
             $this->requestModel->create(
                 $_SESSION['user_id'],
                 $certificateId,
@@ -111,6 +116,9 @@ class RequestController {
         }
     }
 
+    /* =========================================================
+        CANCEL REQUEST
+    ========================================================= */
     public function cancel() {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -134,7 +142,7 @@ class RequestController {
             $req = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$req) {
-                $_SESSION['error'] = "Request cannot be cancelled. It may already be processed.";
+                $_SESSION['error'] = "Request cannot be cancelled.";
                 header("Location: ?page=my-requests");
                 exit;
             }
@@ -142,7 +150,7 @@ class RequestController {
             $certificateId = $req['certificate_id'];
 
             if (!$this->requestModel->canCancelRequest($_SESSION['user_id'], $certificateId)) {
-                $_SESSION['error'] = "You have reached the maximum of 3 cancellations for this certificate.";
+                $_SESSION['error'] = "You reached the maximum of 3 cancellations for this certificate.";
                 header("Location: ?page=my-requests");
                 exit;
             }
@@ -154,28 +162,51 @@ class RequestController {
             ");
             $stmt->execute([$requestId, $_SESSION['user_id']]);
 
-            if ($stmt->rowCount() > 0) {
-                $_SESSION['success'] = "Request cancelled successfully.";
-            } else {
-                $_SESSION['error'] = "Request could not be cancelled. It may already be processed.";
-            }
-
+            $_SESSION['success'] = "Request cancelled successfully.";
             header("Location: ?page=my-requests");
             exit;
         }
     }
 
+    /* =========================================================
+        MY REQUESTS (UPDATED PROPER PAGINATION)
+    ========================================================= */
     public function myRequests() {
 
-        $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
-        $perPage = 5;
+        $userId = $_SESSION['user_id'];
 
-        $paginated = $this->requestModel->getByUserPaginated($_SESSION['user_id'], $page, $perPage);
+        $limit = 5;
+        $currentPage = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
+        $offset = ($currentPage - 1) * $limit;
 
-        $requests    = $paginated['data'] ?? [];
-        $totalPages  = $paginated['totalPages'] ?? 1;
-        $currentPage = $paginated['currentPage'] ?? 1;
+        /* ---------- TOTAL RECORD COUNT ---------- */
+        $countStmt = $this->pdo->prepare("
+            SELECT COUNT(*) 
+            FROM requests 
+            WHERE user_id = ?
+        ");
+        $countStmt->execute([$userId]);
+        $totalRecords = (int) $countStmt->fetchColumn();
 
+        $totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 1;
+
+        /* ---------- FETCH PAGINATED DATA ---------- */
+        $stmt = $this->pdo->prepare("
+            SELECT r.*, c.name as certificate_name
+            FROM requests r
+            JOIN certificates c ON r.certificate_id = c.id
+            WHERE r.user_id = ?
+            ORDER BY r.created_at DESC
+            LIMIT ? OFFSET ?
+        ");
+        $stmt->bindValue(1, $userId, PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        /* ---------- CANCELLATION TRACKING ---------- */
         $stmt = $this->pdo->prepare("
             SELECT certificate_id, COUNT(*) as total
             FROM requests
@@ -183,11 +214,12 @@ class RequestController {
             AND status = 'Cancelled'
             GROUP BY certificate_id
         ");
-        $stmt->execute([$_SESSION['user_id']]);
+        $stmt->execute([$userId]);
         $cancellations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $userCancellationCounts = [];
         $userBanStatus = [];
+
         foreach ($cancellations as $row) {
             $userCancellationCounts[$row['certificate_id']] = $row['total'];
             if ($row['total'] >= 3) {
@@ -198,48 +230,52 @@ class RequestController {
         require '../views/resident/my-request.php';
     }
 
+    /* =========================================================
+        VIEW REQUEST
+    ========================================================= */
     public function viewRequest() {
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        if (!$id) {
-            $_SESSION['error'] = 'Invalid request.';
-            header('Location: ?page=my-requests');
-            exit;
-        }
+        $id = (int) ($_GET['id'] ?? 0);
+
         $request = $this->requestModel->findByIdAndUser($id, $_SESSION['user_id']);
+
         if (!$request) {
             $_SESSION['error'] = 'Request not found.';
             header('Location: ?page=my-requests');
             exit;
         }
+
         require '../views/resident/view-request.php';
     }
 
+    /* =========================================================
+        EDIT REQUEST
+    ========================================================= */
     public function editRequest() {
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        if (!$id) {
-            $_SESSION['error'] = 'Invalid request.';
-            header('Location: ?page=my-requests');
-            exit;
-        }
+
+        $id = (int) ($_GET['id'] ?? 0);
         $request = $this->requestModel->findByIdAndUser($id, $_SESSION['user_id']);
+
         if (!$request) {
             $_SESSION['error'] = 'Request not found.';
             header('Location: ?page=my-requests');
             exit;
         }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $requestId       = (int)($_POST['request_id'] ?? 0);
+
             $fullName        = trim($_POST['full_name'] ?? '');
             $civilStatus     = trim($_POST['civil_status'] ?? '');
             $birthday        = trim($_POST['birthday'] ?? '') ?: null;
             $address         = trim($_POST['address'] ?? '');
             $contactNumber   = trim($_POST['contact_number'] ?? '');
             $appointmentDate = trim($_POST['appointment_date'] ?? '');
-            if ($requestId !== $id || !$fullName || !$address || !$contactNumber || !$appointmentDate) {
+
+            if (!$fullName || !$address || !$contactNumber || !$appointmentDate) {
                 $_SESSION['error'] = 'All required fields must be filled.';
                 header("Location: ?page=edit-request&id=$id");
                 exit;
             }
+
             $ok = $this->requestModel->updateResidentRequest(
                 $id,
                 $_SESSION['user_id'],
@@ -250,18 +286,24 @@ class RequestController {
                 $contactNumber,
                 $appointmentDate
             );
+
             if ($ok) {
                 $_SESSION['success'] = 'Request updated successfully.';
                 header("Location: ?page=view-request&id=$id");
                 exit;
             }
-            $_SESSION['error'] = 'Request could not be updated. It may no longer be pending.';
+
+            $_SESSION['error'] = 'Request could not be updated.';
             header("Location: ?page=edit-request&id=$id");
             exit;
         }
+
         require '../views/resident/edit-request.php';
     }
 
+    /* =========================================================
+        ADMIN ALL REQUESTS
+    ========================================================= */
     public function allRequests() {
 
         $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;

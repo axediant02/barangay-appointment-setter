@@ -4,14 +4,11 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $pageTitle = $pageTitle ?? 'Barangay Certificate System';
 
-// Initialize user display info
 $userName = 'User';
 $userUsername = 'User';
 $userRole = $_SESSION['role'] ?? null;
 
-// Only try DB lookup if we have a PDO instance (index.php includes config/database.php)
 if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
-    // DB uses `username`
     $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -19,7 +16,7 @@ if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
         $userName = $userRow['username'];
         $userUsername = $userRow['username'];
         $userRole = $userRow['role'] ?? $userRole;
-        $_SESSION['role'] = $userRole; // ensure role is in session
+        $_SESSION['role'] = $userRole;
     }
 }
 ?>

@@ -15,7 +15,7 @@ class AdminController {
 
     public function manageRequests() {
         $pageNum = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
-        $perPage = 10;
+        $perPage = 25;
         
         $requests = $this->requestModel->getAll();
         $totalRequests = count($requests);

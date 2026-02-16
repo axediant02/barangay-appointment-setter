@@ -1,11 +1,9 @@
 <?php
-// Railway: use variables from MySQL plugin reference (MYSQLHOST, MYSQLPORT, etc.)
-// Local: use DB_* or default to localhost
-$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
-$port = getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '3306';
-$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'barangay-appointment';
-$user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
-$pass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASSWORD') ?: '';
+$host = getenv('MYSQLHOST');
+$port = getenv('MYSQLPORT');
+$db   = getenv('MYSQLDATABASE');
+$user = getenv('MYSQLUSER');
+$pass = getenv('MYSQLPASSWORD');
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";

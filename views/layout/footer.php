@@ -34,7 +34,7 @@
                 <h3 class="text-white font-semibold mb-4 text-lg">Contact</h3>
                 <ul class="space-y-2 text-sm">
                     <li><strong>Email:</strong> info@barangay.gov.ph</li>
-                    <li><strong>Phone:</strong> +63 (02) 1234-5678</li>
+                    <li><strong>Phone:</strong> +63 9123456789</li>
                     <li><strong>Hours:</strong> Mon-Fri, 8AM-5PM</li>
                 </ul>
             </div>

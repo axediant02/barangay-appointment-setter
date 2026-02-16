@@ -103,7 +103,7 @@ require '../views/layout/header.php';
                         <?php echo htmlspecialchars($req['certificate_name']); ?>
                     </h3>
                     <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">
-                        📅 Appt: <span class="text-slate-700"><?php echo date('M d, Y', strtotime($req['appointment_date'])); ?></span>
+                        📅 Appointment Date: <span class="text-slate-700"><?php echo date('M d, Y', strtotime($req['appointment_date'])); ?></span>
                     </p>
                 </div>
 

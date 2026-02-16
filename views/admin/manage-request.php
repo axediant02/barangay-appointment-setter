@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 require '../views/layout/header.php';
 
 // Pagination & Counting Logic
-$itemsPerPage = 10; 
+$itemsPerPage = 25; 
 $pageNum = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
 $startIndex = ($pageNum - 1) * $itemsPerPage;
 $count = $startIndex + 1;

@@ -154,7 +154,7 @@ switch ($action) {
         }
 
         $pageNum = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
-        $perPage = 10;
+        $perPage = 25;
         $offset = ($pageNum - 1) * $perPage;
 
         $stmt = $pdo->prepare("

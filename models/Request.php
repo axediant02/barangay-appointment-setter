@@ -48,7 +48,7 @@ class RequestModel {
         ];
     }
 
-    public function getAllPaginated($page = 1, $perPage = 10) {
+    public function getAllPaginated($page = 1, $perPage = 25) {
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare("

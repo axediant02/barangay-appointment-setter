@@ -15,9 +15,6 @@ class RequestController {
         $this->requestModel = new RequestModel($pdo);
     }
 
-    /* =========================================================
-        CREATE FORM
-    ========================================================= */
     public function createForm() {
 
         $certificates = $this->certificateModel->getAll();
@@ -56,9 +53,6 @@ class RequestController {
         require '../views/resident/create-request.php';
     }
 
-    /* =========================================================
-        STORE REQUEST
-    ========================================================= */
     public function store() {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -116,9 +110,6 @@ class RequestController {
         }
     }
 
-    /* =========================================================
-        CANCEL REQUEST
-    ========================================================= */
     public function cancel() {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -168,9 +159,6 @@ class RequestController {
         }
     }
 
-    /* =========================================================
-        MY REQUESTS (UPDATED PROPER PAGINATION)
-    ========================================================= */
     public function myRequests() {
 
         $userId = $_SESSION['user_id'];
@@ -179,7 +167,6 @@ class RequestController {
         $currentPage = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
         $offset = ($currentPage - 1) * $limit;
 
-        /* ---------- TOTAL RECORD COUNT ---------- */
         $countStmt = $this->pdo->prepare("
             SELECT COUNT(*) 
             FROM requests 
@@ -190,7 +177,6 @@ class RequestController {
 
         $totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 1;
 
-        /* ---------- FETCH PAGINATED DATA ---------- */
         $stmt = $this->pdo->prepare("
             SELECT r.*, c.name as certificate_name
             FROM requests r
@@ -206,7 +192,6 @@ class RequestController {
 
         $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        /* ---------- CANCELLATION TRACKING ---------- */
         $stmt = $this->pdo->prepare("
             SELECT certificate_id, COUNT(*) as total
             FROM requests
@@ -230,9 +215,6 @@ class RequestController {
         require '../views/resident/my-request.php';
     }
 
-    /* =========================================================
-        VIEW REQUEST
-    ========================================================= */
     public function viewRequest() {
         $id = (int) ($_GET['id'] ?? 0);
 
@@ -247,9 +229,6 @@ class RequestController {
         require '../views/resident/view-request.php';
     }
 
-    /* =========================================================
-        EDIT REQUEST
-    ========================================================= */
     public function editRequest() {
 
         $id = (int) ($_GET['id'] ?? 0);
@@ -301,9 +280,6 @@ class RequestController {
         require '../views/resident/edit-request.php';
     }
 
-    /* =========================================================
-        ADMIN ALL REQUESTS
-    ========================================================= */
     public function allRequests() {
 
         $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;

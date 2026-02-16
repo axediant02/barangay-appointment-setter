@@ -101,7 +101,6 @@ class RequestModel {
         return $row ?: null;
     }
 
-    /** Update resident-editable fields; only allowed when status = Pending */
     public function updateResidentRequest($id, $userId, $fullName, $civilStatus, $birthday, $address, $contactNumber, $appointmentDate) {
         $stmt = $this->pdo->prepare("
             UPDATE requests
@@ -190,7 +189,6 @@ class RequestModel {
             return false;
         }
 
-        // Only 1 active request per day
         if ($this->countUserActiveRequestsForCertificateToday($userId, $certificateId) > 0) {
             return false;
         }

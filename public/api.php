@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 session_start();
 require_once '../config/database.php';
 
-// Controllers used by some actions (eg. cancel-request)
 if (file_exists('../controllers/RequestController.php')) {
     require_once '../controllers/RequestController.php';
 }
@@ -40,7 +39,6 @@ switch ($action) {
         $stmt->execute([$userId]);
         $stats = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        // Ensure all values are integers (not NULL)
         $stats['total'] = (int) ($stats['total'] ?? 0);
         $stats['pending'] = (int) ($stats['pending'] ?? 0);
         $stats['approved'] = (int) ($stats['approved'] ?? 0);
@@ -115,7 +113,6 @@ switch ($action) {
         ");
         $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Format the response for frontend
         $formattedRequests = [];
         foreach ($requests as $req) {
             $formattedRequests[] = [
@@ -149,7 +146,6 @@ switch ($action) {
         echo json_encode($requests);
         break;
 
-    // Alias used by admin live table polling in manage-request.php
     case 'admin-requests':
         if ($role !== 'admin') {
             http_response_code(403);
@@ -157,7 +153,6 @@ switch ($action) {
             exit;
         }
 
-        // Respect the same pagination as manage-requests (10 per page)
         $pageNum = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
         $perPage = 10;
         $offset = ($pageNum - 1) * $perPage;
@@ -175,7 +170,6 @@ switch ($action) {
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Normalize shape a bit for the frontend (format appointment_date)
         $normalized = [];
         foreach ($rows as $row) {
             if (!empty($row['appointment_date'])) {
@@ -223,7 +217,6 @@ switch ($action) {
         echo json_encode(['error' => 'Invalid action']);
 }
 } catch (Throwable $e) {
-    // Ensure we always return JSON, even on unexpected errors
     http_response_code(500);
     echo json_encode([
         'error' => 'Server error',

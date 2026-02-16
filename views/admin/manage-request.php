@@ -5,12 +5,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 require '../views/layout/header.php';
 
-// Ensure $requests, $totalPages, $pageNum are defined from backend
 ?>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* Sticky nav */
 .sticky-nav {
     position: sticky; top: 0; z-index: 50;
     background: rgba(248, 250, 252, 0.8);
@@ -131,6 +129,37 @@ require '../views/layout/header.php';
     </div>
 </div>
 
+<!-- pagination -->
+<?php if (!empty($totalPages) && $totalPages > 1): ?>
+<div class="mt-10 flex justify-center items-center gap-2">
+
+    <?php if ($pageNum > 1): ?>
+        <a href="?page=manage-requests&page_num=<?= $pageNum - 1 ?>"
+           class="px-4 py-2 bg-gray-200 hover:bg-teal-500 hover:text-white rounded-lg text-xs font-black transition">
+           ← Prev
+        </a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?page=manage-requests&page_num=<?= $i ?>"
+           class="px-4 py-2 rounded-lg text-xs font-black transition
+           <?= $i == $pageNum
+               ? 'bg-teal-600 text-white'
+               : 'bg-gray-200 hover:bg-teal-500 hover:text-white' ?>">
+           <?= $i ?>
+        </a>
+    <?php endfor; ?>
+
+    <?php if ($pageNum < $totalPages): ?>
+        <a href="?page=manage-requests&page_num=<?= $pageNum + 1 ?>"
+           class="px-4 py-2 bg-gray-200 hover:bg-teal-500 hover:text-white rounded-lg text-xs font-black transition">
+           Next →
+        </a>
+    <?php endif; ?>
+
+</div>
+<?php endif; ?>
+
 <script>
 function filterTable() {
     let input = document.getElementById("tableSearch");
@@ -147,14 +176,12 @@ function filterTable() {
     }
 }
 
-// Update or insert a request row
 function updateRequestRow(req) {
     let tbody = document.getElementById('requestsBody');
     let row = document.querySelector(`tr[data-request-id='${req.id}']`);
     let statusClass = 'status-' + req.status;
 
     if (!row) {
-        // New request, insert at top
         let tr = document.createElement('tr');
         tr.dataset.requestId = req.id;
         tr.className = `hover:bg-slate-50 transition-all duration-200 ${statusClass}`;
@@ -192,19 +219,16 @@ function updateRequestRow(req) {
         </form>`;
         tbody.prepend(tr);
     } else {
-        // Existing row, update content
         row.querySelector('.resident-name').innerText = req.full_name;
         row.querySelector('.certificate-name').innerText = req.certificate_name;
         row.querySelector('.appointment-date').innerText = req.appointment_date;
         row.querySelector('.status-select').value = req.status;
         row.querySelector('.remarks-input').value = req.remarks ?? '';
 
-        // Update status class
         row.className = `hover:bg-slate-50 transition-all duration-200 ${statusClass}`;
     }
 }
 
-// Poll every 5 seconds
 function syncAdminRequests() {
     fetch('api.php?action=admin-requests&page_num=<?= (int)($pageNum ?? 1) ?>')
         .then(res => res.json())

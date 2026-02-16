@@ -280,17 +280,17 @@ class RequestController {
         require '../views/resident/edit-request.php';
     }
 
-    public function allRequests() {
+    // public function allRequests() {
 
-        $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
-        $perPage = 10;
+    //     $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
+    //     $perPage = 10;
 
-        $paginated = $this->requestModel->getAllPaginated($page, $perPage);
+    //     $paginated = $this->requestModel->getAllPaginated($page, $perPage);
 
-        $requests    = $paginated['data'] ?? [];
-        $totalPages  = $paginated['totalPages'] ?? 1;
-        $currentPage = $paginated['currentPage'] ?? 1;
+    //     $requests    = $paginated['data'] ?? [];
+    //     $totalPages  = $paginated['totalPages'] ?? 1;
+    //     $currentPage = $paginated['currentPage'] ?? 1;
 
-        require '../views/admin/all-requests.php';
-    }
+    //     require '../views/admin/all-requests.php';
+    // }
 }

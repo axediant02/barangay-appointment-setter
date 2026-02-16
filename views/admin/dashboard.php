@@ -71,7 +71,7 @@ $recentRequests = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
             <h1 class="font-bold text-xl tracking-tight">BrgyPortal <span class="text-teal-200 font-light text-sm ml-1 italic">Admin</span></h1>
         </div>
         <div class="hidden md:flex items-center gap-8 font-semibold text-sm uppercase tracking-wide">
-            <a href="?page=manage-requests" class="hover:text-teal-200 transition">Requests</a>
+            <a href="?page=manage-requests" class="hover:text-teal-200 transition">Manage Requests</a>
             <a href="?page=manage-certificates" class="hover:text-teal-200 transition">Certificates</a>
             <a href="?page=logout" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-lg transition shadow-md normal-case">Logout</a>
         </div>

@@ -76,7 +76,6 @@ if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
                     <div class="flex items-center gap-6">
                         <?php if ($userRole === 'admin'): ?>
                             <a href="?page=admin-dashboard" class="hover:text-teal-100 transition font-medium">Dashboard</a>
-                            <a href="?page=manage-requests" class="hover:text-teal-100 transition font-medium">Manage Requests</a>
                             <a href="?page=manage-certificates" class="hover:text-teal-100 transition font-medium">Certificates</a>
                         <?php else: ?>
                             <a href="?page=resident-dashboard" class="hover:text-teal-100 transition font-medium">Dashboard</a>
@@ -87,10 +86,10 @@ if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
 
                     <div class="flex items-center gap-4 pl-4 border-l border-teal-400">
                         <div class="text-sm">
-                            <div class="font-semibold"><?= htmlspecialchars($userName) ?></div>
-                            <div class="text-teal-100 text-xs uppercase"><?= htmlspecialchars($userUsername) ?></div>
+                            <div class="font-semibold text-right"><?= htmlspecialchars($userName) ?></div>
+                            <div class="text-teal-100 text-xs uppercase text-right"><?= htmlspecialchars($userRole) ?></div>
                         </div>
-                        <button onclick="document.getElementById('logoutForm').submit()" class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded transition-colors">
+                        <button onclick="document.getElementById('logoutForm').submit()" class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded transition-colors text-sm font-medium">
                             Logout
                         </button>
                         <form id="logoutForm" action="?page=logout" method="POST" style="display:none;"></form>

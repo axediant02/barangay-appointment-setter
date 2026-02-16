@@ -4,97 +4,136 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 require '../views/layout/header.php';
-
 ?>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-.sticky-nav {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(248, 250, 252, 0.8);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e2e8f0;
-}
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-/* Table row status colors */
-.status-Pending { background-color: #fef3c7; }       /* Amber */
-.status-Approved { background-color: #d1fae5; }      /* Teal */
-.status-Completed { background-color: #cffafe; }     /* Cyan */
-.status-Rejected { background-color: #fee2e2; }      /* Red */
-.status-Cancelled { background-color: #e5e7eb; }     /* Gray */
+    .sticky-nav {
+        position: sticky; top: 0; z-index: 50;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Status Accent Logic */
+    .status-Pending { border-left: 4px solid #f59e0b; }
+    .status-Approved { border-left: 4px solid #10b981; }
+    .status-Completed { border-left: 4px solid #06b6d4; }
+    .status-Rejected { border-left: 4px solid #ef4444; }
+    .status-Cancelled { border-left: 4px solid #94a3b8; }
+
+    .search-focus:focus-within {
+        width: 420px !important;
+        border-color: #0d9488 !important;
+    }
 </style>
 
-<div class="sticky-nav border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-        <button onclick="history.back()" class="inline-flex items-center gap-2 text-teal-600 font-bold hover:text-teal-800 transition group bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
-            <span class="transform group-hover:-translate-x-1 transition">←</span> 
-            <span class="text-sm">Back</span>
+<div class="sticky-nav">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <button onclick="history.back()" class="flex items-center gap-2 text-slate-500 font-bold hover:text-teal-600 transition-all group px-3 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span class="text-[10px] uppercase tracking-[0.2em]">Back</span>
         </button>
         
-        <div class="flex items-center gap-4">
-            <input type="text" id="tableSearch" placeholder="Search residents..." class="form-input text-xs w-64 shadow-sm" onkeyup="filterTable()">
-            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+        <div class="flex items-center gap-6">
+            <div class="relative search-focus transition-all duration-300 w-80 border-2 border-slate-100 rounded-2xl bg-slate-50 overflow-hidden flex items-center px-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="tableSearch" placeholder="Search name, phone, or address..." 
+                    class="bg-transparent border-none w-full py-2.5 text-sm focus:ring-0 outline-none placeholder:text-slate-400 font-medium" 
+                    onkeyup="filterTable()">
+            </div>
+
+            <div class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-2xl shadow-sm">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
                 </span>
-                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-nowrap">Auto-Sync</span>
             </div>
         </div>
     </div>
 </div>
 
 <div class="p-8 max-w-7xl mx-auto min-h-screen">
-    <div class="mb-8">
-        <h2 class="text-5xl font-extrabold text-gray-900 tracking-tight mb-2 uppercase italic">Requests Center</h2>
-        <p class="text-gray-500 font-medium">Reviewing and updating certificate statuses for residents.</p>
+    <div class="mb-10">
+        <div class="flex items-center gap-3 mb-2">
+            <h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Requests Center</h2>
+            <span class="bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest">
+                <?= count($requests) ?> Requests
+            </span>
+        </div>
+        <p class="text-slate-500 font-medium">Review resident applications and verify their local address.</p>
     </div>
 
     <div id="requestsContainer">
         <?php if (empty($requests)): ?>
-            <div class="bg-white rounded-[2rem] border-4 border-dashed border-gray-100 p-24 text-center">
-                <div class="text-7xl mb-6">🏝️</div>
-                <h3 class="text-3xl font-black text-gray-900 mb-2 uppercase">Nothing to show</h3>
-                <p class="text-gray-400">All resident requests have been processed.</p>
+            <div class="bg-white rounded-[3rem] border-4 border-dashed border-slate-100 p-24 text-center">
+                <div class="text-6xl mb-6 grayscale">🏢</div>
+                <h3 class="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tighter italic">Queue is Empty</h3>
+                <p class="text-slate-400 max-w-xs mx-auto text-sm">No pending requests found.</p>
             </div>
         <?php else: ?>
-            <div class="bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-gray-200 overflow-hidden">
+            <div class="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full whitespace-nowrap" id="requestsTable">
                         <thead>
                             <tr class="bg-slate-900 text-white">
-                                <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em]">Resident</th>
-                                <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em]">Document</th>
-                                <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em]">Appointment</th>
-                                <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
-                                <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em]">Admin Notes</th>
-                                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-[0.2em]">Control</th>
+                                <th class="px-8 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em]">Resident Info</th>
+                                <th class="px-8 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em]">Address</th>
+                                <th class="px-8 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em]">Certificate</th>
+                                <th class="px-8 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em]">Schedule</th>
+                                <th class="px-8 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
+                                <th class="px-8 py-5 text-center text-[10px] font-black uppercase tracking-[0.2em]">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="requestsBody" class="divide-y divide-gray-100">
+                        <tbody id="requestsBody" class="divide-y divide-slate-50">
                             <?php foreach ($requests as $req): ?>
-                                <tr data-request-id="<?= $req['id'] ?>" class="hover:bg-slate-50 transition-all duration-200 status-<?= $req['status'] ?>">
+                                <tr data-request-id="<?= $req['id'] ?>" class="group hover:bg-slate-50/50 transition-colors status-<?= $req['status'] ?>">
                                     <form method="POST" class="contents">
                                         <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-3">
-                                                <div class="h-9 w-9 bg-teal-600 text-white rounded-lg flex items-center justify-center font-black text-xs shadow-lg shadow-teal-200">
+                                        
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="h-10 w-10 bg-teal-600 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-lg shadow-teal-100">
                                                     <?= strtoupper(substr($req['full_name'], 0, 1)) ?>
                                                 </div>
-                                                <span class="text-sm font-bold text-slate-800 resident-name"><?= htmlspecialchars($req['full_name']) ?></span>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-black text-slate-800 resident-name tracking-tight"><?= htmlspecialchars($req['full_name']) ?></span>
+                                                    <span class="text-[11px] font-bold text-slate-400 resident-phone">📞 <?= htmlspecialchars($req['contact_number'] ?? 'No Number') ?></span>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-5">
-                                            <div class="flex flex-col">
-                                                <span class="text-xs font-black text-slate-400 uppercase tracking-tighter">Type</span>
-                                                <span class="text-sm font-bold text-teal-700 certificate-name"><?= htmlspecialchars($req['certificate_name']) ?></span>
+
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-start gap-2 max-w-xs whitespace-normal">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-300 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tight resident-address">
+                                                    <?= htmlspecialchars($req['address'] ?? 'Address not set') ?>
+                                                </span>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-5">
-                                            <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-md italic appointment-date"><?= date('M d, Y', strtotime($req['appointment_date'])) ?></span>
+
+                                        <td class="px-8 py-6">
+                                            <span class="text-xs font-black text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100">
+                                                <?= htmlspecialchars($req['certificate_name']) ?>
+                                            </span>
                                         </td>
-                                        <td class="px-6 py-5">
-                                            <select name="status" class="form-input text-[10px] font-black uppercase tracking-widest border-none bg-slate-50 status-select">
+
+                                        <td class="px-8 py-6">
+                                            <span class="text-xs font-bold text-slate-600 italic">
+                                                <?= date('M d, Y', strtotime($req['appointment_date'])) ?>
+                                            </span>
+                                        </td>
+
+                                        <td class="px-8 py-6">
+                                            <select name="status" class="form-select text-[10px] font-black uppercase border-2 border-slate-100 bg-white rounded-xl px-2 py-2 focus:border-teal-500 outline-none transition-all">
                                                 <?php
                                                 $currentStatus = $req['status'];
                                                 $statusMap = [
@@ -105,18 +144,16 @@ require '../views/layout/header.php';
                                                     'Cancelled' => ['Cancelled' => '🚫 Cancelled']
                                                 ];
                                                 $available = $statusMap[$currentStatus] ?? [$currentStatus => $currentStatus];
-                                                foreach ($available as $val => $label):
-                                                    $selected = $currentStatus == $val ? 'selected' : '';
-                                                ?>
-                                                    <option value="<?= $val ?>" <?= $selected ?>><?= $label ?></option>
+                                                foreach ($available as $val => $label): ?>
+                                                    <option value="<?= $val ?>" <?= ($currentStatus == $val ? 'selected' : '') ?>><?= $label ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </td>
-                                        <td class="px-6 py-5">
-                                            <input type="text" name="remarks" value="<?= htmlspecialchars($req['remarks'] ?? '') ?>" placeholder="Add remark..." class="form-input text-xs w-full bg-transparent border-dashed border-slate-200 remarks-input">
-                                        </td>
-                                        <td class="px-6 py-5 text-center">
-                                            <button type="submit" class="bg-slate-900 hover:bg-teal-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all transform active:scale-90 shadow-md">Update</button>
+
+                                        <td class="px-8 py-6 text-center">
+                                            <button type="submit" class="bg-slate-900 hover:bg-teal-600 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-slate-200">
+                                                Save
+                                            </button>
                                         </td>
                                     </form>
                                 </tr>
@@ -129,117 +166,82 @@ require '../views/layout/header.php';
     </div>
 </div>
 
-<!-- pagination -->
-<?php if (!empty($totalPages) && $totalPages > 1): ?>
-<div class="mt-10 flex justify-center items-center gap-2">
+<?php if ($totalPages > 1): ?>
+<div class="mt-12 flex flex-col items-center gap-6 pb-20">
+    <div class="flex items-center gap-2">
+        
+        <?php if ($pageNum > 1): ?>
+            <a href="?page=manage-requests&page_num=<?= $pageNum - 1 ?>" 
+               class="group flex items-center justify-center w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl hover:border-teal-500 hover:text-teal-600 transition-all shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </a>
+        <?php else: ?>
+            <div class="flex items-center justify-center w-12 h-12 bg-slate-50 border-2 border-slate-50 text-slate-200 rounded-2xl cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </div>
+        <?php endif; ?>
 
-    <?php if ($pageNum > 1): ?>
-        <a href="?page=manage-requests&page_num=<?= $pageNum - 1 ?>"
-           class="px-4 py-2 bg-gray-200 hover:bg-teal-500 hover:text-white rounded-lg text-xs font-black transition">
-           ← Prev
-        </a>
-    <?php endif; ?>
+        <div class="flex items-center gap-1 bg-white p-1.5 border-2 border-slate-100 rounded-[1.5rem] shadow-sm">
+            <?php for ($i = 1; $i <= $totalPages; $i++): 
+                $isActive = ($i == $pageNum);
+            ?>
+                <a href="?page=manage-requests&page_num=<?= $i ?>"
+                   class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all
+                   <?= $isActive 
+                       ? 'bg-teal-600 text-white shadow-lg shadow-teal-100 scale-110' 
+                       : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600' ?>">
+                    <?= $i ?>
+                </a>
+            <?php endfor; ?>
+        </div>
 
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-        <a href="?page=manage-requests&page_num=<?= $i ?>"
-           class="px-4 py-2 rounded-lg text-xs font-black transition
-           <?= $i == $pageNum
-               ? 'bg-teal-600 text-white'
-               : 'bg-gray-200 hover:bg-teal-500 hover:text-white' ?>">
-           <?= $i ?>
-        </a>
-    <?php endfor; ?>
+        <?php if ($pageNum < $totalPages): ?>
+            <a href="?page=manage-requests&page_num=<?= $pageNum + 1 ?>" 
+               class="group flex items-center justify-center w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl hover:border-teal-500 hover:text-teal-600 transition-all shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        <?php else: ?>
+            <div class="flex items-center justify-center w-12 h-12 bg-slate-50 border-2 border-slate-50 text-slate-200 rounded-2xl cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        <?php endif; ?>
 
-    <?php if ($pageNum < $totalPages): ?>
-        <a href="?page=manage-requests&page_num=<?= $pageNum + 1 ?>"
-           class="px-4 py-2 bg-gray-200 hover:bg-teal-500 hover:text-white rounded-lg text-xs font-black transition">
-           Next →
-        </a>
-    <?php endif; ?>
-
+    </div>
+    
+    <div class="flex items-center gap-3">
+        <div class="h-[1px] w-8 bg-slate-100"></div>
+        <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">End of results</p>
+        <div class="h-[1px] w-8 bg-slate-100"></div>
+    </div>
 </div>
 <?php endif; ?>
 
 <script>
 function filterTable() {
-    let input = document.getElementById("tableSearch");
-    let filter = input.value.toUpperCase();
-    let table = document.getElementById("requestsTable");
-    let tr = table.getElementsByTagName("tr");
+    const input = document.getElementById("tableSearch");
+    const filter = input.value.toUpperCase();
+    const rows = document.querySelectorAll("#requestsBody tr");
 
-    for (let i = 1; i < tr.length; i++) {
-        let td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-            let txtValue = td.textContent || td.innerText;
-            tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+    rows.forEach(row => {
+        const name = row.querySelector(".resident-name").textContent.toUpperCase();
+        const phone = row.querySelector(".resident-phone").textContent.toUpperCase();
+        const address = row.querySelector(".resident-address").textContent.toUpperCase();
+        
+        if (name.includes(filter) || phone.includes(filter) || address.includes(filter)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
         }
-    }
+    });
 }
-
-function updateRequestRow(req) {
-    let tbody = document.getElementById('requestsBody');
-    let row = document.querySelector(`tr[data-request-id='${req.id}']`);
-    let statusClass = 'status-' + req.status;
-
-    if (!row) {
-        let tr = document.createElement('tr');
-        tr.dataset.requestId = req.id;
-        tr.className = `hover:bg-slate-50 transition-all duration-200 ${statusClass}`;
-        tr.innerHTML = `
-        <form method="POST" class="contents">
-            <input type="hidden" name="request_id" value="${req.id}">
-            <td class="px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <div class="h-9 w-9 bg-teal-600 text-white rounded-lg flex items-center justify-center font-black text-xs shadow-lg shadow-teal-200">
-                        ${req.full_name[0].toUpperCase()}
-                    </div>
-                    <span class="text-sm font-bold text-slate-800 resident-name">${req.full_name}</span>
-                </div>
-            </td>
-            <td class="px-6 py-5">
-                <div class="flex flex-col">
-                    <span class="text-xs font-black text-slate-400 uppercase tracking-tighter">Type</span>
-                    <span class="text-sm font-bold text-teal-700 certificate-name">${req.certificate_name}</span>
-                </div>
-            </td>
-            <td class="px-6 py-5">
-                <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-md italic appointment-date">${req.appointment_date}</span>
-            </td>
-            <td class="px-6 py-5">
-                <select name="status" class="form-input text-[10px] font-black uppercase tracking-widest border-none bg-slate-50 status-select">
-                    <option value="${req.status}" selected>${req.status}</option>
-                </select>
-            </td>
-            <td class="px-6 py-5">
-                <input type="text" name="remarks" value="${req.remarks ?? ''}" placeholder="Add remark..." class="form-input text-xs w-full bg-transparent border-dashed border-slate-200 remarks-input">
-            </td>
-            <td class="px-6 py-5 text-center">
-                <button type="submit" class="bg-slate-900 hover:bg-teal-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all transform active:scale-90 shadow-md">Update</button>
-            </td>
-        </form>`;
-        tbody.prepend(tr);
-    } else {
-        row.querySelector('.resident-name').innerText = req.full_name;
-        row.querySelector('.certificate-name').innerText = req.certificate_name;
-        row.querySelector('.appointment-date').innerText = req.appointment_date;
-        row.querySelector('.status-select').value = req.status;
-        row.querySelector('.remarks-input').value = req.remarks ?? '';
-
-        row.className = `hover:bg-slate-50 transition-all duration-200 ${statusClass}`;
-    }
-}
-
-function syncAdminRequests() {
-    fetch('api.php?action=admin-requests&page_num=<?= (int)($pageNum ?? 1) ?>')
-        .then(res => res.json())
-        .then(data => {
-            const requests = Array.isArray(data) ? data : data.requests ?? [];
-            requests.forEach(req => updateRequestRow(req));
-        })
-        .catch(err => console.error('Realtime admin sync error:', err));
-}
-
-setInterval(syncAdminRequests, 5000);
 </script>
 
 <?php require '../views/layout/footer.php'; ?>

@@ -5,10 +5,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 require '../views/layout/header.php';
 
-// Logic for numbering
+// Pagination & Counting Logic
 $itemsPerPage = 10; 
-$startIndex = (($pageNum ?? 1) - 1) * $itemsPerPage;
+$pageNum = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
+$startIndex = ($pageNum - 1) * $itemsPerPage;
 $count = $startIndex + 1;
+
+// Assuming $totalPages is calculated in your controller, 
+// if not, you can calculate it here: $totalPages = ceil($total_rows / $itemsPerPage);
 ?>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -30,14 +34,15 @@ $count = $startIndex + 1;
     .status-Rejected { border-left: 4px solid #ef4444; }
     .status-Cancelled { border-left: 4px solid #94a3b8; }
 
-    /* Custom Scrollbar for the table */
-    .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar { height: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
+    .remark-input { transition: all 0.2s ease-in-out; }
 </style>
 
 <div class="sticky-nav">
-    <div class="max-w-[1600px] mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
         <button onclick="history.back()" class="flex items-center gap-2 text-slate-500 font-bold hover:text-teal-600 transition-all group">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -45,168 +50,128 @@ $count = $startIndex + 1;
             <span class="text-[10px] uppercase tracking-widest">Back</span>
         </button>
         
-        <div class="flex items-center gap-4">
-            <div class="relative transition-all duration-300 w-64 md:w-96 border border-slate-200 rounded-xl bg-slate-50 overflow-hidden flex items-center px-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input type="text" id="tableSearch" placeholder="Filter requests..." 
-                    class="bg-transparent border-none w-full py-2 text-xs focus:ring-0 outline-none font-medium" 
-                    onkeyup="filterTable()">
-            </div>
+        <div class="relative w-64 md:w-80 border border-slate-200 rounded-xl bg-slate-50 flex items-center px-3 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="tableSearch" placeholder="Search requests..." class="bg-transparent border-none w-full py-2 text-xs focus:ring-0 outline-none font-medium" onkeyup="filterTable()">
         </div>
     </div>
 </div>
 
-<div class="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-    <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="p-6 md:p-10 max-w-[1600px] mx-auto min-h-screen">
+    <div class="mb-8 flex items-end justify-between">
         <div>
-            <h2 class="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Requests Center</h2>
-            <p class="text-slate-500 text-sm font-medium mt-1">Manage resident applications and verifications.</p>
-        </div>
-        <div class="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-[0.2em]">
-            Total: <?= count($requests) ?> Requests
+            <h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Requests Center</h2>
+            <p class="text-slate-500 text-sm font-medium mt-2">Update status and manage internal documentation.</p>
         </div>
     </div>
 
-    <div id="requestsContainer">
-        <?php if (empty($requests)): ?>
-            <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-20 text-center">
-                <span class="text-4xl mb-4 block">📁</span>
-                <h3 class="text-lg font-bold text-slate-400 uppercase tracking-widest">No requests found</h3>
-            </div>
-        <?php else: ?>
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full table-fixed border-collapse" id="requestsTable">
-                        <thead>
-                            <tr class="bg-slate-50 border-bottom border-slate-200 text-slate-600">
-                                <th class="w-12 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">#</th>
-                                <th class="w-56 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">Resident Details</th>
-                                <th class="w-64 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">Address</th>
-                                <th class="w-40 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">Certificate</th>
-                                <th class="w-32 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">Schedule</th>
-                                <th class="w-40 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">Status</th>
-                                <th class="w-56 px-4 py-4 text-left text-[9px] font-black uppercase tracking-widest">Admin Remarks</th>
-                                <th class="w-24 px-4 py-4 text-center text-[9px] font-black uppercase tracking-widest">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requestsBody" class="divide-y divide-slate-100">
-                            <?php foreach ($requests as $req): ?>
-                                <tr data-request-id="<?= $req['id'] ?>" class="group hover:bg-slate-50/50 transition-colors status-<?= $req['status'] ?>">
-                                    <td class="px-4 py-4 text-xs font-black text-slate-300 italic">
-                                        <?= str_pad($count++, 2, '0', STR_PAD_LEFT) ?>
-                                    </td>
+    <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full table-auto" id="requestsTable">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500">
+                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-16">#</th>
+                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest min-w-[200px]">Resident</th>
+                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest">Certificate</th>
+                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest min-w-[150px]">Status Update</th>
+                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-48">Internal Remark</th>
+                        <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-44">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsBody" class="divide-y divide-slate-50">
+                    <?php foreach ($requests as $req): ?>
+                        <tr class="group hover:bg-slate-50/50 transition-colors status-<?= $req['status'] ?>">
+                            <td class="px-6 py-6 text-xs font-black text-slate-300 italic"><?= str_pad($count++, 2, '0', STR_PAD_LEFT) ?></td>
+                            
+                            <td class="px-6 py-6">
+                                <p class="text-sm font-black text-slate-800 tracking-tight"><?= htmlspecialchars($req['full_name']) ?></p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase"><?= htmlspecialchars($req['contact_number'] ?? 'No Contact') ?></p>
+                            </td>
 
-                                    <td class="px-4 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="h-8 w-8 shrink-0 bg-teal-600 rounded-lg flex items-center justify-center font-black text-white text-[10px] shadow-sm">
-                                                <?= strtoupper(substr($req['full_name'] ?? 'U', 0, 1)) ?>
-                                            </div>
-                                            <div class="flex flex-col min-w-0">
-                                                <span class="text-xs font-bold text-slate-800 resident-name truncate"><?= htmlspecialchars($req['full_name']) ?></span>
-                                                <span class="text-[10px] text-slate-400 font-semibold resident-phone">📞 <?= htmlspecialchars($req['contact_number'] ?? 'N/A') ?></span>
-                                            </div>
-                                        </div>
-                                    </td>
+                            <td class="px-6 py-6">
+                                <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
+                            </td>
 
-                                    <td class="px-4 py-4">
-                                        <div class="text-[10px] font-medium text-slate-500 leading-relaxed resident-address line-clamp-2 uppercase">
-                                            <?= htmlspecialchars($req['address'] ?? 'No address listed') ?>
-                                        </div>
-                                    </td>
+                            <form method="POST" action="?page=manage-requests" class="contents">
+                                <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                                
+                                <td class="px-6 py-6">
+                                    <select name="status" class="w-full text-[10px] font-black uppercase border-2 border-slate-100 bg-white rounded-xl px-2 py-2 focus:border-teal-500 outline-none cursor-pointer">
+                                        <?php
+                                        $curr = $req['status'];
+                                        $statusMap = [
+                                            'Pending' => ['Pending' => '⏳ Pending', 'Approved' => '✅ Approved', 'Rejected' => '❌ Rejected'],
+                                            'Approved' => ['Approved' => '✅ Approved', 'Completed' => '💎 Completed'],
+                                            'Rejected' => ['Rejected' => '❌ Rejected'],
+                                            'Completed' => ['Completed' => '💎 Completed'],
+                                            'Cancelled' => ['Cancelled' => '🚫 Cancelled']
+                                        ];
+                                        foreach (($statusMap[$curr] ?? [$curr => $curr]) as $val => $label): ?>
+                                            <option value="<?= $val ?>" <?= $curr == $val ? 'selected' : '' ?>><?= $label ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
 
-                                    <td class="px-4 py-4">
-                                        <span class="text-[9px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase truncate block text-center">
-                                            <?= htmlspecialchars($req['certificate_name']) ?>
-                                        </span>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <span class="text-[10px] font-bold text-slate-600 whitespace-nowrap">
-                                            <?= date('M d, Y', strtotime($req['appointment_date'])) ?>
-                                        </span>
-                                    </td>
-
-                                    <form method="POST" action="?page=manage-requests" class="contents">
-                                        <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                                <td class="px-6 py-6">
+                                    <div class="flex items-center">
+                                        <input type="text" name="remarks" id="input-<?= $req['id'] ?>" 
+                                            value="<?= htmlspecialchars($req['remarks'] ?? '') ?>" 
+                                            placeholder="Write note..."
+                                            class="<?= empty($req['remarks']) ? 'hidden' : '' ?> w-full text-[11px] font-medium border-2 border-slate-100 bg-slate-50 rounded-lg px-3 py-1.5 focus:bg-white focus:border-teal-500 outline-none">
                                         
-                                        <td class="px-4 py-4">
-                                            <select name="status" class="w-full text-[10px] font-bold uppercase border border-slate-200 bg-white rounded-lg px-2 py-1.5 focus:border-teal-500 outline-none transition-all">
-                                                <?php
-                                                $currentStatus = $req['status'];
-                                                $statusMap = [
-                                                    'Pending' => ['Pending' => '⏳ Pending', 'Approved' => '✅ Approved', 'Rejected' => '❌ Rejected'],
-                                                    'Approved' => ['Approved' => '✅ Approved', 'Completed' => '💎 Completed'],
-                                                    'Rejected' => ['Rejected' => '❌ Rejected'],
-                                                    'Completed' => ['Completed' => '💎 Completed'],
-                                                    'Cancelled' => ['Cancelled' => '🚫 Cancelled']
-                                                ];
-                                                $available = $statusMap[$currentStatus] ?? [$currentStatus => $currentStatus];
-                                                foreach ($available as $val => $label): ?>
-                                                    <option value="<?= $val ?>" <?= ($currentStatus == $val ? 'selected' : '') ?>><?= $label ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </td>
+                                        <button type="button" 
+                                            onclick="showRemarkInput(<?= $req['id'] ?>, this)"
+                                            class="<?= !empty($req['remarks']) ? 'hidden' : '' ?> flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-teal-600 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            Add Remark
+                                        </button>
+                                    </div>
+                                </td>
 
-                                        <td class="px-4 py-4">
-                                            <input type="text" name="remarks" value="<?= htmlspecialchars($req['remarks'] ?? '') ?>" 
-                                                placeholder="Add internal notes..."
-                                                class="w-full text-[10px] font-medium border border-slate-200 bg-slate-50/50 rounded-lg px-3 py-1.5 focus:border-teal-500 focus:bg-white outline-none transition-all">
-                                        </td>
-
-                                        <td class="px-4 py-4 text-center">
-                                            <button type="submit" class="bg-slate-900 hover:bg-teal-600 text-white w-full py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all shadow-sm">
-                                                Save
-                                            </button>
-                                        </td>
-                                    </form>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        <?php endif; ?>
+                                <td class="px-6 py-6 text-center">
+                                    <button type="submit" class="bg-slate-900 hover:bg-teal-600 text-white px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-teal-100 whitespace-nowrap">
+                                        Save Changes
+                                    </button>
+                                </td>
+                            </form>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<?php if ($totalPages > 1): ?>
-<div class="mt-8 flex flex-col items-center gap-4 pb-12">
-    <div class="flex items-center gap-1 bg-white p-1 border border-slate-200 rounded-xl shadow-sm">
-        <?php if ($pageNum > 1): ?>
-            <a href="?page=manage-requests&page_num=<?= $pageNum - 1 ?>" class="p-2 hover:text-teal-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-            </a>
-        <?php endif; ?>
-
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=manage-requests&page_num=<?= $i ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-black transition-all <?= ($i == $pageNum) ? 'bg-teal-600 text-white' : 'text-slate-400 hover:bg-slate-50' ?>">
-                <?= $i ?>
-            </a>
-        <?php endfor; ?>
-
-        <?php if ($pageNum < $totalPages): ?>
-            <a href="?page=manage-requests&page_num=<?= $pageNum + 1 ?>" class="p-2 hover:text-teal-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </a>
-        <?php endif; ?>
+    <?php if (isset($totalPages) && $totalPages > 1): ?>
+    <div class="mt-10 flex justify-center pb-12">
+        <nav class="flex items-center gap-2 bg-white p-2 border-2 border-slate-100 rounded-2xl shadow-sm">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=manage-requests&page_num=<?= $i ?>" 
+                   class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all <?= ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600' ?>">
+                    <?= $i ?>
+                </a>
+            <?php endfor; ?>
+        </nav>
     </div>
+    <?php endif; ?>
 </div>
-<?php endif; ?>
 
 <script>
-/**
- * Optimized search function to handle multiple columns
- */
-function filterTable() {
-    const input = document.getElementById("tableSearch");
-    const filter = input.value.toUpperCase();
-    const rows = document.querySelectorAll("#requestsBody tr");
+function showRemarkInput(id, btnElement) {
+    const input = document.getElementById('input-' + id);
+    input.classList.remove('hidden');
+    btnElement.classList.add('hidden');
+    input.focus();
+}
 
+function filterTable() {
+    const filter = document.getElementById("tableSearch").value.toUpperCase();
+    const rows = document.querySelectorAll("#requestsBody tr");
     rows.forEach(row => {
-        const text = row.textContent || row.innerText;
-        row.style.display = text.toUpperCase().includes(filter) ? "" : "none";
+        row.style.display = row.innerText.toUpperCase().includes(filter) ? "" : "none";
     });
 }
 </script>

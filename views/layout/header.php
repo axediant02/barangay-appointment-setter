@@ -27,6 +27,9 @@ if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Modern Barangay Certificate System for efficient request and appointment management">
     <title><?= htmlspecialchars($pageTitle) ?> | Barangay Certificate System</title>
+    <script>
+        window.APP_BASE = <?= json_encode(rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/') . '/') ?>;
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {

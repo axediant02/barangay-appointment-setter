@@ -216,12 +216,18 @@ function updateRequestCard(updatedReq) {
 }
 
 function syncRequests() {
-    fetch('api.php?action=my-requests')
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(req => updateRequestCard(req));
+    var apiUrl = (typeof APP_BASE !== 'undefined' ? APP_BASE : '') + 'api.php?action=my-requests';
+    fetch(apiUrl)
+        .then(function(res) {
+            var ct = res.headers.get('Content-Type') || '';
+            if (!res.ok) throw new Error('API returned ' + res.status);
+            if (!ct.includes('application/json')) throw new Error('API returned non-JSON (check that api.php is reachable at ' + apiUrl + ')');
+            return res.json();
         })
-        .catch(err => console.error('Realtime sync error:', err));
+        .then(function(data) {
+            if (Array.isArray(data)) data.forEach(function(req) { updateRequestCard(req); });
+        })
+        .catch(function(err) { console.error('Realtime sync error:', err.message || err); });
 }
 
 setInterval(syncRequests, 5000);

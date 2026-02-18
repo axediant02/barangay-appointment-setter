@@ -48,14 +48,14 @@
     <?php endif; ?>
     
     <div class="flex justify-between items-center mb-6">
-        <button onclick="history.back()" class="flex items-center gap-2 text-slate-600 hover:text-teal-600 transition font-black text-sm uppercase tracking-widest">
-            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-slate-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <a href="?page=resident-dashboard" class="inline-flex items-center gap-2 text-slate-600 hover:text-teal-600 transition font-black text-sm uppercase tracking-widest group" aria-label="Back to dashboard">
+            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-slate-300 group-hover:border-teal-500 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                 </svg>
             </span>
-            Go Back
-        </button>
+            Back to Dashboard
+        </a>
     </div>
 
     <div class="bg-white rounded-[2rem] shadow-2xl border-2 border-slate-300 overflow-hidden">

@@ -3,16 +3,79 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ?page=login");
     exit;
 }
-require '../views/layout/header.php';
 
-// Pagination & Counting Logic
-$itemsPerPage = 25; 
-$pageNum = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
+$itemsPerPage = 25;
+$pageNum = isset($currentPage) ? (int)$currentPage : 1;
+$search = isset($search) ? $search : '';
 $startIndex = ($pageNum - 1) * $itemsPerPage;
 $count = $startIndex + 1;
+$searchQuery = $search !== '' ? '&search=' . rawurlencode($search) : '';
 
-// Assuming $totalPages is calculated in your controller, 
-// if not, you can calculate it here: $totalPages = ceil($total_rows / $itemsPerPage);
+if (!empty($ajaxFragment)) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<div id="manage-requests-fragment"><table><tbody id="manage-requests-tbody">';
+    foreach ($requests as $req):
+        $rowCount = $count++;
+?>
+<tr class="group hover:bg-slate-50/50 transition-colors status-<?= $req['status'] ?>">
+    <td class="px-6 py-6 text-xs font-black text-slate-300 italic"><?= str_pad($rowCount, 2, '0', STR_PAD_LEFT) ?></td>
+    <td class="px-6 py-6">
+        <p class="text-sm font-black text-slate-800 tracking-tight"><?= htmlspecialchars($req['full_name']) ?></p>
+        <p class="text-[10px] text-slate-400 font-bold uppercase"><?= htmlspecialchars($req['contact_number'] ?? 'No Contact') ?></p>
+    </td>
+    <td class="px-6 py-6">
+        <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
+    </td>
+    <form method="POST" action="?page=manage-requests<?= $pageNum > 1 ? '&page_num=' . (int)$pageNum : '' ?><?= $search !== '' ? '&search=' . rawurlencode($search) : '' ?>" class="contents">
+        <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+        <input type="hidden" name="page_num" value="<?= (int)$pageNum ?>">
+        <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+        <td class="px-6 py-6">
+            <select name="status" class="w-full text-[10px] font-black uppercase border-2 border-slate-100 bg-white rounded-xl px-2 py-2 focus:border-teal-500 outline-none cursor-pointer">
+                <?php
+                $curr = $req['status'];
+                $statusMap = [
+                    'Pending' => ['Pending' => '⏳ Pending', 'Approved' => '✅ Approved', 'Rejected' => '❌ Rejected'],
+                    'Approved' => ['Approved' => '✅ Approved', 'Completed' => '💎 Completed'],
+                    'Rejected' => ['Rejected' => '❌ Rejected'],
+                    'Completed' => ['Completed' => '💎 Completed'],
+                    'Cancelled' => ['Cancelled' => '🚫 Cancelled']
+                ];
+                foreach (($statusMap[$curr] ?? [$curr => $curr]) as $val => $label): ?>
+                    <option value="<?= $val ?>" <?= $curr == $val ? 'selected' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+        </td>
+        <td class="px-6 py-6">
+            <div class="flex items-center">
+                <input type="text" name="remarks" id="input-<?= $req['id'] ?>" value="<?= htmlspecialchars($req['remarks'] ?? '') ?>" placeholder="Write note..." class="<?= empty($req['remarks']) ? 'hidden' : '' ?> w-full text-[11px] font-medium border-2 border-slate-100 bg-slate-50 rounded-lg px-3 py-1.5 focus:bg-white focus:border-teal-500 outline-none">
+                <button type="button" onclick="showRemarkInput(<?= $req['id'] ?>, this)" class="<?= !empty($req['remarks']) ? 'hidden' : '' ?> flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-teal-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Add Remark
+                </button>
+            </div>
+        </td>
+        <td class="px-6 py-6 text-center">
+            <button type="submit" class="bg-slate-900 hover:bg-teal-600 text-white px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-teal-100 whitespace-nowrap">Save Changes</button>
+        </td>
+    </form>
+</tr>
+<?php
+    endforeach;
+    echo '</tbody></table><div id="manage-requests-pagination">';
+    if (isset($totalPages) && $totalPages > 1) {
+        echo '<nav class="flex items-center gap-2 bg-white p-2 border-2 border-slate-100 rounded-2xl shadow-sm">';
+        for ($i = 1; $i <= $totalPages; $i++) {
+            $active = ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600';
+            echo '<a href="?page=manage-requests&page_num=' . $i . $searchQuery . '" class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all ' . $active . '">' . $i . '</a>';
+        }
+        echo '</nav>';
+    }
+    echo '</div></div>';
+    exit;
+}
+
+require '../views/layout/header.php';
 ?>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -50,12 +113,14 @@ $count = $startIndex + 1;
             <span class="text-[10px] uppercase tracking-widest">Back to Dashboard</span>
         </a>
         
-        <div class="relative w-64 md:w-80 border border-slate-200 rounded-xl bg-slate-50 flex items-center px-3 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <form id="searchForm" method="get" action="" class="relative w-64 md:w-80 border border-slate-200 rounded-xl bg-slate-50 flex items-center px-3 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+            <input type="hidden" name="page" value="manage-requests">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input type="text" id="tableSearch" placeholder="Search requests..." class="bg-transparent border-none w-full py-2 text-xs focus:ring-0 outline-none font-medium" onkeyup="filterTable()">
-        </div>
+            <input type="text" id="searchInput" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by name, contact, certificate..." class="bg-transparent border-none w-full py-2 text-xs focus:ring-0 outline-none font-medium" aria-label="Search all requests" autocomplete="off">
+            <button type="submit" class="shrink-0 p-1.5 text-slate-400 hover:text-teal-600 transition font-semibold text-xs" aria-label="Search">Search</button>
+        </form>
     </div>
 </div>
 
@@ -94,9 +159,10 @@ $count = $startIndex + 1;
                                 <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
                             </td>
 
-                            <form method="POST" action="?page=manage-requests<?= $pageNum > 1 ? '&page_num=' . (int)$pageNum : '' ?>" class="contents">
+                            <form method="POST" action="?page=manage-requests<?= $pageNum > 1 ? '&page_num=' . (int)$pageNum : '' ?><?= $search !== '' ? '&search=' . rawurlencode($search) : '' ?>" class="contents">
                                 <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
                                 <input type="hidden" name="page_num" value="<?= (int)$pageNum ?>">
+                                <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
                                 
                                 <td class="px-6 py-6">
                                     <select name="status" class="w-full text-[10px] font-black uppercase border-2 border-slate-100 bg-white rounded-xl px-2 py-2 focus:border-teal-500 outline-none cursor-pointer">
@@ -146,18 +212,18 @@ $count = $startIndex + 1;
         </div>
     </div>
 
+    <div id="paginationContainer" class="mt-10 flex justify-center pb-12">
     <?php if (isset($totalPages) && $totalPages > 1): ?>
-    <div class="mt-10 flex justify-center pb-12">
         <nav class="flex items-center gap-2 bg-white p-2 border-2 border-slate-100 rounded-2xl shadow-sm">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?page=manage-requests&page_num=<?= $i ?>" 
+                <a href="?page=manage-requests&page_num=<?= $i ?><?= $searchQuery ?>" 
                    class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all <?= ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600' ?>">
                     <?= $i ?>
                 </a>
             <?php endfor; ?>
         </nav>
-    </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <script>
@@ -168,13 +234,44 @@ function showRemarkInput(id, btnElement) {
     input.focus();
 }
 
-function filterTable() {
-    const filter = document.getElementById("tableSearch").value.toUpperCase();
-    const rows = document.querySelectorAll("#requestsBody tr");
-    rows.forEach(row => {
-        row.style.display = row.innerText.toUpperCase().includes(filter) ? "" : "none";
-    });
-}
+(function() {
+    function initSearchAsYouType() {
+        var searchForm = document.getElementById('searchForm');
+        var searchInput = document.getElementById('searchInput');
+        var tbody = document.getElementById('requestsBody');
+        var paginationContainer = document.getElementById('paginationContainer');
+        if (!searchForm || !searchInput || !tbody) return;
+        var debounceTimer;
+        function doSearch() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                var q = searchInput.value.trim();
+                var url = '?page=manage-requests&search=' + encodeURIComponent(q) + '&page_num=1&ajax=1';
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function(r) { return r.text(); })
+                    .then(function(html) {
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(html, 'text/html');
+                        var newTbody = doc.getElementById('manage-requests-tbody');
+                        var newPagination = doc.getElementById('manage-requests-pagination');
+                        if (newTbody) tbody.innerHTML = newTbody.innerHTML;
+                        if (paginationContainer && newPagination) paginationContainer.innerHTML = newPagination.innerHTML;
+                        var newUrl = '?page=manage-requests' + (q ? '&search=' + encodeURIComponent(q) : '');
+                        if (window.history && window.history.replaceState) window.history.replaceState(null, '', newUrl);
+                    })
+                    .catch(function() {});
+            }, 200);
+        }
+        searchForm.addEventListener('submit', function(e) { e.preventDefault(); doSearch(); });
+        searchInput.addEventListener('input', doSearch);
+        searchInput.addEventListener('keyup', doSearch);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearchAsYouType);
+    } else {
+        initSearchAsYouType();
+    }
+})();
 </script>
 
 <?php require '../views/layout/footer.php'; ?>

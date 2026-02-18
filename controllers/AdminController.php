@@ -14,17 +14,17 @@ class AdminController {
     }
 
     public function manageRequests() {
-        $pageNum = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
+        $pageNum = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
+        $search = isset($_GET['search']) ? trim((string)$_GET['search']) : (isset($_REQUEST['search']) ? trim((string)$_REQUEST['search']) : '');
         $perPage = 25;
-        
-        $requests = $this->requestModel->getAll();
-        $totalRequests = count($requests);
-        $totalPages = ceil($totalRequests / $perPage);
-        $offset = ($pageNum - 1) * $perPage;
-        
-        $requests = array_slice($requests, $offset, $perPage);
-        $currentPage = $pageNum;
-        
+
+        $result = $this->requestModel->getAllForAdminPaginated($search, $pageNum, $perPage);
+        $requests = $result['data'];
+        $totalRequests = $result['total'];
+        $totalPages = $result['totalPages'];
+        $currentPage = $result['currentPage'];
+        $ajaxFragment = !empty($_GET['ajax']);
+
         require '../views/admin/manage-request.php';
     }
 
@@ -45,6 +45,9 @@ class AdminController {
 
             $redirectPage = isset($_POST['page_num']) ? max(1, (int)$_POST['page_num']) : 1;
             $redirectUrl = '?page=manage-requests' . ($redirectPage > 1 ? '&page_num=' . $redirectPage : '');
+            if (!empty(trim((string)($_POST['search'] ?? '')))) {
+                $redirectUrl .= '&search=' . rawurlencode(trim($_POST['search']));
+            }
             header("Location: " . $redirectUrl);
             exit;
         }

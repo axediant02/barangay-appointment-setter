@@ -76,6 +76,71 @@ class RequestModel {
         ];
     }
 
+    /**
+     * Get requests for admin with optional search (all requests, paginated).
+     * Search matches: full_name, resident username, contact_number, certificate name.
+     */
+    public function getAllForAdminPaginated($search, $page = 1, $perPage = 25) {
+        $search = trim((string) $search);
+        $page = max(1, (int) $page);
+        $perPage = max(1, (int) $perPage);
+        $offset = ($page - 1) * $perPage;
+
+        if ($search === '') {
+            $countStmt = $this->pdo->query("SELECT COUNT(*) AS total FROM requests");
+            $total = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+            $stmt = $this->pdo->prepare("
+                SELECT r.*, u.username AS resident_username, c.name AS certificate_name
+                FROM requests r
+                JOIN users u ON r.user_id = u.id
+                JOIN certificates c ON r.certificate_id = c.id
+                ORDER BY r.created_at DESC
+                LIMIT ? OFFSET ?
+            ");
+            $stmt->bindValue(1, $perPage, PDO::PARAM_INT);
+            $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $term = '%' . $search . '%';
+            $countStmt = $this->pdo->prepare("
+                SELECT COUNT(*) AS total
+                FROM requests r
+                JOIN users u ON r.user_id = u.id
+                JOIN certificates c ON r.certificate_id = c.id
+                WHERE r.full_name LIKE ? OR u.username LIKE ? OR r.contact_number LIKE ? OR c.name LIKE ?
+            ");
+            $countStmt->execute([$term, $term, $term, $term]);
+            $total = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+
+            $stmt = $this->pdo->prepare("
+                SELECT r.*, u.username AS resident_username, c.name AS certificate_name
+                FROM requests r
+                JOIN users u ON r.user_id = u.id
+                JOIN certificates c ON r.certificate_id = c.id
+                WHERE r.full_name LIKE ? OR u.username LIKE ? OR r.contact_number LIKE ? OR c.name LIKE ?
+                ORDER BY r.created_at DESC
+                LIMIT ? OFFSET ?
+            ");
+            $stmt->bindValue(1, $term, PDO::PARAM_STR);
+            $stmt->bindValue(2, $term, PDO::PARAM_STR);
+            $stmt->bindValue(3, $term, PDO::PARAM_STR);
+            $stmt->bindValue(4, $term, PDO::PARAM_STR);
+            $stmt->bindValue(5, $perPage, PDO::PARAM_INT);
+            $stmt->bindValue(6, $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return [
+            'data' => $requests,
+            'total' => $total,
+            'perPage' => $perPage,
+            'currentPage' => $page,
+            'totalPages' => $total > 0 ? (int) ceil($total / $perPage) : 1
+        ];
+    }
+
     public function getByUser($userId) {
         $stmt = $this->pdo->prepare("
             SELECT r.*, c.name AS certificate_name

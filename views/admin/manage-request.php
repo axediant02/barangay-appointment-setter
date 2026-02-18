@@ -94,8 +94,9 @@ $count = $startIndex + 1;
                                 <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
                             </td>
 
-                            <form method="POST" action="?page=manage-requests" class="contents">
+                            <form method="POST" action="?page=manage-requests<?= $pageNum > 1 ? '&page_num=' . (int)$pageNum : '' ?>" class="contents">
                                 <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                                <input type="hidden" name="page_num" value="<?= (int)$pageNum ?>">
                                 
                                 <td class="px-6 py-6">
                                     <select name="status" class="w-full text-[10px] font-black uppercase border-2 border-slate-100 bg-white rounded-xl px-2 py-2 focus:border-teal-500 outline-none cursor-pointer">

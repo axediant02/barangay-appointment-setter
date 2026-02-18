@@ -43,7 +43,9 @@ class AdminController {
                 $_SESSION['error'] = "Invalid status transition or request not found. Action not allowed.";
             }
 
-            header("Location: ?page=manage-requests");
+            $redirectPage = isset($_POST['page_num']) ? max(1, (int)$_POST['page_num']) : 1;
+            $redirectUrl = '?page=manage-requests' . ($redirectPage > 1 ? '&page_num=' . $redirectPage : '');
+            header("Location: " . $redirectUrl);
             exit;
         }
     }

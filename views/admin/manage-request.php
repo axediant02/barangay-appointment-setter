@@ -43,12 +43,12 @@ $count = $startIndex + 1;
 
 <div class="sticky-nav">
     <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-        <button onclick="history.back()" class="flex items-center gap-2 text-slate-500 font-bold hover:text-teal-600 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="?page=admin-dashboard" class="inline-flex items-center gap-2 text-slate-500 font-bold hover:text-teal-600 transition-all group" aria-label="Back to admin dashboard">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span class="text-[10px] uppercase tracking-widest">Back</span>
-        </button>
+            <span class="text-[10px] uppercase tracking-widest">Back to Dashboard</span>
+        </a>
         
         <div class="relative w-64 md:w-80 border border-slate-200 rounded-xl bg-slate-50 flex items-center px-3 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

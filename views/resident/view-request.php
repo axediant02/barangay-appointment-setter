@@ -21,13 +21,13 @@
 
 <nav class="sticky-nav mb-6">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="?page=my-requests" class="inline-flex items-center gap-2 text-slate-600 font-bold hover:text-teal-600 transition group">
+        <a href="?page=my-requests" class="inline-flex items-center gap-2 text-slate-600 font-bold hover:text-teal-600 transition group" aria-label="Back to my requests">
             <span class="bg-white w-9 h-9 flex items-center justify-center rounded-lg shadow-sm border border-gray-200 group-hover:border-teal-200 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
             </span>
-            <span class="text-sm tracking-tight">My Requests</span>
+            <span class="text-sm tracking-tight">Back to My Requests</span>
         </a>
         <div class="hidden sm:block">
             <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Request #<?= (int)($request['id'] ?? 0) ?></span>

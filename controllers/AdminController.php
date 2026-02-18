@@ -23,6 +23,7 @@ class AdminController {
         $totalRequests = $result['total'];
         $totalPages = $result['totalPages'];
         $currentPage = $result['currentPage'];
+        $ajaxFragment = !empty($_GET['ajax']);
 
         require '../views/admin/manage-request.php';
     }

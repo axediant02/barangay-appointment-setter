@@ -1,5 +1,5 @@
 <?php
-$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
+$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
 $port = getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '3306';
 $db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'barangay-appointment';
 $user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';

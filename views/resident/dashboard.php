@@ -144,17 +144,23 @@ body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
 
 <script>
 function updateStats() {
-    fetch('api.php?action=resident-stats')
-        .then(response => response.json())
-        .then(data => {
-            const up = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val || 0; };
+    var apiUrl = (typeof APP_BASE !== 'undefined' ? APP_BASE : '') + 'api.php?action=resident-stats';
+    fetch(apiUrl)
+        .then(function(response) {
+            if (!response.ok) throw new Error('API ' + response.status);
+            var ct = response.headers.get('Content-Type') || '';
+            if (!ct.includes('application/json')) throw new Error('API returned non-JSON');
+            return response.json();
+        })
+        .then(function(data) {
+            var up = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val != null ? val : 0; };
             up('stat-total', data.total);
             up('stat-pending', data.pending);
             up('stat-approved', data.approved);
             up('stat-completed', data.completed);
             up('stat-rejected', data.rejected);
         })
-        .catch(e => console.log('Sync error'));
+        .catch(function(e) { console.log('Sync error:', e.message || e); });
 }
 setInterval(updateStats, 20000);
 </script>

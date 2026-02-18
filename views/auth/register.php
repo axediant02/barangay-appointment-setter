@@ -2,24 +2,37 @@
 require_once '../config/database.php';
 
 $errors = [];
+$username = '';
+$email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $email = $_POST['email'] ?? '';
+    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
     if (!$username || !$email || !$password || !$confirm) {
         $errors[] = "All fields are required.";
-    } elseif ($password !== $confirm) {
-        $errors[] = "Passwords do not match.";
     } elseif (strlen($password) < 6) {
         $errors[] = "Password must be at least 6 characters long.";
-    } else {
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    } elseif ($password !== $confirm) {
+        $errors[] = "Passwords do not match.";
+    }
+
+    if (empty($errors)) {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
-            $errors[] = "Email is already registered.";
-        } else {
+            $errors[] = "This email is already registered. Please use another email address.";
+        }
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
+        $stmt->execute([$username]);
+        if ($stmt->fetch()) {
+            $errors[] = "This username is already taken. Please choose another.";
+        }
+    }
+
+    if (empty($errors)) {
+        try {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("
                 INSERT INTO users (username, email, password, role)
@@ -27,12 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt->execute([$username, $email, $hash]);
 
-            $_SESSION['user_id'] = $pdo->lastInsertId();
+            $_SESSION['user_id'] = (int) $pdo->lastInsertId();
             $_SESSION['role'] = 'resident';
             $_SESSION['username'] = $username;
+            session_write_close();
 
             header("Location: ?page=resident-dashboard");
             exit;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000 || strpos($e->getMessage(), 'Duplicate') !== false || strpos($e->getMessage(), 'UNIQUE') !== false) {
+                $errors[] = "This username or email is already in use. Please choose another.";
+            } else {
+                $errors[] = "Registration failed. Please try again or use a different username and email.";
+            }
         }
     }
 }
@@ -130,12 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="glass-card rounded-[2.5rem] shadow-xl overflow-hidden ring-1 ring-slate-200">
         <div class="p-8 sm:p-10">
-            <?php if ($errors): ?>
-                <div class="bg-red-50 border-2 border-red-100 rounded-2xl p-4 mb-8">
-                    <div class="flex gap-3 items-center">
-                        <div class="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">!</div>
-                        <div class="text-red-700 text-[10px] font-black uppercase tracking-tight">
-                            <?php foreach ($errors as $error) echo "<p>$error</p>"; ?>
+            <?php if (!empty($errors)): ?>
+                <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-4 mb-8" role="alert">
+                    <div class="flex gap-3 items-start">
+                        <div class="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">!</div>
+                        <div class="text-red-700 text-[10px] font-black uppercase tracking-tight space-y-1">
+                            <?php foreach ($errors as $error): ?>
+                                <p><?= htmlspecialchars($error) ?></p>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
@@ -144,12 +166,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST" class="space-y-5">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block label-bold mb-2 ml-1">Full Name</label>
-                        <input type="text" name="username" placeholder="e.g. Juan Dela Cruz" required class="form-input">
+                        <label class="block label-bold mb-2 ml-1">Username</label>
+                        <input type="text" name="username" placeholder="e.g. Juan Dela Cruz" value="<?= htmlspecialchars($username) ?>" required class="form-input" autocomplete="username">
                     </div>
                     <div>
                         <label class="block label-bold mb-2 ml-1">Email Address</label>
-                        <input type="email" name="email" placeholder="juan@email.com" required class="form-input">
+                        <input type="email" name="email" placeholder="juan@email.com" value="<?= htmlspecialchars($email) ?>" required class="form-input" autocomplete="email">
                     </div>
                 </div>
 

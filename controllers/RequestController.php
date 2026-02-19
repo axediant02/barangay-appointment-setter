@@ -23,9 +23,7 @@ class RequestController {
         $certificates = $this->certificateModel->getAll();
         $reasons = $this->reasonModel->getAll();
 
-        $stmt = $this->pdo->prepare("SELECT username, email FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $userName = $_SESSION['username'] ?? 'Resident';
 
         $stmt = $this->pdo->prepare("
             SELECT certificate_id 

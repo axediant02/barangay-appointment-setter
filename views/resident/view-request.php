@@ -85,10 +85,6 @@
                 <span class="detail-value"><?= htmlspecialchars($request['certificate_name']) ?></span>
             </div>
             <div class="detail-row px-4 bg-white">
-                <span class="detail-label">Reason for Request</span>
-                <span class="detail-value"><?= htmlspecialchars($request['reason_name'] ?? '—') ?></span>
-            </div>
-            <div class="detail-row px-4 bg-white">
                 <span class="detail-label">Status</span>
                 <span class="detail-value"><?= htmlspecialchars($request['status']) ?></span>
             </div>

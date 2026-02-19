@@ -102,7 +102,6 @@ require '../views/layout/header.php';
                     <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight truncate certificate-name">
                         <?php echo htmlspecialchars($req['certificate_name']); ?>
                     </h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 italic"><?php echo htmlspecialchars($req['reason_name'] ?? '—'); ?></p>
                     <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">
                         📅 Appointment Date: <span class="text-slate-700"><?php echo date('M d, Y', strtotime($req['appointment_date'])); ?></span>
                     </p>

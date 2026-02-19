@@ -190,16 +190,6 @@
                             <label class="input-label">Preferred Appointment Date <span class="text-red-600">*</span></label>
                             <input type="date" name="appointment_date" class="form-input" required min="<?= date('Y-m-d', strtotime('+1 day')) ?>">
                         </div>
-
-                        <div>
-                            <label class="input-label">Reason for Request <span class="text-red-600">*</span></label>
-                            <select name="reason_id" class="form-input" required>
-                                <option value="">Select Reason</option>
-                                <?php foreach ($reasons as $reason): ?>
-                                    <option value="<?= $reason['id'] ?>"><?= htmlspecialchars($reason['reason']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
                     </div>
                 </div>
 

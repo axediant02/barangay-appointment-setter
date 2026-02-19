@@ -4,6 +4,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+include 'partials/status-badge.php';
+
 $itemsPerPage = 25;
 $pageNum = isset($currentPage) ? (int)$currentPage : 1;
 $search = isset($search) ? $search : '';
@@ -11,127 +13,148 @@ $startIndex = ($pageNum - 1) * $itemsPerPage;
 $count = $startIndex + 1;
 $searchQuery = $search !== '' ? '&search=' . rawurlencode($search) : '';
 
-// Partial Row Logic (moved to views/admin/partials/request-row.php)
-
+// AJAX Fragment update
 if (!empty($ajaxFragment)) {
     header('Content-Type: text/html; charset=utf-8');
     echo '<div id="manage-requests-fragment"><table><tbody id="manage-requests-tbody">';
     foreach ($requests as $req):
         $rowCount = $count++;
-        include '../views/admin/partials/request-row.php';
+        include 'partials/request-row.php';
     endforeach;
     echo '</tbody></table><div id="manage-requests-pagination">';
     if (isset($totalPages) && $totalPages > 1) {
         echo '<nav class="flex items-center gap-2 bg-white p-2 border-2 border-slate-100 rounded-2xl shadow-sm">';
         for ($i = 1; $i <= $totalPages; $i++) {
-            $active = ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600';
-            echo '<a href="?page=manage-requests&page_num=' . $i . $searchQuery . '" class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all ' . $active . '">' . $i . '</a>';
+            $activeClass = ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600';
+            echo '<a href="?page=manage-requests&page_num=' . $i . $searchQuery . '" class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all ' . $activeClass . '">' . $i . '</a>';
         }
         echo '</nav>';
     }
     echo '</div></div>';
     exit;
 }
-
-require '../views/layout/header.php';
 ?>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests | BrgyPortal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        }
+        @layer components {
+            .sidebar-item {
+                @apply flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-700 hover:translate-x-1;
+            }
+            .sidebar-item.active {
+                @apply bg-teal-600 text-white shadow-xl shadow-teal-200/50 hover:translate-x-0 hover:bg-teal-600;
+            }
+            .icon-box {
+                @apply transition-transform group-hover:scale-110 flex-shrink-0;
+            }
+            .status-badge {
+                @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border transition-all duration-200;
+            }
+            .status-badge svg { @apply w-3.5 h-3.5; }
+            .status-pending { @apply bg-amber-50 text-amber-600 border-amber-100; }
+            .status-approved { @apply bg-emerald-50 text-emerald-600 border-emerald-100; }
+            .status-completed { @apply bg-cyan-50 text-cyan-600 border-cyan-100; }
+            .status-rejected { @apply bg-red-50 text-red-600 border-red-100; }
+            .status-cancelled { @apply bg-slate-50 text-slate-500 border-slate-200; }
+        }
+    </style>
+</head>
+<body class="h-full overflow-hidden">
 
-    .sticky-nav {
-        position: sticky; top: 0; z-index: 50;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid #e2e8f0;
-    }
+<div class="flex h-full">
+    <?php 
+    $currentPage = 'manage-requests';
+    include 'partials/sidebar.php'; 
+    ?>
 
-    .custom-scrollbar::-webkit-scrollbar { height: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.35rem 0.85rem;
-        border-radius: 9999px;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        transition: all 0.2s;
-        border: 1px solid transparent;
-    }
+    <main class="flex-1 h-full overflow-y-auto bg-slate-50/50">
+        <header class="bg-white border-b border-slate-200 px-10 py-4 flex justify-between items-center sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-slate-800">Requests Management</h2>
+                <span class="px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-black uppercase tracking-wider">Live View</span>
+            </div>
+            
+            <form id="searchForm" method="get" action="" class="relative group w-96">
+                <input type="hidden" name="page" value="manage-requests">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-slate-400 group-focus-within:text-teal-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <input type="text" id="searchInput" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search residents, certificates..." class="block w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all outline-none">
+            </form>
 
-    .status-badge svg { width: 12px; height: 12px; }
+            <div class="flex items-center gap-3">
+                <div class="text-right mr-2">
+                    <p class="text-sm font-bold text-slate-800"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></p>
+                    <p class="text-[10px] text-slate-400 font-medium italic">Official Desk</p>
+                </div>
+                <div class="h-10 w-10 bg-teal-600 rounded-full border-2 border-white shadow-sm overflow-hidden flex items-center justify-center font-bold text-white uppercase text-sm">
+                    <?= substr($_SESSION['username'] ?? 'A', 0, 2) ?>
+                </div>
+            </div>
+        </header>
 
-    .status-pending { 
-        background-color: #fef3c7; color: #92400e; border-color: #fde68a;
-    }
-    .status-approved { 
-        background-color: #dcfce7; color: #166534; border-color: #bbf7d0;
-    }
-    .status-completed { 
-        background-color: #ecfeff; color: #0891b2; border-color: #cffafe;
-    }
-    .status-rejected { 
-        background-color: #fee2e2; color: #991b1b; border-color: #fecaca;
-    }
-    .status-cancelled { 
-        background-color: #f1f5f9; color: #475569; border-color: #e2e8f0;
-    }
-    
-    .remark-input { transition: all 0.2s ease-in-out; }
-</style>
+        <div class="p-10 max-w-[1600px] mx-auto">
+            <div class="mb-10">
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Requests Hub</h1>
+                <p class="text-slate-500 font-medium mt-1">Manage and verify resident applications.</p>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-8 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-white">
+                    <div>
+                        <h3 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+                            <span class="h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                            Incoming Requests
+                        </h3>
+                        <p class="text-slate-400 text-xs font-medium mt-1">Review the latest document submissions.</p>
+                    </div>
+                </div>
 
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full table-auto" id="requestsTable">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-slate-500">
+                                <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-16">#</th>
+                                <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest min-w-[200px]">Resident</th>
+                                <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest">Certificate</th>
+                                <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-32">Appointment</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-32">Status</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-24">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsBody" class="divide-y divide-slate-50">
+                            <?php foreach ($requests as $req): 
+                                $rowCount = $count++;
+                                include 'partials/request-row.php';
+                            endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-<div class="p-6 md:p-10 max-w-[1600px] mx-auto min-h-screen">
-    <div class="mb-8 flex items-end justify-between">
-        <div>
-            <h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Requests Center</h2>
-            <p class="text-slate-500 text-sm font-medium mt-2">Update status and manage internal documentation.</p>
+            <div id="paginationContainer" class="mt-10 flex justify-center pb-12">
+            <?php if (isset($totalPages) && $totalPages > 1): ?>
+                <nav class="flex items-center gap-2 bg-white p-2 border-2 border-slate-100 rounded-2xl shadow-sm">
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=manage-requests&page_num=<?= $i ?><?= $searchQuery ?>" 
+                           class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all <?= ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </nav>
+            <?php endif; ?>
+            </div>
         </div>
-    </div>
-
-    <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full table-auto" id="requestsTable">
-                <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500">
-                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-16">#</th>
-                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest min-w-[200px]">Resident</th>
-                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest">Certificate</th>
-                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-32">Appointment</th>
-                        <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-32">Proof of ID</th>
-                        <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-32">Status</th>
-                        <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-24">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="requestsBody" class="divide-y divide-slate-50">
-                    <?php foreach ($requests as $req): 
-                        $rowCount = $count++;
-                        include '../views/admin/partials/request-row.php';
-                    endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="paginationContainer" class="mt-10 flex justify-center pb-12">
-    <?php if (isset($totalPages) && $totalPages > 1): ?>
-        <nav class="flex items-center gap-2 bg-white p-2 border-2 border-slate-100 rounded-2xl shadow-sm">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?page=manage-requests&page_num=<?= $i ?><?= $searchQuery ?>" 
-                   class="w-10 h-10 flex items-center justify-center rounded-xl text-xs font-black transition-all <?= ($i == $pageNum) ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 hover:text-teal-600' ?>">
-                    <?= $i ?>
-                </a>
-            <?php endfor; ?>
-        </nav>
-    <?php endif; ?>
-    </div>
+    </main>
 </div>
 
 <?php 
@@ -271,7 +294,7 @@ window.onclick = function(event) {
 }
 
 document.addEventListener('keydown', function(event) {
-    if (event.key === "Escape") {
+    if (event.key === "Escape") { 
         closeIdModal();
     }
 });
@@ -316,4 +339,5 @@ document.addEventListener('keydown', function(event) {
 })();
 </script>
 
-<?php require '../views/layout/footer.php'; ?>
+</body>
+</html>

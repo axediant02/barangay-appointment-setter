@@ -34,20 +34,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
     }
 }
 
-$pageTitle = 'Manage Certificates';
-require_once '../views/layout/header.php';
 ?>
 
-<div class="mb-10">
-    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Certificate Registry</h1>
-    <p class="text-slate-500 font-medium mt-1">Define and organize the documents available for resident requests.</p>
-</div>
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Certificates | BrgyPortal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        }
+        @layer components {
+            .sidebar-item {
+                @apply flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-700 hover:translate-x-1;
+            }
+            .sidebar-item.active {
+                @apply bg-teal-600 text-white shadow-xl shadow-teal-200/50 hover:translate-x-0 hover:bg-teal-600;
+            }
+            .icon-box {
+                @apply transition-transform group-hover:scale-110 flex-shrink-0;
+            }
+            .btn-primary {
+                @apply px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm transition transform active:scale-95 shadow-lg shadow-teal-900/10 flex items-center gap-2;
+            }
+            .form-input {
+                @apply w-full bg-white border-2 border-slate-100 rounded-2xl px-4 py-3 outline-none transition-all focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 font-bold text-sm text-slate-800;
+            }
+        }
+    </style>
+</head>
+<body class="h-full overflow-hidden">
 
-<?php if(isset($_GET['status'])): ?>
-    <div id="toast" class="mb-8 flex items-center p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl animate-bounce">
-        <span class="mr-3">✨</span> Registry updated successfully!
-    </div>
-<?php endif; ?>
+<div class="flex h-full">
+    <?php 
+    $currentPage = 'manage-certificates';
+    include 'partials/sidebar.php'; 
+    ?>
+
+    <main class="flex-1 h-full overflow-y-auto bg-slate-50/50">
+        <header class="bg-white border-b border-slate-200 px-10 py-4 flex justify-between items-center sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-slate-800">Certificate Registry</h2>
+                <div class="bg-teal-50 border border-teal-100 px-3 py-1 rounded-full flex items-center gap-2" id="portfolioBadge">
+                    <span class="text-teal-800 font-black text-[10px] uppercase tracking-wider">Active Portfolio:</span>
+                    <span class="text-teal-600 font-black text-sm" id="totalCountTop"><?= count($certificates) ?></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="text-right mr-2">
+                    <p class="text-sm font-bold text-slate-800"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></p>
+                    <p class="text-[10px] text-slate-400 font-medium italic">Document Manager</p>
+                </div>
+                <div class="h-10 w-10 bg-teal-600 rounded-full border-2 border-white shadow-sm overflow-hidden flex items-center justify-center font-bold text-white uppercase text-sm">
+                    <?= strtoupper(substr($_SESSION['username'] ?? 'AD', 0, 2)) ?>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-10 max-w-[1600px] mx-auto min-h-screen">
+            <?php if(isset($_GET['status'])): ?>
+                <div id="toast" class="mb-8 flex items-center p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl animate-bounce">
+                    <span class="mr-3">✨</span> Registry updated successfully!
+                </div>
+            <?php endif; ?>
+
+            <div class="mb-10">
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Certificate Registry</h1>
+                <p class="text-slate-500 font-medium mt-1">Define and organize the documents available for resident requests.</p>
+            </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
     <div class="lg:col-span-4">
@@ -132,6 +191,9 @@ require_once '../views/layout/header.php';
     </div>
 </div>
 
+</main>
+</div>
+
 <script>
     function filterCerts() {
         const input = document.getElementById('certSearch');
@@ -160,4 +222,5 @@ require_once '../views/layout/header.php';
     }, 4000);
 </script>
 
-<?php require_once '../views/layout/footer.php'; ?>
+</body>
+</html>

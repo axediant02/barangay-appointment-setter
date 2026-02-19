@@ -368,6 +368,10 @@ require '../views/layout/header.php';
                                             <span class="text-[9px] font-black uppercase text-slate-400">Contact</span>
                                             <span class="text-xs font-bold text-slate-800" id="detailsContact">—</span>
                                         </div>
+                                        <div class="flex justify-between items-start border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                            <span class="text-[9px] font-black uppercase text-slate-400">Email</span>
+                                            <span class="text-xs font-bold text-slate-800" id="detailsEmail">—</span>
+                                        </div>
                                         <div class="pt-1">
                                             <span class="text-[9px] font-black uppercase text-slate-400 block mb-1">Address</span>
                                             <p class="text-xs font-medium text-slate-600 leading-relaxed" id="detailsAddress">—</p>
@@ -483,6 +487,7 @@ function openDetailsModal(data) {
     document.getElementById('detailsFullName').textContent = data.full_name;
     document.getElementById('detailsCivilStatus').textContent = data.civil_status || '—';
     document.getElementById('detailsContact').textContent = data.contact_number || '—';
+    document.getElementById('detailsEmail').textContent = data.email || '—';
     document.getElementById('detailsAddress').textContent = data.address;
     document.getElementById('detailsCertName').textContent = data.certificate_name;
     document.getElementById('detailsRemarks').value = data.remarks || '';

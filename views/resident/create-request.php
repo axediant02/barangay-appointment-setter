@@ -67,7 +67,7 @@
         </div>
 
         <div class="px-8 py-10">
-            <form method="POST" class="space-y-10">
+            <form method="POST" class="space-y-10" enctype="multipart/form-data">
                 
                 <div class="form-section">
                     <div class="flex items-center gap-3 mb-8 border-b-4 border-slate-200 pb-4">
@@ -108,9 +108,44 @@
                     </div>
                 </div>
 
+                <div class="form-section relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-teal-100 rounded-full blur-xl opacity-50 group-hover:scale-150 transition duration-700"></div>
+                    
+                    <div class="flex items-center gap-3 mb-8 border-b-4 border-slate-200 pb-4 relative">
+                        <span class="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black shadow-lg shadow-indigo-200">2</span>
+                        <h3 class="font-black text-slate-900 uppercase text-lg tracking-widest">Identity Verification</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                        <div>
+                            <label class="input-label mb-4">Upload Valid ID <span class="text-red-600">*</span></label>
+                            
+                            <div class="relative group cursor-pointer">
+                                <input type="file" name="id_image" id="id_image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*" required onchange="previewImage(this)">
+                                
+                                <div class="bg-white border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center transition-all group-hover:border-teal-500 group-hover:bg-teal-50">
+                                    <div class="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl group-hover:scale-110 transition">
+                                        📸
+                                    </div>
+                                    <p class="font-bold text-slate-700 text-sm uppercase tracking-wide mb-1">Click to Upload</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">JPG, PNG, WebP (Max 5MB)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-200 rounded-2xl h-64 flex items-center justify-center overflow-hidden border-2 border-slate-300 shadow-inner relative">
+                            <img id="imagePreview" src="#" alt="Preview" class="w-full h-full object-cover hidden">
+                            <div id="placeholderPreview" class="text-center p-6">
+                                <span class="text-4xl block mb-2 opacity-30">👁️</span>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Preview will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-section">
                     <div class="flex items-center gap-3 mb-8 border-b-4 border-slate-200 pb-4">
-                        <span class="bg-slate-900 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black">2</span>
+                        <span class="bg-slate-900 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black">3</span>
                         <h3 class="font-black text-slate-900 uppercase text-lg tracking-widest">Request Details</h3>
                     </div>
 
@@ -170,3 +205,26 @@
 </div>
 
 <?php require '../views/layout/footer.php'; ?>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('placeholderPreview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = '#';
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+    }
+}
+</script>

@@ -64,9 +64,49 @@ class RequestController {
             $birthday        = $_POST['birthday'] ?? null;
             $address         = $_POST['address'] ?? null;
             $contactNumber   = $_POST['contact_number'] ?? null;
+            
+            // File Upload Handling
+            $file = $_FILES['id_image'] ?? null;
+            $idImagePath = null;
 
             if (!$certificateId || !$appointmentDate || !$fullName || !$address || !$contactNumber) {
                 $_SESSION['error'] = "All required fields must be filled.";
+                header("Location: ?page=create-request");
+                exit;
+            }
+
+            // Validate File
+            if ($file && $file['error'] === UPLOAD_ERR_OK) {
+                $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+                if (!in_array($file['type'], $allowedTypes)) {
+                    $_SESSION['error'] = "Only JPG, PNG, and WebP images are allowed for ID.";
+                    header("Location: ?page=create-request");
+                    exit;
+                }
+                
+                if ($file['size'] > 5 * 1024 * 1024) { // 5MB limit
+                    $_SESSION['error'] = "ID image must be less than 5MB.";
+                    header("Location: ?page=create-request");
+                    exit;
+                }
+
+                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $filename = 'req_' . time() . '_' . uniqid() . '.' . $ext;
+                $targetDir = '../public/uploads/request_ids/';
+                
+                if (!is_dir($targetDir)) {
+                    mkdir($targetDir, 0755, true);
+                }
+                
+                if (move_uploaded_file($file['tmp_name'], $targetDir . $filename)) {
+                    $idImagePath = 'public/uploads/request_ids/' . $filename;
+                } else {
+                    $_SESSION['error'] = "Failed to upload ID image. Please try again.";
+                    header("Location: ?page=create-request");
+                    exit;
+                }
+            } else {
+                $_SESSION['error'] = "A valid ID photo is required.";
                 header("Location: ?page=create-request");
                 exit;
             }
@@ -101,7 +141,8 @@ class RequestController {
                 $civilStatus,
                 $birthday,
                 $address,
-                $contactNumber
+                $contactNumber,
+                $idImagePath // Pass image path
             );
 
             $_SESSION['success'] = "Request submitted successfully.";

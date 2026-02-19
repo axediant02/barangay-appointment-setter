@@ -98,6 +98,19 @@
                 <span class="detail-label">Contact number</span>
                 <span class="detail-value"><?= htmlspecialchars($request['contact_number']) ?></span>
             </div>
+            <?php if (!empty($request['id_image_path'])): 
+                $displayPath = $request['id_image_path'];
+                if (strpos($displayPath, 'public/') !== 0 && strpos($displayPath, 'http') !== 0) {
+                    $displayPath = 'public/' . $displayPath;
+                }
+            ?>
+            <div class="detail-row px-4 bg-white flex-col gap-3 items-start">
+                <span class="detail-label">Uploaded ID</span>
+                <div class="w-full bg-slate-100 rounded-lg p-2 border border-slate-200">
+                    <img src="<?= htmlspecialchars($displayPath) ?>" alt="ID Preview" class="w-full h-auto rounded-md shadow-sm">
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
         <?php if (!empty($request['remarks'])): ?>

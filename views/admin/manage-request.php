@@ -44,6 +44,7 @@ if (!empty($ajaxFragment)) {
 
     <td class="px-6 py-6">
         <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
+        <p class="text-[10px] text-slate-400 font-bold uppercase mt-1"><?= htmlspecialchars($req['reason_name'] ?? '—') ?></p>
     </td>
 
     <td class="px-6 py-6">
@@ -217,6 +218,7 @@ require '../views/layout/header.php';
 
                             <td class="px-6 py-6">
                                 <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase mt-1"><?= htmlspecialchars($req['reason_name'] ?? '—') ?></p>
                             </td>
 
                             <td class="px-6 py-6">
@@ -409,6 +411,11 @@ require '../views/layout/header.php';
                                         </div>
                                         <p class="text-base font-black text-slate-900 leading-tight mb-4" id="detailsCertName">Barangay Clearance</p>
                                         
+                                        <div class="mb-4">
+                                            <p class="text-[9px] font-black text-teal-600 uppercase tracking-widest mb-1">Reason for Request</p>
+                                            <p class="text-[11px] font-bold text-slate-700 italic" id="detailsReason">—</p>
+                                        </div>
+
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 bg-white rounded-xl shadow-sm border border-teal-200 flex flex-col items-center justify-center">
                                                 <span class="text-[8px] font-black text-teal-600 uppercase" id="detailsApptMonth">Oct</span>
@@ -462,7 +469,7 @@ function openIdModal(imagePath, requestId) {
     const modal = document.getElementById('idModal');
     const modalImg = document.getElementById('modalIdImage');
     const requestIdInput = document.getElementById('modalRequestId');
-    const requestIdDisplay = document.getElementById('modalIdTitle');
+    const requestIdDisplay = document.getElementById('modal-title');
 
     modalImg.src = imagePath;
     requestIdInput.value = requestId;
@@ -490,6 +497,7 @@ function openDetailsModal(data) {
     document.getElementById('detailsEmail').textContent = data.email || '—';
     document.getElementById('detailsAddress').textContent = data.address;
     document.getElementById('detailsCertName').textContent = data.certificate_name;
+    document.getElementById('detailsReason').textContent = data.reason_name || '—';
     document.getElementById('detailsRemarks').value = data.remarks || '';
     document.getElementById('detailsInputId').value = data.id;
 

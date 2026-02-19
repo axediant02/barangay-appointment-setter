@@ -32,15 +32,24 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $id = $_POST['request_id'];
-            $status = $_POST['status'];
-            $remarks = $_POST['remarks'];
+            $status = $_POST['status'] ?? null;
+            $remarks = $_POST['remarks'] ?? null;
+            $isVerified = isset($_POST['is_verified']) ? (int)$_POST['is_verified'] : null;
 
-            $ok = $this->requestModel->updateStatus($id, $status, $remarks);
+            $ok = true;
+            if ($isVerified !== null) {
+                $ok = $this->requestModel->updateVerificationStatus($id, $isVerified);
+            }
+
+            if ($status !== null) {
+                $statusOk = $this->requestModel->updateStatus($id, $status, $remarks);
+                $ok = $ok && $statusOk;
+            }
 
             if ($ok) {
                 $_SESSION['success'] = "Request updated successfully.";
             } else {
-                $_SESSION['error'] = "Invalid status transition or request not found. Action not allowed.";
+                $_SESSION['error'] = "Action not allowed or request not found.";
             }
 
             $redirectPage = isset($_POST['page_num']) ? max(1, (int)$_POST['page_num']) : 1;

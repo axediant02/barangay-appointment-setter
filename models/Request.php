@@ -212,7 +212,11 @@ class RequestModel {
 
         $stmt = $this->pdo->prepare("UPDATE requests SET status = ?, remarks = ? WHERE id = ?");
         return $stmt->execute([$status, $remarks, $id]);
-        return $stmt->execute([$status, $remarks, $id]);
+    }
+
+    public function updateVerificationStatus($id, $isVerified) {
+        $stmt = $this->pdo->prepare("UPDATE requests SET is_verified = ? WHERE id = ?");
+        return $stmt->execute([(int)$isVerified, $id]);
     }
 
     public function countUserActiveRequestsForCertificateToday($userId, $certificateId) {

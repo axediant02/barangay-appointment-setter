@@ -106,7 +106,15 @@
             ?>
             <div class="detail-row px-4 bg-white flex-col gap-3 items-start">
                 <span class="detail-label">Uploaded ID</span>
-                <div class="w-full bg-slate-100 rounded-lg p-2 border border-slate-200">
+                <div class="w-full bg-slate-100 rounded-lg p-2 border border-slate-200 relative">
+                    <?php if ($request['is_verified']): ?>
+                        <div class="absolute top-4 left-4 bg-teal-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-lg uppercase tracking-widest flex items-center gap-1.5 z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            Verified ID
+                        </div>
+                    <?php endif; ?>
                     <img src="<?= htmlspecialchars($displayPath) ?>" alt="ID Preview" class="w-full h-auto rounded-md shadow-sm">
                 </div>
             </div>

@@ -6,10 +6,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'resident') {
 
 $userId = $_SESSION['user_id'];
 
-$stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
-$stmt->execute([$userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-$username = $user['username'] ?? 'Resident';
+$username = $_SESSION['username'] ?? 'Resident';
 
 // Stats Query
 $stmt = $pdo->prepare("

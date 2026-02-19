@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $role = strtolower((string)$user['role']);
             $_SESSION['user_id'] = (int)$user['id'];
             $_SESSION['role'] = $role;
-            $_SESSION['username'] = (string)$user['name'];
+            $_SESSION['username'] = (string)$user['username'];
             $_SESSION['email'] = (string)$user['email'];
             session_commit();
             

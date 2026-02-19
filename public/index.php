@@ -7,6 +7,22 @@ function redirect($url) {
     exit;
 }
 $isLoggedIn = isset($_SESSION['user_id']);
+
+// Ensure session data is robust if logged in
+if ($isLoggedIn && (!isset($_SESSION['username']) || !isset($_SESSION['role']) || $_SESSION['username'] === '')) {
+    try {
+        $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($userRow) {
+            $_SESSION['username'] = $userRow['username'] ?: 'User';
+            $_SESSION['role'] = $userRow['role'];
+        }
+    } catch (Exception $e) {
+        // Silently continue
+    }
+}
+
 $role = $_SESSION['role'] ?? null;
 
 $page = $_GET['page'] ?? 'home';

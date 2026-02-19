@@ -4,21 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $pageTitle = $pageTitle ?? 'Barangay Certificate System';
 
-$userName = 'User';
-$userUsername = 'User';
+$userName = $_SESSION['username'] ?? 'User';
 $userRole = $_SESSION['role'] ?? null;
-
-if (isset($_SESSION['user_id']) && isset($pdo) && $pdo instanceof PDO) {
-    $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($userRow) {
-        $userName = $userRow['username'];
-        $userUsername = $userRow['username'];
-        $userRole = $userRow['role'] ?? $userRole;
-        $_SESSION['role'] = $userRole;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">

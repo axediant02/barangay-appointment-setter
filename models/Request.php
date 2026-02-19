@@ -52,7 +52,7 @@ class RequestModel {
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare("
-            SELECT r.*, u.username AS resident_username, c.name AS certificate_name
+            SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
@@ -90,7 +90,7 @@ class RequestModel {
             $countStmt = $this->pdo->query("SELECT COUNT(*) AS total FROM requests");
             $total = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
             $stmt = $this->pdo->prepare("
-                SELECT r.*, u.username AS resident_username, c.name AS certificate_name
+                SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
                 FROM requests r
                 JOIN users u ON r.user_id = u.id
                 JOIN certificates c ON r.certificate_id = c.id
@@ -114,7 +114,7 @@ class RequestModel {
             $total = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
             $stmt = $this->pdo->prepare("
-                SELECT r.*, u.username AS resident_username, c.name AS certificate_name
+                SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
                 FROM requests r
                 JOIN users u ON r.user_id = u.id
                 JOIN certificates c ON r.certificate_id = c.id

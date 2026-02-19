@@ -64,12 +64,13 @@ class RequestController {
             $birthday        = $_POST['birthday'] ?? null;
             $address         = $_POST['address'] ?? null;
             $contactNumber   = $_POST['contact_number'] ?? null;
+            $reasonForRequest = $_POST['reason_for_request'] ?? null;
             
             // File Upload Handling
             $file = $_FILES['id_image'] ?? null;
             $idImagePath = null;
 
-            if (!$certificateId || !$appointmentDate || !$fullName || !$address || !$contactNumber) {
+            if (!$certificateId || !$appointmentDate || !$fullName || !$address || !$contactNumber || !$reasonForRequest) {
                 $_SESSION['error'] = "All required fields must be filled.";
                 header("Location: ?page=create-request");
                 exit;
@@ -142,6 +143,7 @@ class RequestController {
                 $birthday,
                 $address,
                 $contactNumber,
+                $reasonForRequest,
                 $idImagePath // Pass image path
             );
 
@@ -288,9 +290,10 @@ class RequestController {
             $birthday        = trim($_POST['birthday'] ?? '') ?: null;
             $address         = trim($_POST['address'] ?? '');
             $contactNumber   = trim($_POST['contact_number'] ?? '');
+            $reasonForRequest = trim($_POST['reason_for_request'] ?? '');
             $appointmentDate = trim($_POST['appointment_date'] ?? '');
 
-            if (!$fullName || !$address || !$contactNumber || !$appointmentDate) {
+            if (!$fullName || !$address || !$contactNumber || !$reasonForRequest || !$appointmentDate) {
                 $_SESSION['error'] = 'All required fields must be filled.';
                 header("Location: ?page=edit-request&id=$id");
                 exit;
@@ -304,6 +307,7 @@ class RequestController {
                 $birthday,
                 $address,
                 $contactNumber,
+                $reasonForRequest,
                 $appointmentDate
             );
 

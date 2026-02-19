@@ -50,8 +50,10 @@ CREATE TABLE requests (
     birthday DATE NULL,
     address VARCHAR(255) NOT NULL,
     contact_number VARCHAR(20) NOT NULL,
+    reason_for_request VARCHAR(150) NOT NULL,
     remarks TEXT NULL,
     id_image_path VARCHAR(255) NULL,
+    is_verified TINYINT(1) NOT NULL DEFAULT 0,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -75,7 +77,13 @@ CREATE TABLE requests (
 If you already have the `requests` table, run this command to add the ID content column:
 ```sql
 ALTER TABLE requests
+    ADD COLUMN reason_for_request VARCHAR(150) NOT NULL AFTER contact_number;
+
+ALTER TABLE requests
     ADD COLUMN id_image_path VARCHAR(255) NULL AFTER remarks;
+
+ALTER TABLE requests
+    ADD COLUMN is_verified TINYINT(1) NOT NULL DEFAULT 0 AFTER id_image_path;
 ```
 
 ## 3. Populate Certificates

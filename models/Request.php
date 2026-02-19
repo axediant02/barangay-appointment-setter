@@ -9,7 +9,7 @@ class RequestModel {
 
     public function getAll() {
         $stmt = $this->pdo->query("
-            SELECT r.*, u.username AS resident_username, c.name AS certificate_name
+            SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
@@ -166,22 +166,22 @@ class RequestModel {
         return $row ?: null;
     }
 
-    public function updateResidentRequest($id, $userId, $fullName, $civilStatus, $birthday, $address, $contactNumber, $appointmentDate) {
+    public function updateResidentRequest($id, $userId, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonForRequest, $appointmentDate) {
         $stmt = $this->pdo->prepare("
             UPDATE requests
-            SET full_name = ?, civil_status = ?, birthday = ?, address = ?, contact_number = ?, appointment_date = ?
+            SET full_name = ?, civil_status = ?, birthday = ?, address = ?, contact_number = ?, reason_for_request = ?, appointment_date = ?
             WHERE id = ? AND user_id = ? AND status = 'Pending'
         ");
-        return $stmt->execute([$fullName, $civilStatus, $birthday ?: null, $address, $contactNumber, $appointmentDate, $id, $userId]);
+        return $stmt->execute([$fullName, $civilStatus, $birthday ?: null, $address, $contactNumber, $reasonForRequest, $appointmentDate, $id, $userId]);
     }
 
-    public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $idImagePath = null) {
+    public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonForRequest, $idImagePath = null) {
         $stmt = $this->pdo->prepare("
             INSERT INTO requests 
-            (user_id, certificate_id, appointment_date, full_name, civil_status, birthday, address, contact_number, id_image_path) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, certificate_id, appointment_date, full_name, civil_status, birthday, address, contact_number, reason_for_request, id_image_path) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $idImagePath]);
+        return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonForRequest, $idImagePath]);
     }
 
     public function updateStatus($id, $status, $remarks = null) {

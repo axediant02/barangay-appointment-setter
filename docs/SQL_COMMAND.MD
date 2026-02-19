@@ -37,6 +37,12 @@ CREATE TABLE certificates (
 
 ### Requests Table
 ```sql
+CREATE TABLE reasons (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    reason VARCHAR(150) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE requests (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -50,7 +56,7 @@ CREATE TABLE requests (
     birthday DATE NULL,
     address VARCHAR(255) NOT NULL,
     contact_number VARCHAR(20) NOT NULL,
-    reason_for_request VARCHAR(150) NOT NULL,
+    reason_id INT UNSIGNED NULL,
     remarks TEXT NULL,
     id_image_path VARCHAR(255) NULL,
     is_verified TINYINT(1) NOT NULL DEFAULT 0,
@@ -77,7 +83,13 @@ CREATE TABLE requests (
 If you already have the `requests` table, run this command to add the ID content column:
 ```sql
 ALTER TABLE requests
-    ADD COLUMN reason_for_request VARCHAR(150) NOT NULL AFTER contact_number;
+    ADD COLUMN reason_id INT UNSIGNED NULL AFTER contact_number;
+
+ALTER TABLE requests
+    ADD FOREIGN KEY (reason_id) REFERENCES reasons(id);
+
+-- Optional: Migrate existing data if necessary, then drop old column
+-- ALTER TABLE requests DROP COLUMN reason_for_request;
 
 ALTER TABLE requests
     ADD COLUMN id_image_path VARCHAR(255) NULL AFTER remarks;
@@ -86,7 +98,22 @@ ALTER TABLE requests
     ADD COLUMN is_verified TINYINT(1) NOT NULL DEFAULT 0 AFTER id_image_path;
 ```
 
-## 3. Populate Certificates
+## 3. Populate Reasons
+```sql
+INSERT INTO reasons (reason) VALUES
+('Employment / Job Application'),
+('School / Education Requirement'),
+('Business Registration / Permit'),
+('Government Assistance / Financial Aid'),
+('Legal / Official Transaction'),
+('Proof of Residency / Address'),
+('Community Participation / Programs'),
+('Scholarship Application'),
+('Loan / Banking Requirement'),
+('Personal Identification');
+```
+
+## 4. Populate Certificates
 ```sql
 INSERT INTO certificates (name, description, created_at, updated_at) VALUES
 ('Barangay Clearance', 'Official clearance from the barangay', NOW(), NOW()),

@@ -54,7 +54,7 @@ The current manual process has several challenges:
 
 ### Key Features:
 - **Request-Based ID Verification:** Secure image upload for identity/address proof per transaction.
-- **Reason Categorization:** 10 pre-defined reasons to aid barangay record-keeping.
+- **Reason Categorization & Normalization:** 10+ dynamic reasons managed via a dedicated `reasons` table, aiding barangay record-keeping and scalability.
 - **Premium Status Badges:** Color-coded, icon-based status tracking.
 - **Resident Email Traceability:** Direct access to resident email for official communication.
 - **Live Search & AJAX Filtering:** Instant request lookup on the admin dashboard.

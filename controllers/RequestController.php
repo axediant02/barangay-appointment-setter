@@ -2,22 +2,26 @@
 
 require_once '../models/Certificate.php';
 require_once '../models/Request.php';
+require_once '../models/Reason.php';
 
 class RequestController {
 
     private $certificateModel;
     private $requestModel;
+    private $reasonModel;
     private $pdo;
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
         $this->certificateModel = new Certificate($pdo);
         $this->requestModel = new RequestModel($pdo);
+        $this->reasonModel = new Reason($pdo);
     }
 
     public function createForm() {
 
         $certificates = $this->certificateModel->getAll();
+        $reasons = $this->reasonModel->getAll();
 
         $stmt = $this->pdo->prepare("SELECT username, email FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
@@ -64,13 +68,13 @@ class RequestController {
             $birthday        = $_POST['birthday'] ?? null;
             $address         = $_POST['address'] ?? null;
             $contactNumber   = $_POST['contact_number'] ?? null;
-            $reasonForRequest = $_POST['reason_for_request'] ?? null;
+            $reasonId        = $_POST['reason_id'] ?? null;
             
             // File Upload Handling
             $file = $_FILES['id_image'] ?? null;
             $idImagePath = null;
 
-            if (!$certificateId || !$appointmentDate || !$fullName || !$address || !$contactNumber || !$reasonForRequest) {
+            if (!$certificateId || !$appointmentDate || !$fullName || !$address || !$contactNumber || !$reasonId) {
                 $_SESSION['error'] = "All required fields must be filled.";
                 header("Location: ?page=create-request");
                 exit;
@@ -143,7 +147,7 @@ class RequestController {
                 $birthday,
                 $address,
                 $contactNumber,
-                $reasonForRequest,
+                $reasonId,
                 $idImagePath // Pass image path
             );
 
@@ -221,9 +225,10 @@ class RequestController {
         $totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 1;
 
         $stmt = $this->pdo->prepare("
-            SELECT r.*, c.name as certificate_name
+            SELECT r.*, c.name as certificate_name, rn.reason AS reason_name
             FROM requests r
             JOIN certificates c ON r.certificate_id = c.id
+            LEFT JOIN reasons rn ON r.reason_id = rn.id
             WHERE r.user_id = ?
             ORDER BY r.created_at DESC
             LIMIT ? OFFSET ?
@@ -276,6 +281,7 @@ class RequestController {
 
         $id = (int) ($_GET['id'] ?? 0);
         $request = $this->requestModel->findByIdAndUser($id, $_SESSION['user_id']);
+        $reasons = $this->reasonModel->getAll();
 
         if (!$request) {
             $_SESSION['error'] = 'Request not found.';
@@ -290,10 +296,10 @@ class RequestController {
             $birthday        = trim($_POST['birthday'] ?? '') ?: null;
             $address         = trim($_POST['address'] ?? '');
             $contactNumber   = trim($_POST['contact_number'] ?? '');
-            $reasonForRequest = trim($_POST['reason_for_request'] ?? '');
+            $reasonId        = $_POST['reason_id'] ?? null;
             $appointmentDate = trim($_POST['appointment_date'] ?? '');
 
-            if (!$fullName || !$address || !$contactNumber || !$reasonForRequest || !$appointmentDate) {
+            if (!$fullName || !$address || !$contactNumber || !$reasonId || !$appointmentDate) {
                 $_SESSION['error'] = 'All required fields must be filled.';
                 header("Location: ?page=edit-request&id=$id");
                 exit;
@@ -307,7 +313,7 @@ class RequestController {
                 $birthday,
                 $address,
                 $contactNumber,
-                $reasonForRequest,
+                $reasonId,
                 $appointmentDate
             );
 

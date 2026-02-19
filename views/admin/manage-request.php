@@ -44,6 +44,7 @@ if (!empty($ajaxFragment)) {
 
     <td class="px-6 py-6">
         <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
+        <p class="text-[10px] text-slate-400 font-bold uppercase mt-1"><?= htmlspecialchars($req['reason_name'] ?? '—') ?></p>
     </td>
 
     <td class="px-6 py-6">
@@ -217,7 +218,7 @@ require '../views/layout/header.php';
 
                             <td class="px-6 py-6">
                                 <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 uppercase"><?= htmlspecialchars($req['certificate_name']) ?></span>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase mt-1"><?= htmlspecialchars($req['reason_for_request'] ?? '—') ?></p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase mt-1"><?= htmlspecialchars($req['reason_name'] ?? '—') ?></p>
                             </td>
 
                             <td class="px-6 py-6">
@@ -468,7 +469,7 @@ function openIdModal(imagePath, requestId) {
     const modal = document.getElementById('idModal');
     const modalImg = document.getElementById('modalIdImage');
     const requestIdInput = document.getElementById('modalRequestId');
-    const requestIdDisplay = document.getElementById('modalIdTitle');
+    const requestIdDisplay = document.getElementById('modal-title');
 
     modalImg.src = imagePath;
     requestIdInput.value = requestId;
@@ -496,7 +497,7 @@ function openDetailsModal(data) {
     document.getElementById('detailsEmail').textContent = data.email || '—';
     document.getElementById('detailsAddress').textContent = data.address;
     document.getElementById('detailsCertName').textContent = data.certificate_name;
-    document.getElementById('detailsReason').textContent = data.reason_for_request || '—';
+    document.getElementById('detailsReason').textContent = data.reason_name || '—';
     document.getElementById('detailsRemarks').value = data.remarks || '';
     document.getElementById('detailsInputId').value = data.id;
 

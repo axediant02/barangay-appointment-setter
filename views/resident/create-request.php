@@ -193,18 +193,11 @@
 
                         <div>
                             <label class="input-label">Reason for Request <span class="text-red-600">*</span></label>
-                            <select name="reason_for_request" class="form-input" required>
+                            <select name="reason_id" class="form-input" required>
                                 <option value="">Select Reason</option>
-                                <option value="Employment / Job Application">Employment / Job Application</option>
-                                <option value="School / Education Requirement">School / Education Requirement</option>
-                                <option value="Business Registration / Permit">Business Registration / Permit</option>
-                                <option value="Government Assistance / Financial Aid">Government Assistance / Financial Aid</option>
-                                <option value="Legal / Official Transaction">Legal / Official Transaction</option>
-                                <option value="Proof of Residency / Address">Proof of Residency / Address</option>
-                                <option value="Community Participation / Programs">Community Participation / Programs</option>
-                                <option value="Scholarship Application">Scholarship Application</option>
-                                <option value="Loan / Banking Requirement">Loan / Banking Requirement</option>
-                                <option value="Personal Identification">Personal Identification</option>
+                                <?php foreach ($reasons as $reason): ?>
+                                    <option value="<?= $reason['id'] ?>"><?= htmlspecialchars($reason['reason']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>

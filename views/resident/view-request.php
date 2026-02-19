@@ -86,7 +86,7 @@
             </div>
             <div class="detail-row px-4 bg-white">
                 <span class="detail-label">Reason for Request</span>
-                <span class="detail-value"><?= htmlspecialchars($request['reason_for_request'] ?? '—') ?></span>
+                <span class="detail-value"><?= htmlspecialchars($request['reason_name'] ?? '—') ?></span>
             </div>
             <div class="detail-row px-4 bg-white">
                 <span class="detail-label">Status</span>

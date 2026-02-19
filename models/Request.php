@@ -9,10 +9,11 @@ class RequestModel {
 
     public function getAll() {
         $stmt = $this->pdo->query("
-            SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
+            SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name, rn.reason AS reason_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
+            LEFT JOIN reasons rn ON r.reason_id = rn.id
             ORDER BY r.created_at DESC
         ");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -22,9 +23,10 @@ class RequestModel {
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare("
-            SELECT r.*, c.name AS certificate_name
+            SELECT r.*, c.name AS certificate_name, rn.reason AS reason_name
             FROM requests r
             JOIN certificates c ON r.certificate_id = c.id
+            LEFT JOIN reasons rn ON r.reason_id = rn.id
             WHERE r.user_id = ?
             ORDER BY r.created_at DESC
             LIMIT ? OFFSET ?
@@ -52,10 +54,11 @@ class RequestModel {
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare("
-            SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
+            SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name, rn.reason AS reason_name
             FROM requests r
             JOIN users u ON r.user_id = u.id
             JOIN certificates c ON r.certificate_id = c.id
+            LEFT JOIN reasons rn ON r.reason_id = rn.id
             ORDER BY r.created_at DESC
             LIMIT ? OFFSET ?
         ");
@@ -90,10 +93,11 @@ class RequestModel {
             $countStmt = $this->pdo->query("SELECT COUNT(*) AS total FROM requests");
             $total = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
             $stmt = $this->pdo->prepare("
-                SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
+                SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name, rn.reason AS reason_name
                 FROM requests r
                 JOIN users u ON r.user_id = u.id
                 JOIN certificates c ON r.certificate_id = c.id
+                LEFT JOIN reasons rn ON r.reason_id = rn.id
                 ORDER BY r.created_at DESC
                 LIMIT ? OFFSET ?
             ");
@@ -114,10 +118,11 @@ class RequestModel {
             $total = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
             $stmt = $this->pdo->prepare("
-                SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name
+                SELECT r.*, u.username AS resident_username, u.email, c.name AS certificate_name, rn.reason AS reason_name
                 FROM requests r
                 JOIN users u ON r.user_id = u.id
                 JOIN certificates c ON r.certificate_id = c.id
+                LEFT JOIN reasons rn ON r.reason_id = rn.id
                 WHERE r.full_name LIKE ? OR u.username LIKE ? OR r.contact_number LIKE ? OR c.name LIKE ?
                 ORDER BY r.created_at DESC
                 LIMIT ? OFFSET ?
@@ -143,9 +148,10 @@ class RequestModel {
 
     public function getByUser($userId) {
         $stmt = $this->pdo->prepare("
-            SELECT r.*, c.name AS certificate_name
+            SELECT r.*, c.name AS certificate_name, rn.reason AS reason_name
             FROM requests r
             JOIN certificates c ON r.certificate_id = c.id
+            LEFT JOIN reasons rn ON r.reason_id = rn.id
             WHERE r.user_id = ?
             ORDER BY r.created_at DESC
         ");
@@ -156,9 +162,10 @@ class RequestModel {
     /** @return array|null Request row with certificate_name for the given user */
     public function findByIdAndUser($id, $userId) {
         $stmt = $this->pdo->prepare("
-            SELECT r.*, c.name AS certificate_name
+            SELECT r.*, c.name AS certificate_name, rn.reason AS reason_name
             FROM requests r
             JOIN certificates c ON r.certificate_id = c.id
+            LEFT JOIN reasons rn ON r.reason_id = rn.id
             WHERE r.id = ? AND r.user_id = ?
         ");
         $stmt->execute([$id, $userId]);
@@ -166,22 +173,22 @@ class RequestModel {
         return $row ?: null;
     }
 
-    public function updateResidentRequest($id, $userId, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonForRequest, $appointmentDate) {
+    public function updateResidentRequest($id, $userId, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonId, $appointmentDate) {
         $stmt = $this->pdo->prepare("
             UPDATE requests
-            SET full_name = ?, civil_status = ?, birthday = ?, address = ?, contact_number = ?, reason_for_request = ?, appointment_date = ?
+            SET full_name = ?, civil_status = ?, birthday = ?, address = ?, contact_number = ?, reason_id = ?, appointment_date = ?
             WHERE id = ? AND user_id = ? AND status = 'Pending'
         ");
-        return $stmt->execute([$fullName, $civilStatus, $birthday ?: null, $address, $contactNumber, $reasonForRequest, $appointmentDate, $id, $userId]);
+        return $stmt->execute([$fullName, $civilStatus, $birthday ?: null, $address, $contactNumber, $reasonId, $appointmentDate, $id, $userId]);
     }
 
-    public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonForRequest, $idImagePath = null) {
+    public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonId, $idImagePath = null) {
         $stmt = $this->pdo->prepare("
             INSERT INTO requests 
-            (user_id, certificate_id, appointment_date, full_name, civil_status, birthday, address, contact_number, reason_for_request, id_image_path) 
+            (user_id, certificate_id, appointment_date, full_name, civil_status, birthday, address, contact_number, reason_id, id_image_path) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonForRequest, $idImagePath]);
+        return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $reasonId, $idImagePath]);
     }
 
     public function updateStatus($id, $status, $remarks = null) {

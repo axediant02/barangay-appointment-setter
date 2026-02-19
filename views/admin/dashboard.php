@@ -4,8 +4,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-$totalResidents = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'resident'")->fetchColumn();
-$totalResidents = $totalResidents ?: 0;
+// Data Fetching
+$totalResidents = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'resident'")->fetchColumn() ?: 0;
 
 $stmtStats = $pdo->query("
     SELECT 
@@ -27,165 +27,106 @@ $stmtRecent = $pdo->query("
     LIMIT 8
 ");
 $recentRequests = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
+
+$pageTitle = 'Admin Dashboard';
+require_once '../views/layout/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | BrgyPortal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #F3F4F6; 
-        }
+<div class="mb-10">
+    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Overview</h1>
+    <p class="text-slate-500 font-medium mt-1">Real-time statistics for today's operations.</p>
+</div>
 
-        .stat-card { 
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid #E5E7EB;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            transform: translateY(-4px);
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
-    </style>
-</head>
-<body class="min-h-screen">
-
-<nav class="sticky top-0 z-50 bg-gradient-to-r from-teal-600 to-teal-700 p-4 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <span class="text-2xl">🏘️</span>
-            <h1 class="font-bold text-xl tracking-tight">BrgyPortal <span class="text-teal-200 font-light text-sm ml-1 italic">Admin</span></h1>
-        </div>
-        <div class="hidden md:flex items-center gap-8 font-semibold text-sm uppercase tracking-wide">
-            <a href="?page=manage-requests" class="hover:text-teal-200 transition">Manage Requests</a>
-            <a href="?page=manage-certificates" class="hover:text-teal-200 transition">Certificates</a>
-            <a href="?page=logout" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-lg transition shadow-md normal-case">Logout</a>
-        </div>
-    </div>
-</nav>
-
-<div class="max-w-7xl mx-auto py-10 px-6">
-    
-    <header class="mb-12">
-        <h2 class="text-6xl font-extrabold text-gray-900 tracking-tighter mb-2">System Overview</h2>
-        <p class="text-gray-500 text-lg">Manage residents and certificate requests with ease.</p>
-    </header>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12" id="stats-container">
-        
-        <div class="stat-card">
-            <div class="text-3xl mb-2">👥</div>
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Residents</p>
-            <h3 class="text-3xl font-extrabold text-gray-900" id="stat-residents"><?= $totalResidents ?></h3>
-        </div>
-
-        <div class="stat-card border-l-4 border-teal-500">
-            <div class="text-3xl mb-2">📊</div>
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Requests</p>
-            <h3 class="text-3xl font-extrabold text-gray-900" id="stat-total"><?= $stats['total'] ?: 0 ?></h3>
-        </div>
-
-        <div class="stat-card border-l-4 border-amber-500 bg-amber-50/50">
-            <div class="text-3xl mb-2">⏳</div>
-            <p class="text-amber-700 text-xs font-bold uppercase tracking-wider">Pending</p>
-            <h3 class="text-3xl font-extrabold text-amber-600" id="stat-pending"><?= $stats['pending'] ?: 0 ?></h3>
-        </div>
-
-        <div class="stat-card border-l-4 border-emerald-500 bg-emerald-50/50">
-            <div class="text-3xl mb-2">✅</div>
-            <p class="text-emerald-700 text-xs font-bold uppercase tracking-wider">Approved</p>
-            <h3 class="text-3xl font-extrabold text-emerald-600" id="stat-approved"><?= $stats['approved'] ?: 0 ?></h3>
-        </div>
-
-        <div class="stat-card border-l-4 border-cyan-500 bg-cyan-50/50">
-            <div class="text-3xl mb-2">💎</div>
-            <p class="text-cyan-700 text-xs font-bold uppercase tracking-wider">Completed</p>
-            <h3 class="text-3xl font-extrabold text-cyan-600" id="stat-completed"><?= $stats['completed'] ?: 0 ?></h3>
-        </div>
-
-        <div class="stat-card border-l-4 border-red-500 bg-red-50/50">
-            <div class="text-3xl mb-2">❌</div>
-            <p class="text-red-700 text-xs font-bold uppercase tracking-wider">Rejected</p>
-            <h3 class="text-3xl font-extrabold text-red-600" id="stat-rejected"><?= $stats['rejected'] ?: 0 ?></h3>
-        </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300">
+        <div class="absolute right-[-10px] top-[-10px] text-slate-50/50 text-7xl font-black group-hover:scale-110 group-hover:-rotate-6 transition-transform">👥</div>
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Residents</p>
+        <h4 class="text-3xl font-black text-slate-800"><?= $totalResidents ?></h4>
+        <div class="mt-4 flex items-center text-xs text-teal-600 font-bold italic">Registered Users</div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center bg-white">
-            <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-4 sm:mb-0">
-                <span>⚡</span> Recent Activity
-            </h3>
-            <a href="?page=manage-requests" class="bg-teal-50 text-teal-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-teal-100 transition">
-                Manage All Requests →
-            </a>
+    <?php
+    $statusConfig = [
+        'pending' => ['label' => 'Pending', 'color' => 'amber', 'icon' => '⏳'],
+        'approved' => ['label' => 'Approved', 'color' => 'emerald', 'icon' => '✅'],
+        'completed' => ['label' => 'Completed', 'color' => 'cyan', 'icon' => '💎'],
+        'rejected' => ['label' => 'Rejected', 'color' => 'red', 'icon' => '❌'],
+    ];
+    foreach ($statusConfig as $key => $cfg): ?>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-<?= $cfg['color'] ?>-200 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-2xl"><?= $cfg['icon'] ?></span>
+                <span class="text-[10px] font-black text-<?= $cfg['color'] ?>-600 bg-<?= $cfg['color'] ?>-50 px-2.5 py-1 rounded-lg uppercase tracking-wider"><?= $cfg['label'] ?></span>
+            </div>
+            <h4 class="text-3xl font-black text-slate-800"><?= $stats[$key] ?: 0 ?></h4>
+            <p class="text-slate-400 text-[10px] font-bold mt-1 uppercase tracking-tighter">Total Requests</p>
         </div>
+    <?php endforeach; ?>
+</div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse" id="recent-requests-table">
-                <thead class="bg-gray-50 text-gray-400 text-xs uppercase font-bold tracking-widest">
-                    <tr>
-                        <th class="px-8 py-4">Resident</th>
-                        <th class="px-8 py-4">Certificate</th>
-                        <th class="px-8 py-4">Status</th>
-                        <th class="px-8 py-4">Date Submitted</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100" id="recent-requests-body">
-                    <?php 
-                    $statusColors = [
-                        'Pending'   => 'text-amber-600 bg-amber-50 border-amber-200',
-                        'Approved'  => 'text-emerald-600 bg-emerald-50 border-emerald-200',
-                        'Completed' => 'text-cyan-600 bg-cyan-50 border-cyan-200',
-                        'Rejected'  => 'text-red-600 bg-red-50 border-red-200'
-                    ];
-
-                    foreach ($recentRequests as $row): 
-                        $currentStatus = $row['status'];
-                        $badgeColor = isset($statusColors[$currentStatus]) ? $statusColors[$currentStatus] : 'text-gray-600 bg-gray-50 border-gray-200';
-                    ?>
-                    <tr class="hover:bg-teal-50/30 transition-colors" data-request-id="<?= $row['id'] ?>">
-                        <td class="px-8 py-5 font-bold text-gray-900"><?= htmlspecialchars($row['resident_name']) ?></td>
-                        <td class="px-8 py-5">
-                            <span class="text-sm text-gray-600 font-medium">📄 <?= htmlspecialchars($row['certificate_name']) ?></span>
-                        </td>
-                        <td class="px-8 py-5">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase border <?= $badgeColor ?> status-cell">
-                                <?= $currentStatus ?>
-                            </span>
-                        </td>
-                        <td class="px-8 py-5 text-gray-500 text-sm">
-                            <?= date('M d, Y', strtotime($row['created_at'])) ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+<div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-8 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-white">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                Incoming Requests
+            </h2>
+            <p class="text-slate-400 text-xs font-medium mt-1">Review the latest document submissions.</p>
         </div>
+        <a href="?page=manage-requests" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-800 transition shadow-lg shadow-slate-200">
+            View Detailed List
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                <tr>
+                    <th class="px-8 py-4">Resident Info</th>
+                    <th class="px-8 py-4">Document Type</th>
+                    <th class="px-8 py-4">Status</th>
+                    <th class="px-8 py-4">Submission Date</th>
+                    <th class="px-8 py-4 text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <?php 
+                $statusStyles = [
+                    'Pending'   => 'text-amber-600 bg-amber-50 border-amber-100',
+                    'Approved'  => 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                    'Completed' => 'text-cyan-600 bg-cyan-50 border-cyan-100',
+                    'Rejected'  => 'text-red-600 bg-red-50 border-red-100'
+                ];
+
+                foreach ($recentRequests as $row): 
+                    $badgeStyle = $statusStyles[$row['status']] ?? 'text-slate-600 bg-slate-50 border-slate-100';
+                ?>
+                <tr class="hover:bg-slate-50/50 transition-all duration-200">
+                    <td class="px-8 py-5">
+                        <div class="font-bold text-slate-800"><?= htmlspecialchars($row['resident_name']) ?></div>
+                        <div class="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">ID: #<?= str_pad($row['id'], 5, '0', STR_PAD_LEFT) ?></div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="inline-flex items-center gap-2 text-sm text-slate-600 font-semibold bg-slate-100 px-3 py-1 rounded-xl">
+                            📄 <?= htmlspecialchars($row['certificate_name']) ?>
+                        </span>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border <?= $badgeStyle ?>">
+                            <?= $row['status'] ?>
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-slate-500 text-sm font-medium">
+                        <?= date('M d, Y', strtotime($row['created_at'])) ?>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <a href="?page=manage-requests&search=<?= urlencode($row['resident_name']) ?>" class="bg-teal-50 text-teal-600 px-4 py-2 rounded-lg font-bold text-xs hover:bg-teal-600 hover:text-white transition-all">Manage</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
-<script>
-    const statusColors = {
-        'Pending': 'text-amber-600 bg-amber-50 border-amber-200',
-        'Approved': 'text-emerald-600 bg-emerald-50 border-emerald-200',
-        'Completed': 'text-cyan-600 bg-cyan-50 border-cyan-200',
-        'Rejected': 'text-red-600 bg-red-50 border-red-200'
-    };
-</script>
-
-</body>
-</html>
+<?php require_once '../views/layout/footer.php'; ?>

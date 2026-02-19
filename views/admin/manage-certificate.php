@@ -1,186 +1,134 @@
 <?php
 require_once '../config/database.php';
 
-$certificates = []; 
-try {
-    $stmt = $pdo->query("SELECT * FROM certificates ORDER BY name ASC");
-    $fetched = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $certificates = $fetched ? $fetched : [];
-} catch (PDOException $e) {
-    $certificates = []; 
-}
+// Success/Error Message Handling
+$message = '';
+$status = '';
 
+// Delete Logic with better safety
 if (isset($_GET['delete']) && isset($_GET['id'])) {
-    $id = (int)$_GET['id'];
-    $deleteStmt = $pdo->prepare("DELETE FROM certificates WHERE id = ?");
-    $deleteStmt->execute([$id]);
-    header("Location: ?page=manage-certificates");
-    exit;
+    try {
+        $id = (int)$_GET['id'];
+        $deleteStmt = $pdo->prepare("DELETE FROM certificates WHERE id = ?");
+        $deleteStmt->execute([$id]);
+        header("Location: ?page=manage-certificates&status=deleted");
+        exit;
+    } catch (Exception $e) { $message = "Error deleting record."; $status = "error"; }
 }
 
+// Data Fetching
+try {
+    $stmt = $pdo->query("SELECT *, DATE_FORMAT(created_at, '%b %d, %Y') as formatted_date FROM certificates ORDER BY name ASC");
+    $certificates = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+} catch (PDOException $e) { $certificates = []; }
+
+// Insert Logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
-    
     if (!empty($name)) {
-        $insertStmt = $pdo->prepare("INSERT INTO certificates (name, description) VALUES (?, ?)");
+        $insertStmt = $pdo->prepare("INSERT INTO certificates (name, description, created_at) VALUES (?, ?, NOW())");
         $insertStmt->execute([$name, $description]);
-        header("Location: ?page=manage-certificates");
+        header("Location: ?page=manage-certificates&status=added");
         exit;
     }
 }
+
+$pageTitle = 'Manage Certificates';
+require_once '../views/layout/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Certificates - Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 10px; }
-
-        .form-input {
-            width: 100%;
-            background-color: white;
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            outline: none;
-            transition: all 0.2s ease-in-out;
-        }
-        .form-input:focus {
-            border-color: #0D9488;
-            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
-        }
-        .btn-primary {
-            @apply px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm transition transform active:scale-95 shadow-lg shadow-teal-900/10 flex items-center gap-2;
-        }
-        .card-hover {
-            @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 40;
-            background: rgba(249, 250, 251, 0.95);
-            backdrop-filter: blur(10px);
-        }
-    </style>
-</head>
-<body>
-
-<div class="sticky-header border-b border-gray-200 shadow-sm mb-6">
-    <div class="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-        <a href="?page=admin-dashboard" class="inline-flex items-center gap-2 text-teal-600 font-bold hover:text-teal-800 transition group" aria-label="Back to admin dashboard">
-            <span class="bg-white w-10 h-10 flex items-center justify-center rounded-xl shadow-sm border border-gray-100 group-hover:bg-teal-50 group-hover:scale-110 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-            </span>
-            <span class="hidden sm:inline font-black text-xs uppercase tracking-widest">Back to Dashboard</span>
-        </a>
-
-        <div class="flex items-center gap-3">
-             <div class="bg-teal-50 border border-teal-100 px-4 py-2 rounded-xl flex items-center gap-3">
-                <span class="text-teal-800 font-black text-[10px] uppercase tracking-wider">Active Catalog:</span>
-                <span class="text-teal-600 font-black text-lg"><?= count($certificates) ?></span>
-            </div>
-        </div>
-    </div>
+<div class="mb-10">
+    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Certificate Registry</h1>
+    <p class="text-slate-500 font-medium mt-1">Define and organize the documents available for resident requests.</p>
 </div>
 
-<div class="p-8 max-w-7xl mx-auto min-h-screen">
-    
-    <div class="mb-10">
-        <h2 class="text-5xl font-black text-gray-900 tracking-tighter mb-2 italic">CERTIFICATE REGISTRY</h2>
-        <p class="text-gray-500 text-lg">Define and organize the documents available for resident requests.</p>
+<?php if(isset($_GET['status'])): ?>
+    <div id="toast" class="mb-8 flex items-center p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl animate-bounce">
+        <span class="mr-3">✨</span> Registry updated successfully!
     </div>
+<?php endif; ?>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 mb-12 relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-5 text-7xl select-none rotate-12">📝</div>
-        <h3 class="text-xl font-black text-gray-900 mb-6 uppercase tracking-tight flex items-center gap-2">
-            <span class="w-2 h-6 bg-teal-500 rounded-full"></span>
-            Add New Document Type
-        </h3>
-        <form method="POST" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-1">
-                    <label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest ml-1">Official Name</label>
-                    <input type="text" name="name" placeholder="e.g. Indigency Certificate" class="form-input" required>
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest ml-1">Purpose/Description</label>
-                    <input type="text" name="description" placeholder="What is this document used for?" class="form-input" required>
-                </div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+    <div class="lg:col-span-4">
+        <div class="sticky top-28 bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+            <div class="mb-8">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Add New Type</h2>
+                <p class="text-slate-500 text-sm mt-1">Populate the document catalog for residents.</p>
             </div>
 
-            <div class="flex justify-end pt-2">
-                <button type="submit" class="btn-primary">
-                    <span>➕</span> Register Document
+            <form method="POST" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2 ml-1">Document Title</label>
+                    <input type="text" name="name" placeholder="e.g., Barangay Clearance" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 outline-none transition-all focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 font-medium" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2 ml-1">Official Description</label>
+                    <textarea name="description" rows="4" placeholder="Briefly describe the purpose..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 outline-none transition-all focus:bg-white focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 font-medium resize-none" required></textarea>
+                </div>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-teal-600/20 w-full justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Add to Catalog
                 </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="lg:col-span-8">
+        <div class="flex items-center justify-between mb-8">
+            <div class="relative w-full max-w-sm">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+                <input type="text" id="certSearch" onkeyup="filterCerts()" placeholder="Search registry..." class="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-3 text-sm font-medium outline-none focus:border-teal-500 transition-all">
             </div>
-        </form>
-    </div>
-
-    <div class="flex flex-col sm:flex-row items-center gap-4 mb-10">
-        <div class="relative w-full sm:w-64">
-            <input type="text" id="certSearch" placeholder="Search catalog..." class="form-input text-sm py-2" onkeyup="filterCerts()">
+            <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Entries</span>
+                <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-lg font-bold text-sm" id="totalCount"><?= count($certificates) ?></span>
+            </div>
         </div>
-        <hr class="flex-grow border-gray-200">
-        <span class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Document Portfolio</span>
-        <hr class="flex-grow border-gray-200">
-    </div>
 
-    <?php if (empty($certificates)): ?>
-        <div class="bg-white rounded-3xl border-4 border-dashed border-gray-100 p-20 text-center">
-            <div class="text-7xl mb-6">🏜️</div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Empty Registry</h3>
-            <p class="text-gray-400">Add your first certificate type above to start operations.</p>
-        </div>
-    <?php else: ?>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="certGrid">
-            <?php foreach ($certificates as $cert): ?>
-                <div class="cert-card bg-white rounded-3xl border border-gray-100 p-8 card-hover flex flex-col justify-between group">
-                    <div>
-                        <div class="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 transform group-hover:rotate-3 shadow-sm group-hover:shadow-teal-200">
-                            📄
+        <?php if (empty($certificates)): ?>
+            <div class="text-center py-20 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                <div class="text-6xl mb-4">📂</div>
+                <h3 class="text-xl font-bold text-slate-400 uppercase tracking-widest">No Documents Found</h3>
+                <p class="text-slate-400 text-sm mt-2">Start by adding a document type in the left panel.</p>
+            </div>
+        <?php else: ?>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="certGrid">
+                <?php foreach ($certificates as $cert): ?>
+                    <div class="bg-white border border-slate-200/60 rounded-[2rem] p-8 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:-translate-y-2 group relative cert-card">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all duration-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-tighter">ID: #<?= $cert['id'] ?></span>
                         </div>
-                        <h4 class="text-2xl font-black text-gray-900 mb-3 tracking-tight group-hover:text-teal-600 transition-colors">
-                            <?= htmlspecialchars($cert['name']) ?>
-                        </h4>
-                        <p class="text-gray-500 text-sm leading-relaxed mb-8">
-                            <?= htmlspecialchars($cert['description']) ?>
-                        </p>
-                    </div>
 
-                    <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
-                        <span class="bg-teal-50 text-teal-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Active</span>
-                        <a 
-                            href="?page=manage-certificates&delete=1&id=<?= $cert['id'] ?>"
-                            class="p-3 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
-                            onclick="return confirm('WARNING: Deleting this document type will affect existing resident options. Continue?');"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+                        <h4 class="text-xl font-bold text-slate-800 mb-2 leading-tight cert-name"><?= htmlspecialchars($cert['name']) ?></h4>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3"><?= htmlspecialchars($cert['description']) ?></p>
 
-    <div class="mt-20 py-10 border-t border-gray-100 flex flex-col items-center gap-4">
-        <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em]">Proprietary Management System</p>
-        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-teal-600 text-xs font-bold hover:underline">Scroll to Top ↑</button>
+                        <div class="pt-6 border-t border-slate-50 flex items-center justify-between">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Established</span>
+                                <span class="text-xs font-bold text-slate-600"><?= $cert['formatted_date'] ?></span>
+                            </div>
+                            
+                            <div class="flex items-center gap-1">
+                                <button class="p-2 text-slate-300 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-all" title="Edit">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                </button>
+                                <a href="?page=manage-certificates&delete=1&id=<?= $cert['id'] ?>" 
+                                   onclick="return confirm('Archive this document type? This cannot be undone.')"
+                                   class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -189,13 +137,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
         const input = document.getElementById('certSearch');
         const filter = input.value.toLowerCase();
         const cards = document.getElementsByClassName('cert-card');
+        let visibleCount = 0;
 
-        for (let i = 0; i < cards.length; i++) {
-            const title = cards[i].getElementsByTagName('h4')[0].innerText;
-            cards[i].style.display = title.toLowerCase().includes(filter) ? "" : "none";
-        }
+        Array.from(cards).forEach(card => {
+            const title = card.querySelector('.cert-name').innerText.toLowerCase();
+            if (title.includes(filter)) {
+                card.style.display = "";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+        
+        const countEl = document.getElementById('totalCount');
+        if (countEl) countEl.innerText = visibleCount;
     }
+
+    // Auto-hide toast
+    setTimeout(() => {
+        const toast = document.getElementById('toast');
+        if(toast) toast.style.display = 'none';
+    }, 4000);
 </script>
 
-</body>
-</html>
+<?php require_once '../views/layout/footer.php'; ?>

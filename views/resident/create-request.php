@@ -77,7 +77,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="md:col-span-2">
-                            <label class="input-label">Full Name <span class="text-red-600">*</span></label>
+                            <label class="input-label">Username <span class="text-red-600">*</span></label>
                             <input type="text" name="full_name" placeholder="Juan Dela Cruz" value="<?= htmlspecialchars($user['username'] ?? '') ?>" class="form-input" required>
                         </div>
 

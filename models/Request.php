@@ -175,13 +175,13 @@ class RequestModel {
         return $stmt->execute([$fullName, $civilStatus, $birthday ?: null, $address, $contactNumber, $appointmentDate, $id, $userId]);
     }
 
-    public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber) {
+    public function create($userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $idImagePath = null) {
         $stmt = $this->pdo->prepare("
             INSERT INTO requests 
-            (user_id, certificate_id, appointment_date, full_name, civil_status, birthday, address, contact_number) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, certificate_id, appointment_date, full_name, civil_status, birthday, address, contact_number, id_image_path) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber]);
+        return $stmt->execute([$userId, $certificateId, $appointmentDate, $fullName, $civilStatus, $birthday, $address, $contactNumber, $idImagePath]);
     }
 
     public function updateStatus($id, $status, $remarks = null) {

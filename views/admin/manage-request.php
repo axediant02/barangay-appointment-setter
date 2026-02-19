@@ -11,6 +11,22 @@ $startIndex = ($pageNum - 1) * $itemsPerPage;
 $count = $startIndex + 1;
 $searchQuery = $search !== '' ? '&search=' . rawurlencode($search) : '';
 
+function renderStatusBadge($status) {
+    $status = htmlspecialchars($status);
+    $lowerStatus = strtolower($status);
+    
+    $icons = [
+        'pending'   => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" /></svg>',
+        'approved'  => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>',
+        'completed' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg>',
+        'rejected'  => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>',
+        'cancelled' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd" /></svg>'
+    ];
+
+    $icon = $icons[$lowerStatus] ?? '';
+    return "<span class='status-badge status-{$lowerStatus}'>{$icon}{$status}</span>";
+}
+
 if (!empty($ajaxFragment)) {
     header('Content-Type: text/html; charset=utf-8');
     echo '<div id="manage-requests-fragment"><table><tbody id="manage-requests-tbody">';
@@ -59,9 +75,7 @@ if (!empty($ajaxFragment)) {
     </td>
 
     <td class="px-6 py-6 text-center">
-        <span class="status-badge status-<?= strtolower($req['status']) ?>">
-            <?= htmlspecialchars($req['status']) ?>
-        </span>
+        <?= renderStatusBadge($req['status']) ?>
     </td>
 
     <td class="px-6 py-6 text-center">
@@ -103,16 +117,41 @@ require '../views/layout/header.php';
         border-bottom: 1px solid #e2e8f0;
     }
 
-    /* Status Accent Borders */
-    .status-Pending { border-left: 4px solid #f59e0b; }
-    .status-Approved { border-left: 4px solid #10b981; }
-    .status-Completed { border-left: 4px solid #06b6d4; }
-    .status-Rejected { border-left: 4px solid #ef4444; }
-    .status-Cancelled { border-left: 4px solid #94a3b8; }
-
     .custom-scrollbar::-webkit-scrollbar { height: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .status-badge svg { width: 12px; height: 12px; }
+
+    .status-pending { 
+        background-color: #fef3c7; color: #92400e; border-color: #fde68a;
+    }
+    .status-approved { 
+        background-color: #dcfce7; color: #166534; border-color: #bbf7d0;
+    }
+    .status-completed { 
+        background-color: #ecfeff; color: #0891b2; border-color: #cffafe;
+    }
+    .status-rejected { 
+        background-color: #fee2e2; color: #991b1b; border-color: #fecaca;
+    }
+    .status-cancelled { 
+        background-color: #f1f5f9; color: #475569; border-color: #e2e8f0;
+    }
     
     .remark-input { transition: all 0.2s ease-in-out; }
 </style>
@@ -204,9 +243,7 @@ require '../views/layout/header.php';
                             </td>
 
                             <td class="px-6 py-6 text-center">
-                                <span class="status-badge status-<?= strtolower($req['status']) ?>">
-                                    <?= htmlspecialchars($req['status']) ?>
-                                </span>
+                                <?= renderStatusBadge($req['status']) ?>
                             </td>
 
                             <td class="px-6 py-6 text-center">
@@ -353,7 +390,10 @@ require '../views/layout/header.php';
                                 <div>
                                     <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Request Details</h4>
                                     <div class="bg-teal-50 rounded-2xl p-5 border border-teal-100">
-                                        <p class="text-[9px] font-black text-teal-600 uppercase tracking-widest mb-1" id="detailsCertType">Certificate Name</p>
+                                        <div class="flex justify-between items-start mb-1">
+                                            <p class="text-[9px] font-black text-teal-600 uppercase tracking-widest" id="detailsCertType">Certificate Name</p>
+                                            <div id="detailsStatusBadgeContainer"></div>
+                                        </div>
                                         <p class="text-base font-black text-slate-900 leading-tight mb-4" id="detailsCertName">Barangay Clearance</p>
                                         
                                         <div class="flex items-center gap-3">
@@ -476,9 +516,23 @@ function openDetailsModal(data) {
 
     // Status mapping and options
     const statusSelect = document.getElementById('detailsStatusSelect');
+    const badgeContainer = document.getElementById('detailsStatusBadgeContainer');
     statusSelect.innerHTML = ''; // Clear previous
     
     const curr = data.status;
+    const lowerStatus = curr.toLowerCase();
+    
+    // Update Badge in Modal
+    const icons = {
+        'pending': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" /></svg>',
+        'approved': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>',
+        'completed': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg>',
+        'rejected': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>',
+        'cancelled': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd" /></svg>'
+    };
+    
+    badgeContainer.innerHTML = `<span class="status-badge status-${lowerStatus}">${icons[lowerStatus] || ''}${curr}</span>`;
+
     const statusMap = {
         'Pending': { 'Pending': '⏳ Pending', 'Approved': '✅ Approved', 'Rejected': '❌ Rejected' },
         'Approved': { 'Approved': '✅ Approved', 'Completed': '💎 Completed' },

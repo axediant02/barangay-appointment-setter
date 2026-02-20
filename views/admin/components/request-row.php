@@ -17,6 +17,12 @@ $reqJson = htmlspecialchars(json_encode($req), ENT_QUOTES, 'UTF-8');
         </div>
     </td>
 
+    <td class="px-6 py-5 min-w-[180px]">
+        <a href="mailto:<?= htmlspecialchars($req['email'] ?? '') ?>" class="text-[11px] font-bold text-teal-600 hover:text-teal-800 hover:underline transition-colors truncate block max-w-[180px]" title="<?= htmlspecialchars($req['email'] ?? '') ?>">
+            <?= htmlspecialchars($req['email'] ?? '—') ?>
+        </a>
+    </td>
+
     <td class="px-6 py-5">
         <div class="flex flex-col">
             <span class="text-[10px] font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 uppercase w-fit group-hover:bg-white group-hover:border-teal-100 transition-colors">

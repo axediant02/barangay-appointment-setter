@@ -128,6 +128,7 @@ if (!empty($ajaxFragment)) {
                                 <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest">Certificate</th>
                                 <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-32">Appointment</th>
                                 <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-32">Status</th>
+                                <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-32">Identification</th>
                                 <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-24">Action</th>
                             </tr>
                         </thead>

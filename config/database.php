@@ -105,8 +105,8 @@
 //postgres
 $host = getenv('DB_HOST');
 $port = getenv('DB_PORT') ?: '5432';
-$db   = getenv('DB_NAME');
-$user = getenv('DB_USER');
+$db   = getenv('DB_DATABASE'); // fixed
+$user = getenv('DB_USERNAME'); // fixed
 $pass = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$db";

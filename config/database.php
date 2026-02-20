@@ -103,11 +103,11 @@
 
 
 //postgres
-$host = 'dpg-d6bvddkr85hc73dpjieg-a';
-$port = '5432';
-$db   = 'barangay_portal_qr3l';
-$user = 'barangay_portal_qr3l_user';
-$pass = '1VYFtnBtdLa1AY4aATIgZo6T4LY8I6YQ'; // replace with your actual password
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT') ?: '5432';
+$db   = getenv('DB_NAME');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$db";
 

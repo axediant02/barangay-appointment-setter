@@ -103,13 +103,14 @@
 
 
 //postgres
-$host = getenv('DB_HOST') ?: 'localhost';
-$port = getenv('DB_PORT') ?: '5432';
-$db   = getenv('DB_NAME') ?: 'barangay_appointment';
-$user = getenv('DB_USER') ?: 'postgres';
-$pass = getenv('DB_PASSWORD') ?: '';
+$host = 'dpg-d6bvddkr85hc73dpjieg-a';
+$port = '5432';
+$db   = 'barangay_portal_qr3l';
+$user = 'barangay_portal_qr3l_user';
+$pass = '1VYFtnBtdLa1AY4aATIgZo6T4LY8I6YQ'; // replace with your actual password
 
-$dsn = "pgsql:host=$host;port=$port;dbname=$db;user=$user;password=$pass";
+$dsn = "pgsql:host=$host;port=$port;dbname=$db";
+
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -117,9 +118,9 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
+    echo "Connected to PostgreSQL successfully!";
 } catch (\PDOException $e) {
     error_log('Database connection failed: ' . $e->getMessage());
     http_response_code(503);
-    echo "Service Unavailable. Database connection failed.";
-    exit;
+    die('Database connection failed.');
 }

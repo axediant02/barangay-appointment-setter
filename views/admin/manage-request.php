@@ -185,19 +185,44 @@ function closeIdModal() {
 
 function openDetailsModal(data) {
     const modal = document.getElementById('detailsModal');
+    if (!modal) return;
     
     // Set text contents
-    document.getElementById('modal-title').textContent = data.certificate_name;
-    document.getElementById('detailsRequestId').textContent = 'Request #' + String(data.id).padStart(2, '0');
-    document.getElementById('detailsFullName').textContent = data.full_name;
-    document.getElementById('detailsCivilStatus').textContent = data.civil_status || '—';
-    document.getElementById('detailsContact').textContent = data.contact_number || '—';
-    document.getElementById('detailsEmail').textContent = data.email || '—';
-    document.getElementById('detailsAddress').textContent = data.address;
-    document.getElementById('detailsCertName').textContent = data.certificate_name;
-    document.getElementById('detailsReason').textContent = data.reason_name || '—';
-    document.getElementById('detailsRemarks').value = data.remarks || '';
-    document.getElementById('detailsInputId').value = data.id;
+    const title = document.getElementById('modal-details-title');
+    if (title) title.textContent = data.certificate_name;
+
+    const reqId = document.getElementById('detailsRequestId');
+    if (reqId) reqId.textContent = 'Request #' + String(data.id).padStart(2, '0');
+
+    const fullName = document.getElementById('detailsFullName');
+    if (fullName) fullName.textContent = data.full_name;
+
+    const civilStatus = document.getElementById('detailsCivilStatus');
+    if (civilStatus) civilStatus.textContent = data.civil_status || '—';
+
+    const contact = document.getElementById('detailsContact');
+    if (contact) contact.textContent = data.contact_number || '—';
+
+    const email = document.getElementById('detailsEmail');
+    if (email) email.textContent = data.email || '—';
+
+    const address = document.getElementById('detailsAddress');
+    if (address) address.textContent = data.address;
+
+    const certName = document.getElementById('detailsCertName');
+    if (certName) certName.textContent = data.certificate_name;
+
+    const reason = document.getElementById('detailsReason');
+    if (reason) reason.textContent = data.reason_name || '—';
+
+    const remarks = document.getElementById('detailsRemarks');
+    if (remarks) remarks.value = data.remarks || '';
+
+    const inputId = document.getElementById('detailsInputId');
+    if (inputId) inputId.value = data.id;
+
+    const headId = document.getElementById('detailsRequestIdHead');
+    if (headId) headId.textContent = '#' + String(data.id).padStart(5, '0');
 
     // Birthday formatting
     if (data.birthday) {
@@ -237,7 +262,7 @@ function openDetailsModal(data) {
     // Status mapping and options
     const statusSelect = document.getElementById('detailsStatusSelect');
     const badgeContainer = document.getElementById('detailsStatusBadgeContainer');
-    statusSelect.innerHTML = ''; // Clear previous
+    if (statusSelect) statusSelect.innerHTML = ''; // Clear previous
     
     const curr = data.status;
     const lowerStatus = curr.toLowerCase();

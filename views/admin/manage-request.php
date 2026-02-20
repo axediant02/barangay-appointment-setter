@@ -323,7 +323,7 @@ document.addEventListener('keydown', function(event) {
     if (event.key === "Escape") { 
         closeIdModal();
     }
-});@
+});
 
 (function() {
     function initSearchAsYouType() {

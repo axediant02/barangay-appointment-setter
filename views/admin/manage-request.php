@@ -161,6 +161,7 @@ if (!empty($ajaxFragment)) {
 <?php 
 include '../views/admin/components/modal-id-preview.php';
 include '../views/admin/components/modal-request-details.php';
+include '../views/admin/components/modal-quick-update.php';
 ?>
 
 <script>
@@ -311,17 +312,59 @@ function expandIdImage() {
     openIdModal(src, id);
 }
 
+function openQuickUpdateModal(data) {
+    const modal = document.getElementById('quickUpdateModal');
+    if (!modal) return;
+
+    // Populate fields
+    document.getElementById('quickUpdateInputId').value = data.id;
+    document.getElementById('quickUpdateName').textContent = data.full_name || '—';
+    document.getElementById('quickUpdateCert').textContent = data.certificate_name || '—';
+    document.getElementById('quickUpdateRemarks').value = data.remarks || '';
+
+    // Set status select to current
+    const select = document.getElementById('quickUpdateStatus');
+    if (select) select.value = data.status || 'Pending';
+
+    // Render current status badge
+    const badgeColors = {
+        'Pending':   'bg-amber-50 text-amber-700 border-amber-200',
+        'Approved':  'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Completed': 'bg-blue-50 text-blue-700 border-blue-200',
+        'Rejected':  'bg-red-50 text-red-700 border-red-200',
+        'Cancelled': 'bg-slate-100 text-slate-500 border-slate-200'
+    };
+    const color = badgeColors[data.status] || badgeColors['Pending'];
+    const badgeContainer = document.getElementById('quickUpdateCurrentBadge');
+    if (badgeContainer) {
+        badgeContainer.innerHTML = `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider ${color}">${data.status}</span>`;
+    }
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeQuickUpdateModal() {
+    const modal = document.getElementById('quickUpdateModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
 // Close modals when clicking outside
 window.onclick = function(event) {
     const idModal = document.getElementById('idModal');
     const detailsModal = document.getElementById('detailsModal');
+    const quickUpdateModal = document.getElementById('quickUpdateModal');
     if (event.target == idModal) closeIdModal();
     if (event.target == detailsModal) closeDetailsModal();
+    if (event.target == quickUpdateModal) closeQuickUpdateModal();
 }
 
 document.addEventListener('keydown', function(event) {
     if (event.key === "Escape") { 
         closeIdModal();
+        closeDetailsModal();
+        closeQuickUpdateModal();
     }
 });
 

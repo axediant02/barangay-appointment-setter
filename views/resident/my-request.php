@@ -124,7 +124,7 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-2 sm:border-l sm:border-slate-100 sm:pl-6 min-w-[110px]">
-                            <a href="?page=view-request&id=<?= (int)$req['id']; ?>" 
+                            <a href="?page=view-request&id=<?= (int)$req['id']; ?>&from_page=<?= $reqPageNum ?? 1 ?>" 
                                class="text-center px-5 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition shadow-sm h-[40px] flex items-center justify-center">
                                 View
                             </a>
@@ -132,6 +132,7 @@
                             <?php if ($status === 'Pending' && !($userBanStatus[$req['certificate_id']] ?? false)): ?>
                                 <form method="POST" action="?page=cancel-request" onsubmit="return confirm('Cancel request?');" class="flex-shrink-0">
                                     <input type="hidden" name="request_id" value="<?= $req['id']; ?>">
+                                    <input type="hidden" name="page_num" value="<?= $reqPageNum ?? 1 ?>">
                                     <button type="submit" class="w-[40px] h-[40px] flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl border border-slate-200 hover:border-red-100 transition shadow-sm" title="Cancel">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>

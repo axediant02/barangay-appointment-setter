@@ -160,10 +160,12 @@ class RequestController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $requestId = $_POST['request_id'] ?? null;
+            $pageNum   = isset($_POST['page_num']) ? max(1, (int)$_POST['page_num']) : 1;
+            $backUrl   = '?page=my-requests' . ($pageNum > 1 ? '&page_num=' . $pageNum : '');
 
             if (!$requestId) {
                 $_SESSION['error'] = "Invalid request.";
-                header("Location: ?page=my-requests");
+                header("Location: $backUrl");
                 exit;
             }
 
@@ -179,7 +181,7 @@ class RequestController {
 
             if (!$req) {
                 $_SESSION['error'] = "Request cannot be cancelled.";
-                header("Location: ?page=my-requests");
+                header("Location: $backUrl");
                 exit;
             }
 
@@ -187,7 +189,7 @@ class RequestController {
 
             if (!$this->requestModel->canCancelRequest($_SESSION['user_id'], $certificateId)) {
                 $_SESSION['error'] = "You reached the maximum of 3 cancellations for this certificate.";
-                header("Location: ?page=my-requests");
+                header("Location: $backUrl");
                 exit;
             }
 
@@ -199,7 +201,7 @@ class RequestController {
             $stmt->execute([$requestId, $_SESSION['user_id']]);
 
             $_SESSION['success'] = "Request cancelled successfully.";
-            header("Location: ?page=my-requests");
+            header("Location: $backUrl");
             exit;
         }
     }

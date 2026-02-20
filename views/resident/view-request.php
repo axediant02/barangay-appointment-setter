@@ -26,7 +26,6 @@
         @apply text-base font-medium text-slate-800;
     }
 
-    /* Progress Tracker Logic */
     .timeline-node { @apply relative flex-1 flex flex-col items-center; }
     .timeline-node::after {
         content: '';

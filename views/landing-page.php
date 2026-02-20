@@ -3,7 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['role'] === 'admin') {
         header("Location: ?page=admin-dashboard");
@@ -24,7 +23,6 @@ include __DIR__ . '/layout/header.php';
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .hero-gradient { background: radial-gradient(circle at 10% 20%, rgba(20, 184, 166, 0.05) 0%, rgba(255, 255, 255, 0) 100%); }
     
-    /* Carousel Styling */
     .process-swiper { padding: 40px 0 60px 0 !important; }
     .swiper-pagination-bullet-active { background: #0d9488 !important; }
     .step-card { 

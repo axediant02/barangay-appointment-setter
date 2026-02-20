@@ -19,7 +19,6 @@
         @apply focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500;
     }
 
-    /* Floating disabled state */
     option:disabled { @apply text-slate-400 bg-slate-50; }
 
     .btn-primary {

@@ -60,7 +60,7 @@
                 <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-tighter">Applications</span>
                 <span class="text-lg font-black text-slate-800 leading-none"><?= $totalRecords ?? 0 ?></span>
             </div>
-            <a href="?page=request-certificate" class="bg-teal-600 hover:bg-teal-700 text-white p-2.5 rounded-xl transition shadow-md shadow-teal-100">
+            <a href="?page=create-request" class="bg-teal-600 hover:bg-teal-700 text-white p-2.5 rounded-xl transition shadow-md shadow-teal-100">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
             </a>
         </div>

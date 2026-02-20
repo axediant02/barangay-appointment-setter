@@ -125,6 +125,7 @@ if (!empty($ajaxFragment)) {
                             <tr class="bg-slate-50 border-b border-slate-100 text-slate-500">
                                 <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-16">#</th>
                                 <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest min-w-[200px]">Resident</th>
+                                <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest min-w-[180px]">Email</th>
                                 <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest">Certificate</th>
                                 <th class="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest w-32">Appointment</th>
                                 <th class="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest w-32">Status</th>

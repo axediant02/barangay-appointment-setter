@@ -4,7 +4,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-include 'partials/status-badge.php';
+include 'components/status-badge.php';
 
 $itemsPerPage = 25;
 $pageNum = isset($currentPage) ? (int)$currentPage : 1;
@@ -19,7 +19,7 @@ if (!empty($ajaxFragment)) {
     echo '<div id="manage-requests-fragment"><table><tbody id="manage-requests-tbody">';
     foreach ($requests as $req):
         $rowCount = $count++;
-        include 'partials/request-row.php';
+        include 'components/request-row.php';
     endforeach;
     echo '</tbody></table><div id="manage-requests-pagination">';
     if (isset($totalPages) && $totalPages > 1) {
@@ -74,7 +74,7 @@ if (!empty($ajaxFragment)) {
 <div class="flex h-full">
     <?php 
     $currentPage = 'manage-requests';
-    include 'partials/sidebar.php'; 
+    include 'components/sidebar.php'; 
     ?>
 
     <main class="flex-1 h-full overflow-y-auto bg-slate-50/50">
@@ -134,7 +134,7 @@ if (!empty($ajaxFragment)) {
                         <tbody id="requestsBody" class="divide-y divide-slate-50">
                             <?php foreach ($requests as $req): 
                                 $rowCount = $count++;
-                                include 'partials/request-row.php';
+                                include 'components/request-row.php';
                             endforeach; ?>
                         </tbody>
                     </table>
@@ -158,8 +158,8 @@ if (!empty($ajaxFragment)) {
 </div>
 
 <?php 
-include '../views/admin/partials/modal-id-preview.php';
-include '../views/admin/partials/modal-request-details.php';
+include '../views/admin/components/modal-id-preview.php';
+include '../views/admin/components/modal-request-details.php';
 ?>
 
 <script>

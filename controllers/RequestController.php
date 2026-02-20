@@ -87,7 +87,7 @@ class RequestController {
                     exit;
                 }
                 
-                if ($file['size'] > 5 * 1024 * 1024) { // 5MB limit
+                if ($file['size'] > 5 * 1024 * 1024) {
                     $_SESSION['error'] = "ID image must be less than 5MB.";
                     header("Location: ?page=create-request");
                     exit;
@@ -146,7 +146,7 @@ class RequestController {
                 $address,
                 $contactNumber,
                 $reasonId,
-                $idImagePath // Pass image path
+                $idImagePath
             );
 
             $_SESSION['success'] = "Request submitted successfully.";

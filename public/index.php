@@ -8,7 +8,6 @@ function redirect($url) {
 }
 $isLoggedIn = isset($_SESSION['user_id']);
 
-// Ensure session data is robust if logged in
 if ($isLoggedIn && (!isset($_SESSION['username']) || !isset($_SESSION['role']) || $_SESSION['username'] === '')) {
     try {
         $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
@@ -19,7 +18,6 @@ if ($isLoggedIn && (!isset($_SESSION['username']) || !isset($_SESSION['role']) |
             $_SESSION['role'] = $userRow['role'];
         }
     } catch (Exception $e) {
-        // Silently continue
     }
 }
 

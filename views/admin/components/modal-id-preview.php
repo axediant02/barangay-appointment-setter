@@ -2,7 +2,6 @@
 /** @var int $pageNum */
 /** @var string $search */
 ?>
-<!-- ID Preview Modal -->
 <div id="idModal" class="fixed inset-0 z-[110] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm transition-opacity" onclick="closeIdModal()"></div>
 

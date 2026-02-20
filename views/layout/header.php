@@ -65,6 +65,7 @@ $currentPage = $_GET['page'] ?? 'home';
                 <div class="hidden lg:flex lg:items-center lg:gap-6">
                     <?php if ($userRole === 'admin'): ?>
                         <a href="?page=admin-dashboard" class="nav-link <?= $currentPage === 'admin-dashboard' ? 'nav-link-active' : '' ?>">Dashboard</a>
+                        <a href="?page=manage-requests" class="nav-link <?= $currentPage === 'manage-requests' ? 'nav-link-active' : '' ?>">Requests</a>
                         <a href="?page=manage-certificates" class="nav-link <?= $currentPage === 'manage-certificates' ? 'nav-link-active' : '' ?>">Certificates</a>
                     <?php else: ?>
                         <a href="?page=resident-dashboard" class="nav-link <?= $currentPage === 'resident-dashboard' ? 'nav-link-active' : '' ?>">Dashboard</a>
@@ -131,6 +132,7 @@ $currentPage = $_GET['page'] ?? 'home';
         <div class="space-y-2">
             <?php if ($userRole === 'admin'): ?>
                 <a href="?page=admin-dashboard" class="block rounded-lg px-3 py-2 font-medium hover:bg-teal-500/50">Dashboard</a>
+                <a href="?page=manage-requests" class="block rounded-lg px-3 py-2 font-medium hover:bg-teal-500/50">Requests</a>
                 <a href="?page=manage-certificates" class="block rounded-lg px-3 py-2 font-medium hover:bg-teal-500/50">Certificates</a>
             <?php else: ?>
                 <a href="?page=resident-dashboard" class="block rounded-lg px-3 py-2 font-medium hover:bg-teal-500/50">Dashboard</a>

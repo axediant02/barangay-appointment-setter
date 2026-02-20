@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
 <div class="flex h-full">
     <?php 
     $currentPage = 'manage-certificates';
-    include 'partials/sidebar.php'; 
+    include 'components/sidebar.php'; 
     ?>
 
     <main class="flex-1 h-full overflow-y-auto bg-slate-50/50">

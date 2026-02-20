@@ -59,7 +59,7 @@ $currentPage = $_GET['page'] ?? 'admin-dashboard';
 <body class="h-full overflow-hidden">
 
 <div class="flex h-full">
-    <?php include 'partials/sidebar.php'; ?>
+    <?php include 'components/sidebar.php'; ?>
 
     <main class="flex-1 h-full overflow-y-auto bg-slate-50/50">
         <header class="bg-white border-b border-slate-200 px-10 py-4 flex justify-between items-center sticky top-0 z-10">

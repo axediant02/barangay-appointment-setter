@@ -78,11 +78,11 @@
 
 
 //mysql
-$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
+$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'sql301.infinityfree.com';
 $port = getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '3306';
-$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'barangay-appointment';
-$user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
-$pass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASSWORD') ?: '';
+$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'if0_41203304_barangay_portal';
+$user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'if0_41203304';
+$pass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASSWORD') ?: 'jkCIDjUOWB2';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";

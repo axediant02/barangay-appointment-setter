@@ -323,7 +323,7 @@ document.addEventListener('keydown', function(event) {
     if (event.key === "Escape") { 
         closeIdModal();
     }
-});
+});@
 
 (function() {
     function initSearchAsYouType() {
@@ -357,10 +357,43 @@ document.addEventListener('keydown', function(event) {
         searchInput.addEventListener('input', doSearch);
         searchInput.addEventListener('keyup', doSearch);
     }
+    function syncAdminRequests() {
+        // Don't sync if user is typing or a modal is open
+        if (document.activeElement === searchInput || !document.getElementById('idModal').classList.contains('hidden') || !document.getElementById('detailsModal').classList.contains('hidden')) {
+            return;
+        }
+
+        var q = searchInput.value.trim();
+        // Get current page from pagination if possible, otherwise use pageNum from PHP
+        var currentPage = <?= $pageNum ?>;
+        var url = '?page=manage-requests&search=' + encodeURIComponent(q) + '&page_num=' + currentPage + '&ajax=1';
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+                var newTbody = doc.getElementById('manage-requests-tbody');
+                var newPagination = doc.getElementById('manage-requests-pagination');
+                
+                if (newTbody && tbody.innerHTML !== newTbody.innerHTML) {
+                    tbody.innerHTML = newTbody.innerHTML;
+                }
+                if (paginationContainer && newPagination && paginationContainer.innerHTML !== newPagination.innerHTML) {
+                    paginationContainer.innerHTML = newPagination.innerHTML;
+                }
+            })
+            .catch(function() {});
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSearchAsYouType);
+        document.addEventListener('DOMContentLoaded', function() {
+            initSearchAsYouType();
+            setInterval(syncAdminRequests, 15000);
+        });
     } else {
         initSearchAsYouType();
+        setInterval(syncAdminRequests, 15000);
     }
 })();
 </script>

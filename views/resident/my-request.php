@@ -158,31 +158,82 @@
 </div>
 
 <script>
-/* (Script logic remains the same for real-time updates) */
 function updateRequestCard(updatedReq) {
     const card = document.querySelector(`[data-request-id="${updatedReq.id}"]`);
     if (!card) return;
 
-    const badges = card.querySelectorAll('.request-status');
-    if (badges.length > 0) {
-        const firstLabel = badges[0].querySelector('span');
-        if (firstLabel.innerText.trim() !== updatedReq.status) {
-            location.reload(); // Simplest way to handle layout changes (like hiding cancel button) via real-time update
+    // Detect current status from the first badge
+    const badgeSpan = card.querySelector('.request-status span');
+    if (!badgeSpan) return;
+
+    const currentStatus = badgeSpan.innerText.trim();
+    if (currentStatus === updatedReq.status) return;
+
+    const statusLower = updatedReq.status.toLowerCase();
+    
+    // Status Icon Mapping
+    const icons = {
+        'Approved': `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`,
+        'Completed': `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>`,
+        'Rejected': `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`,
+        'Cancelled': `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>`,
+        'Pending': `<svg class="w-3.5 h-3.5 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+    };
+
+    // Accent Color Mapping
+    const accentClasses = {
+        'Approved': 'bg-emerald-500',
+        'Completed': 'bg-blue-500',
+        'Rejected': 'bg-red-500',
+        'Cancelled': 'bg-slate-300',
+        'Pending': 'bg-amber-400'
+    };
+
+    const iconHtml = icons[updatedReq.status] || icons['Pending'];
+    const accentClass = accentClasses[updatedReq.status] || accentClasses['Pending'];
+
+    // Update All Badges (Desktop & Mobile)
+    const allBadges = card.querySelectorAll('.request-status');
+    allBadges.forEach(badge => {
+        // Keep special classes like justify-center or w-full if present
+        const extraClasses = Array.from(badge.classList).filter(c => c !== 'status-badge' && !c.startsWith('status-') && c !== 'request-status' && c !== 'whitespace-nowrap').join(' ');
+        badge.className = `status-badge status-${statusLower} request-status whitespace-nowrap ${extraClasses}`;
+        badge.innerHTML = `${iconHtml}<span>${updatedReq.status}</span>`;
+    });
+
+    // Update Accent Bar & Shadow
+    const accentBar = card.querySelector('.rounded-full[class*="h-10"]');
+    if (accentBar) {
+        accentBar.className = `w-1.5 h-10 rounded-full ${accentClass} flex-shrink-0 shadow-sm shadow-${statusLower}-200`;
+    }
+
+    // Handle Cancel Button Logic
+    if (updatedReq.status !== 'Pending') {
+        const cancelForm = card.querySelector('form[action*="cancel-request"]');
+        if (cancelForm) {
+            const spacer = document.createElement('div');
+            spacer.className = "w-[40px] hidden sm:block";
+            cancelForm.replaceWith(spacer);
         }
     }
 }
 
 async function syncRequests() {
     try {
-        const apiUrl = (typeof APP_BASE !== 'undefined' ? APP_BASE : '') + 'api.php?action=my-requests';
-        const response = await fetch(apiUrl);
+        const baseUrl = window.APP_BASE || '';
+        const response = await fetch(baseUrl + 'api.php?action=my-requests');
         if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data)) data.forEach(updateRequestCard);
         }
-    } catch (err) {}
+    } catch (err) {
+        console.error('Sync failed:', err);
+    }
 }
+// Run sync every 10 seconds
 setInterval(syncRequests, 10000);
+// Also run on load
+document.addEventListener('DOMContentLoaded', syncRequests);
 </script>
 
 <?php require '../views/layout/footer.php'; ?>

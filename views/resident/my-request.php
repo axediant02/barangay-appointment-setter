@@ -154,6 +154,37 @@
         </div>
         <?php endforeach; ?>
         </div>
+
+        <?php
+        // Use a local alias to avoid conflict with $currentPage set by header.php
+        $reqPageNum = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
+        ?>
+
+        <?php if (($totalPages ?? 1) > 1): ?>
+        <nav class="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
+            <?php if ($reqPageNum > 1): ?>
+                <a href="?page=my-requests&page_num=<?= ($reqPageNum - 1) ?>" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-teal-50 hover:text-teal-600 hover:border-teal-200 transition-all shadow-sm" aria-label="Previous">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+                </a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=my-requests&page_num=<?= $i ?>" class="h-10 w-10 flex items-center justify-center rounded-xl text-xs font-black transition-all shadow-sm
+                    <?= $i == $reqPageNum
+                        ? 'bg-slate-900 text-white border border-slate-900'
+                        : 'bg-white border border-slate-200 text-slate-500 hover:bg-teal-50 hover:text-teal-600 hover:border-teal-200' ?>">
+                    <?= $i ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if ($reqPageNum < ($totalPages ?? 1)): ?>
+                <a href="?page=my-requests&page_num=<?= ($reqPageNum + 1) ?>" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-teal-50 hover:text-teal-600 hover:border-teal-200 transition-all shadow-sm" aria-label="Next">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            <?php endif; ?>
+        </nav>
+        <?php endif; ?>
+
     <?php endif; ?>
 </div>
 

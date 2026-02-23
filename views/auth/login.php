@@ -6,7 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$email || !$password) {
         $errors[] = "Both email and password are required.";
-    } else {
+    }
+    else {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch();
@@ -18,14 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = (string)$user['username'];
             $_SESSION['email'] = (string)$user['email'];
             session_commit();
-            
+
             if ($role === 'admin') {
                 header("Location: ?page=admin-dashboard", true, 302);
-            } else {
+            }
+            else {
                 header("Location: ?page=resident-dashboard", true, 302);
             }
             exit;
-        } else {
+        }
+        else {
             $errors[] = "Invalid email or password.";
         }
     }
@@ -132,11 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="flex gap-3 items-center">
                         <div class="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">!</div>
                         <div class="text-red-700 text-[10px] font-black uppercase tracking-tight">
-                            <?php foreach ($errors as $error) echo $error; ?>
+                            <?php foreach ($errors as $error)
+        echo $error; ?>
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <form method="POST" class="space-y-5 w-full">
                 <div class="w-full">

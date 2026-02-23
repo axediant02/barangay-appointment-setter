@@ -240,6 +240,7 @@ function openDetailsModal(data) {
     const idImg = document.getElementById('detailsIdImage');
     const idContainer = document.getElementById('detailsIdContainer');
     const verifiedBadge = document.getElementById('detailsVerifiedBadge');
+    const idStatus = document.getElementById('detailsIdStatus');
     
     if (data.id_image_path) {
         let path = data.id_image_path;
@@ -248,13 +249,22 @@ function openDetailsModal(data) {
         }
         idImg.src = path;
         idContainer.classList.remove('hidden');
-        if (data.is_verified == 1) {
-            verifiedBadge.classList.remove('hidden');
-        } else {
-            verifiedBadge.classList.add('hidden');
+
+        if (idStatus) {
+            if (data.is_verified == 1) {
+                verifiedBadge.classList.remove('hidden');
+                idStatus.innerHTML = '<span class="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Verified</span>';
+            } else if (data.is_verified == 0 && data.is_verified !== null) {
+                verifiedBadge.classList.add('hidden');
+                idStatus.innerHTML = '<span class="px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>Rejected</span>';
+            } else {
+                verifiedBadge.classList.add('hidden');
+                idStatus.innerHTML = '<span class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" /></svg>Unverified</span>';
+            }
         }
     } else {
         idContainer.classList.add('hidden');
+        if (idStatus) idStatus.innerHTML = '';
     }
 
     const statusSelect = document.getElementById('detailsStatusSelect');
@@ -289,6 +299,30 @@ function openDetailsModal(data) {
         opt.textContent = label;
         if (val === curr) opt.selected = true;
         statusSelect.appendChild(opt);
+    }
+
+    // Verify status logic
+    const isVerified = data.is_verified == 1;
+    const submitBtn = document.getElementById('detailsSubmitBtn');
+    
+    if (statusSelect) {
+        statusSelect.disabled = !isVerified;
+        if (!isVerified) {
+            statusSelect.classList.add('opacity-60', 'cursor-not-allowed');
+        } else {
+            statusSelect.classList.remove('opacity-60', 'cursor-not-allowed');
+        }
+    }
+    
+    if (submitBtn) {
+        submitBtn.disabled = !isVerified;
+        if (!isVerified) {
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale-[0.5]');
+            submitBtn.title = "Resident must be verified to update status";
+        } else {
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale-[0.5]');
+            submitBtn.title = "";
+        }
     }
 
     modal.classList.remove('hidden');
@@ -329,6 +363,31 @@ function openQuickUpdateModal(data) {
     const badgeContainer = document.getElementById('quickUpdateCurrentBadge');
     if (badgeContainer) {
         badgeContainer.innerHTML = `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider ${color}">${data.status}</span>`;
+    }
+
+    // Verify status logic
+    const isVerified = data.is_verified == 1;
+    const selectStatus = document.getElementById('quickUpdateStatus');
+    const submitQuickBtn = document.getElementById('quickUpdateSubmitBtn');
+
+    if (selectStatus) {
+        selectStatus.disabled = !isVerified;
+        if (!isVerified) {
+            selectStatus.classList.add('opacity-60', 'cursor-not-allowed');
+        } else {
+            selectStatus.classList.remove('opacity-60', 'cursor-not-allowed');
+        }
+    }
+
+    if (submitQuickBtn) {
+        submitQuickBtn.disabled = !isVerified;
+        if (!isVerified) {
+            submitQuickBtn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale-[0.5]');
+            submitQuickBtn.title = "Resident must be verified to update status";
+        } else {
+            submitQuickBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale-[0.5]');
+            submitQuickBtn.title = "";
+        }
     }
 
     modal.classList.remove('hidden');

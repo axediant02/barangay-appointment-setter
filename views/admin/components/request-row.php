@@ -56,71 +56,94 @@ $reqJson = htmlspecialchars(json_encode($req), ENT_QUOTES, 'UTF-8');
         </div>
     </td>
 
-    <!-- ✅ INLINE STATUS DROPDOWN -->
-    <td class="px-6 py-5 text-center w-40">
-        <?php
-        $currentStatus = $req['status'];
 
-        $statusTransitions = [
-            'Pending'   => ['Pending','Approved','Rejected'],
-            'Approved'  => ['Approved','Completed'],
-            'Rejected'  => ['Rejected'],
-            'Completed' => ['Completed'],
-            'Cancelled' => ['Cancelled']
-        ];
+<td class="px-6 py-5 text-center w-40">
+    <?php
+    $currentStatus = $req['status'];
+    $isVerified    = $req['is_verified'] ?? null;
 
-        $allowedStatuses = $statusTransitions[$currentStatus] ?? [$currentStatus];
-        ?>
+    $statusTransitions = [
+        'Pending'   => ['Pending','Approved','Rejected'],
+        'Approved'  => ['Approved','Completed'],
+        'Rejected'  => ['Rejected'],
+        'Completed' => ['Completed'],
+        'Cancelled' => ['Cancelled']
+    ];
 
-        <form method="POST">
-            <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+    $allowedStatuses = $statusTransitions[$currentStatus] ?? [$currentStatus];
 
-            <select name="status"
-                onchange="this.form.submit()"
-                class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border
-                <?= match($currentStatus) {
-                    'Pending'   => 'bg-yellow-50 text-yellow-600 border-yellow-100',
-                    'Approved'  => 'bg-blue-50 text-blue-600 border-blue-100',
-                    'Completed' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                    'Rejected'  => 'bg-rose-50 text-rose-600 border-rose-100',
-                    'Cancelled' => 'bg-slate-100 text-slate-600 border-slate-200',
-                    default     => 'bg-slate-50 text-slate-600 border-slate-200',
-                } ?> cursor-pointer outline-none">
+    // 🔒 Disable if not verified
+    $isDisabled = $isVerified != 1;
+    ?>
 
-                <?php foreach ($allowedStatuses as $statusOption): ?>
-                    <option value="<?= $statusOption ?>"
-                        <?= $statusOption === $currentStatus ? 'selected' : '' ?>>
-                        <?= $statusOption ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </form>
-    </td>
+    <form method="POST">
+        <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+
+        <select name="status"
+            onchange="this.form.submit()"
+            <?= $isDisabled ? 'disabled' : '' ?>
+            class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border
+            <?= match($currentStatus) {
+                'Pending'   => 'bg-yellow-50 text-yellow-600 border-yellow-100',
+                'Approved'  => 'bg-blue-50 text-blue-600 border-blue-100',
+                'Completed' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                'Rejected'  => 'bg-rose-50 text-rose-600 border-rose-100',
+                'Cancelled' => 'bg-slate-100 text-slate-600 border-slate-200',
+                default     => 'bg-slate-50 text-slate-600 border-slate-200',
+            } ?>
+            <?= $isDisabled ? 'opacity-50 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' : 'cursor-pointer outline-none' ?>">
+
+            <?php foreach ($allowedStatuses as $statusOption): ?>
+                <option value="<?= $statusOption ?>"
+                    <?= $statusOption === $currentStatus ? 'selected' : '' ?>>
+                    <?= $statusOption ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </form>
+</td>
 
     <!-- VERIFY COLUMN (unchanged) -->
     <td class="px-6 py-5 text-center w-32">
-        <div class="flex items-center justify-center">
-            <?php 
-            $isVerified = $req['is_verified'] ?? null;
-            $idPath = $req['id_image_path'] ?? '';
-            if ($idPath && strpos($idPath, 'http') !== 0 && strpos($idPath, 'public/') !== 0) {
-                $idPath = 'public/' . $idPath;
-            }
-            ?>
+    <div class="flex items-center justify-center">
+        <?php 
+        $isVerified = $req['is_verified'] ?? null;
+        $idPath = $req['id_image_path'] ?? '';
 
-            <?php if ($isVerified == 1): ?>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black uppercase tracking-wider shadow-sm">
-                    Verified
-                </span>
-            <?php else: ?>
-                <button type="button"
-                        onclick="openIdModal('<?= htmlspecialchars($idPath) ?>', '<?= $req['id'] ?>')"
-                        class="h-9 px-3 flex items-center gap-2 bg-teal-50 text-teal-600 border-teal-100 rounded-xl hover:opacity-80 transition-all shadow-sm border">
-                    <span class="text-[9px] font-black uppercase tracking-wider">Verify</span>
-                </button>
-            <?php endif; ?>
-        </div>
-    </td>
+        if ($idPath && strpos($idPath, 'http') !== 0 && strpos($idPath, 'public/') !== 0) {
+            $idPath = 'public/' . $idPath;
+        }
+        ?>
+
+        <?php if ($isVerified === null): ?>
+            <!-- 🔴 UNVERIFIED (Clickable) -->
+            <button type="button"
+                onclick="openIdModal('<?= htmlspecialchars($idPath) ?>', '<?= $req['id'] ?>')"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl 
+                bg-rose-50 text-rose-600 border border-rose-100 
+                text-[10px] font-black uppercase tracking-wider shadow-sm 
+                hover:opacity-80 hover:scale-105 transition-all">
+                Unverified
+            </button>
+
+        <?php elseif ($isVerified == 1): ?>
+            <!-- 🟢 VERIFIED (Static) -->
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl 
+                bg-emerald-50 text-emerald-600 border border-emerald-100 
+                text-[10px] font-black uppercase tracking-wider shadow-sm">
+                Verified
+            </span>
+
+        <?php else: ?>
+            <!-- 🟡 REJECTED (Static) -->
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl 
+                bg-amber-50 text-amber-600 border border-amber-100 
+                text-[10px] font-black uppercase tracking-wider shadow-sm">
+                Rejected
+            </span>
+        <?php endif; ?>
+    </div>
+</td>
 
     <!-- ACTION COLUMN (Quick Update Removed) -->
     <td class="px-6 py-5 text-center w-24">

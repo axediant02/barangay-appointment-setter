@@ -103,7 +103,6 @@ $reqJson = htmlspecialchars(json_encode($req), ENT_QUOTES, 'UTF-8');
     </form>
 </td>
 
-    <!-- VERIFY COLUMN (unchanged) -->
     <td class="px-6 py-5 text-center w-32">
     <div class="flex items-center justify-center">
         <?php 
@@ -145,7 +144,6 @@ $reqJson = htmlspecialchars(json_encode($req), ENT_QUOTES, 'UTF-8');
     </div>
 </td>
 
-    <!-- ACTION COLUMN (Quick Update Removed) -->
     <td class="px-6 py-5 text-center w-24">
         <button type="button"
                 onclick='openDetailsModal(<?= $reqJson ?>)'

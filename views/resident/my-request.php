@@ -1,7 +1,6 @@
 <?php require '../views/layout/header.php'; ?>
 
 <style type="text/tailwindcss">
-    /* Improved Badge System */
     .status-badge {
         @apply inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider border shadow-sm transition-all duration-300;
     }
@@ -157,7 +156,6 @@
         </div>
 
         <?php
-        // Use a local alias to avoid conflict with $currentPage set by header.php
         $reqPageNum = isset($_GET['page_num']) ? max(1, (int)$_GET['page_num']) : 1;
         ?>
 
@@ -194,7 +192,6 @@ function updateRequestCard(updatedReq) {
     const card = document.querySelector(`[data-request-id="${updatedReq.id}"]`);
     if (!card) return;
 
-    // Detect current status from the first badge
     const badgeSpan = card.querySelector('.request-status span');
     if (!badgeSpan) return;
 
@@ -203,7 +200,6 @@ function updateRequestCard(updatedReq) {
 
     const statusLower = updatedReq.status.toLowerCase();
     
-    // Status Icon Mapping
     const icons = {
         'Approved': `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`,
         'Completed': `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>`,
@@ -212,7 +208,6 @@ function updateRequestCard(updatedReq) {
         'Pending': `<svg class="w-3.5 h-3.5 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
     };
 
-    // Accent Color Mapping
     const accentClasses = {
         'Approved': 'bg-emerald-500',
         'Completed': 'bg-blue-500',
@@ -224,22 +219,18 @@ function updateRequestCard(updatedReq) {
     const iconHtml = icons[updatedReq.status] || icons['Pending'];
     const accentClass = accentClasses[updatedReq.status] || accentClasses['Pending'];
 
-    // Update All Badges (Desktop & Mobile)
     const allBadges = card.querySelectorAll('.request-status');
     allBadges.forEach(badge => {
-        // Keep special classes like justify-center or w-full if present
         const extraClasses = Array.from(badge.classList).filter(c => c !== 'status-badge' && !c.startsWith('status-') && c !== 'request-status' && c !== 'whitespace-nowrap').join(' ');
         badge.className = `status-badge status-${statusLower} request-status whitespace-nowrap ${extraClasses}`;
         badge.innerHTML = `${iconHtml}<span>${updatedReq.status}</span>`;
     });
 
-    // Update Accent Bar & Shadow
     const accentBar = card.querySelector('.rounded-full[class*="h-10"]');
     if (accentBar) {
         accentBar.className = `w-1.5 h-10 rounded-full ${accentClass} flex-shrink-0 shadow-sm shadow-${statusLower}-200`;
     }
 
-    // Handle Cancel Button Logic
     if (updatedReq.status !== 'Pending') {
         const cancelForm = card.querySelector('form[action*="cancel-request"]');
         if (cancelForm) {
@@ -262,9 +253,7 @@ async function syncRequests() {
         console.error('Sync failed:', err);
     }
 }
-// Run sync every 10 seconds
 setInterval(syncRequests, 10000);
-// Also run on load
 document.addEventListener('DOMContentLoaded', syncRequests);
 </script>
 

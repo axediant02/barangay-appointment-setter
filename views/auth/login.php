@@ -54,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 2px solid #94a3b8;
             box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02);
         }
-        /* Inputs: underline only, full-width line */
         .form-input {
             @apply pt-2 pb-3 transition-all duration-150 font-semibold text-slate-800 placeholder:text-slate-500 text-sm;
             display: block;
@@ -78,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .glow-icon {
             box-shadow: 0 0 25px rgba(20, 184, 166, 0.4);
         }
-        /* Fixed Navigation Header */
         .sticky-header {
             position: fixed;
             top: 0;
@@ -89,7 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
-        /* Fixed Footer */
         .fixed-footer {
             position: fixed;
             bottom: 0;

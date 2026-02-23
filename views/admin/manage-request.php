@@ -13,7 +13,6 @@ $startIndex = ($pageNum - 1) * $itemsPerPage;
 $count = $startIndex + 1;
 $searchQuery = $search !== '' ? '&search=' . rawurlencode($search) : '';
 
-// AJAX Fragment update
 if (!empty($ajaxFragment)) {
     header('Content-Type: text/html; charset=utf-8');
     echo '<div id="manage-requests-fragment"><table><tbody id="manage-requests-tbody">';
@@ -190,7 +189,6 @@ function openDetailsModal(data) {
     const modal = document.getElementById('detailsModal');
     if (!modal) return;
     
-    // Set text contents
     const title = document.getElementById('modal-details-title');
     if (title) title.textContent = data.certificate_name;
 
@@ -227,7 +225,6 @@ function openDetailsModal(data) {
     const headId = document.getElementById('detailsRequestIdHead');
     if (headId) headId.textContent = '#' + String(data.id).padStart(5, '0');
 
-    // Birthday formatting
     if (data.birthday) {
         const bday = new Date(data.birthday);
         document.getElementById('detailsBirthday').textContent = bday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -235,13 +232,11 @@ function openDetailsModal(data) {
         document.getElementById('detailsBirthday').textContent = '—';
     }
 
-    // Appointment date formatting
     const appt = new Date(data.appointment_date);
     document.getElementById('detailsApptMonth').textContent = appt.toLocaleDateString('en-US', { month: 'short' });
     document.getElementById('detailsApptDay').textContent = appt.getDate();
     document.getElementById('detailsApptYear').textContent = appt.getFullYear();
 
-    // ID Image
     const idImg = document.getElementById('detailsIdImage');
     const idContainer = document.getElementById('detailsIdContainer');
     const verifiedBadge = document.getElementById('detailsVerifiedBadge');
@@ -272,15 +267,13 @@ function openDetailsModal(data) {
         if (idStatus) idStatus.innerHTML = '';
     }
 
-    // Status mapping and options
     const statusSelect = document.getElementById('detailsStatusSelect');
     const badgeContainer = document.getElementById('detailsStatusBadgeContainer');
-    if (statusSelect) statusSelect.innerHTML = ''; // Clear previous
+    if (statusSelect) statusSelect.innerHTML = '';
     
     const curr = data.status;
     const lowerStatus = curr.toLowerCase();
     
-    // Update Badge in Modal
     const icons = {
         'pending': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" /></svg>',
         'approved': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>',
@@ -351,17 +344,14 @@ function openQuickUpdateModal(data) {
     const modal = document.getElementById('quickUpdateModal');
     if (!modal) return;
 
-    // Populate fields
     document.getElementById('quickUpdateInputId').value = data.id;
     document.getElementById('quickUpdateName').textContent = data.full_name || '—';
     document.getElementById('quickUpdateCert').textContent = data.certificate_name || '—';
     document.getElementById('quickUpdateRemarks').value = data.remarks || '';
 
-    // Set status select to current
     const select = document.getElementById('quickUpdateStatus');
     if (select) select.value = data.status || 'Pending';
 
-    // Render current status badge
     const badgeColors = {
         'Pending':   'bg-amber-50 text-amber-700 border-amber-200',
         'Approved':  'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -410,7 +400,6 @@ function closeQuickUpdateModal() {
     document.body.style.overflow = '';
 }
 
-// Close modals when clicking outside
 window.onclick = function(event) {
     const idModal = document.getElementById('idModal');
     const detailsModal = document.getElementById('detailsModal');
@@ -461,13 +450,11 @@ document.addEventListener('keydown', function(event) {
         searchInput.addEventListener('keyup', doSearch);
     }
     function syncAdminRequests() {
-        // Don't sync if user is typing or a modal is open
         if (document.activeElement === searchInput || !document.getElementById('idModal').classList.contains('hidden') || !document.getElementById('detailsModal').classList.contains('hidden')) {
             return;
         }
 
         var q = searchInput.value.trim();
-        // Get current page from pagination if possible, otherwise use pageNum from PHP
         var currentPage = <?= $pageNum ?>;
         var url = '?page=manage-requests&search=' + encodeURIComponent(q) + '&page_num=' + currentPage + '&ajax=1';
 

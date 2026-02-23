@@ -8,7 +8,6 @@ $userId = $_SESSION['user_id'];
 
 $username = $_SESSION['username'] ?? 'Resident';
 
-// Stats Query
 $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total,
@@ -22,7 +21,6 @@ $stmt = $pdo->prepare("
 $stmt->execute([$userId]);
 $stats = $stmt->fetch();
 
-// Recent Activity
 $recentStmt = $pdo->prepare("
     SELECT r.*, c.name as certificate_name 
     FROM requests r
@@ -46,7 +44,6 @@ include __DIR__ . '/../layout/header.php';
         .status-badge {
             @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors;
         }
-        /* Status Colors */
         .status-pending   { @apply bg-amber-50 text-amber-700 border-amber-200; }
         .status-approved  { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
         .status-completed { @apply bg-blue-50 text-blue-700 border-blue-200; }
@@ -192,9 +189,7 @@ include __DIR__ . '/../layout/header.php';
 </div>
 
 <script>
-/**
- * Polling function to keep stats fresh without full page reloads
- */
+
 function updateStats() {
     var apiUrl = (typeof APP_BASE !== 'undefined' ? APP_BASE : '') + 'api.php?action=resident-stats';
     fetch(apiUrl)

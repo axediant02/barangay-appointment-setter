@@ -2,7 +2,6 @@
 /** @var int $pageNum */
 /** @var string $search */
 ?>
-<!-- Details Modal -->
 <div id="detailsModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closeDetailsModal()"></div>
 
@@ -27,7 +26,6 @@
                 <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
                 
                 <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 bg-white">
-                    <!-- Left: Resident Info -->
                     <div class="space-y-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="h-1.5 w-6 bg-teal-500 rounded-full"></div>
@@ -65,7 +63,6 @@
                             </div>
                         </div>
 
-                        <!-- ID Preview Section inside Details -->
                         <div id="detailsIdContainer" class="hidden">
                              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2 ml-1">Proof of Identity</label>
                              <div class="relative group cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-100" onclick="expandIdImage()">
@@ -85,7 +82,6 @@
                         </div>
                     </div>
 
-                    <!-- Right: Request Info -->
                     <div class="space-y-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="h-1.5 w-6 bg-teal-500 rounded-full"></div>
@@ -123,13 +119,11 @@
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2 ml-1">Current Status</label>
                                     <div id="detailsStatusBadgeContainer" class="flex items-center">
-                                        <!-- Badge injected by JS -->
                                     </div>
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2 ml-1">Actions</label>
                                     <select name="status" id="detailsStatusSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all outline-none">
-                                        <!-- Options injected by JS -->
                                     </select>
                                 </div>
                             </div>

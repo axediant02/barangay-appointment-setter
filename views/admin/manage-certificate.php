@@ -1,11 +1,9 @@
 <?php
 require_once '../config/database.php';
 
-// Success/Error Message Handling
 $message = '';
 $status = '';
 
-// Delete Logic with better safety
 if (isset($_GET['delete']) && isset($_GET['id'])) {
     try {
         $id = (int)$_GET['id'];
@@ -16,13 +14,11 @@ if (isset($_GET['delete']) && isset($_GET['id'])) {
     } catch (Exception $e) { $message = "Error deleting record."; $status = "error"; }
 }
 
-// Data Fetching
 try {
     $stmt = $pdo->query("SELECT *, DATE_FORMAT(created_at, '%b %d, %Y') as formatted_date FROM certificates ORDER BY name ASC");
     $certificates = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 } catch (PDOException $e) { $certificates = []; }
 
-// Insert Logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
@@ -215,7 +211,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
         if (countEl) countEl.innerText = visibleCount;
     }
 
-    // Auto-hide toast
     setTimeout(() => {
         const toast = document.getElementById('toast');
         if(toast) toast.style.display = 'none';

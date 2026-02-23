@@ -4,7 +4,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-// Data Fetching
 $totalResidents = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'resident'")->fetchColumn() ?: 0;
 
 $stmtStats = $pdo->query("

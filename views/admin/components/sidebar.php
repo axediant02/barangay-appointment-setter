@@ -1,5 +1,4 @@
 <?php
-// Ensure $stats['pending'] is available for the badge
 if (!isset($stats['pending']) && isset($pdo)) {
     try {
         $stats['pending'] = $pdo->query("SELECT COUNT(*) FROM requests WHERE status = 'Pending'")->fetchColumn() ?: 0;

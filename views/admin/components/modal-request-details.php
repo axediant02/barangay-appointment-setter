@@ -79,6 +79,9 @@
                                     </span>
                                 </div>
                              </div>
+                             <div id="detailsIdStatus" class="mt-2 flex justify-center">
+                                  <!-- Status indicator injected by JS -->
+                              </div>
                         </div>
                     </div>
 
@@ -145,7 +148,7 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <button type="button" onclick="closeDetailsModal()" class="text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-widest px-4">Cancel</button>
-                        <button type="submit" name="update_request" value="1" class="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-teal-200 transition-all active:scale-95 flex items-center gap-3">
+                        <button type="submit" name="update_request" value="1" id="detailsSubmitBtn" class="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-teal-200 transition-all active:scale-95 flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>

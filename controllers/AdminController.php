@@ -39,6 +39,10 @@ class AdminController {
             $ok = true;
             if ($isVerified !== null) {
                 $ok = $this->requestModel->updateVerificationStatus($id, $isVerified);
+                // Automatically reject request status if ID is rejected
+                if ($isVerified === 0) {
+                    $this->requestModel->updateStatus($id, 'Rejected', 'Automatically rejected due to ID verification failure.');
+                }
             }
 
             if ($status !== null) {

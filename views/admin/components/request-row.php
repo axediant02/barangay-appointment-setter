@@ -37,6 +37,12 @@ $reqJson = htmlspecialchars(json_encode($req), ENT_QUOTES, 'UTF-8');
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-1.5 ml-0.5">
                 <?= htmlspecialchars($req['reason_name'] ?? '—') ?>
             </p>
+            <?php if (!empty($req['remarks'])): ?>
+                <p class="text-[9px] text-teal-600 font-medium italic mt-1 ml-0.5 truncate max-w-[150px]" title="<?= htmlspecialchars($req['remarks']) ?>">
+                    <span class="font-black text-[8px] uppercase tracking-tighter not-italic text-teal-500 mr-1">Note:</span>
+                    "<?= htmlspecialchars($req['remarks']) ?>"
+                </p>
+            <?php endif; ?>
         </div>
     </td>
 

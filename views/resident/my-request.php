@@ -150,6 +150,30 @@
                     </div>
 
                 </div>
+
+                <?php if (!empty($req['remarks'])): ?>
+                    <div class="mt-5 pt-5 border-t border-slate-50 flex gap-3 remarks-container">
+                        <div class="shrink-0 w-8 h-8 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="block text-[9px] font-black text-teal-600 uppercase tracking-[0.2em] mb-1">Admin Remarks</span>
+                            <p class="text-xs font-medium text-slate-600 italic leading-relaxed truncate-3-lines remarks-text">
+                                "<?= htmlspecialchars($req['remarks']) ?>"
+                            </p>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="remarks-container hidden mt-5 pt-5 border-t border-slate-50 flex gap-3">
+                        <div class="shrink-0 w-8 h-8 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="block text-[9px] font-black text-teal-600 uppercase tracking-[0.2em] mb-1">Admin Remarks</span>
+                            <p class="text-xs font-medium text-slate-600 italic leading-relaxed truncate-3-lines remarks-text"></p>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endforeach; ?>
@@ -229,6 +253,18 @@ function updateRequestCard(updatedReq) {
     const accentBar = card.querySelector('.rounded-full[class*="h-10"]');
     if (accentBar) {
         accentBar.className = `w-1.5 h-10 rounded-full ${accentClass} flex-shrink-0 shadow-sm shadow-${statusLower}-200`;
+    }
+
+    // Update Remarks
+    const remarksContainer = card.querySelector('.remarks-container');
+    const remarksText = card.querySelector('.remarks-text');
+    if (remarksContainer && remarksText) {
+        if (updatedReq.remarks && updatedReq.remarks.trim() !== '') {
+            remarksText.textContent = `"${updatedReq.remarks}"`;
+            remarksContainer.classList.remove('hidden');
+        } else {
+            remarksContainer.classList.add('hidden');
+        }
     }
 
     if (updatedReq.status !== 'Pending') {
